@@ -51,8 +51,11 @@ $$;
 
 CREATE TABLE public.zones (
   id          uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name        text NOT NULL,
-  description text,
+  name        text NOT NULL UNIQUE,
+  label       text,
+  center_lat  double precision,
+  center_lng  double precision,
+  radius_km   numeric(5,2) DEFAULT 2.0,
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 

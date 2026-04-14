@@ -40,11 +40,10 @@ export type PhotoType = 'storefront' | 'menu' | 'dish'
 export interface Zone {
   id: string
   name: string
-  label: string
-  description: string | null
+  label: string | null
   center_lat: number | null
   center_lng: number | null
-  radius_km: number | null
+  radius_km: number
   created_at: string
 }
 
