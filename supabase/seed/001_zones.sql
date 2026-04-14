@@ -19,7 +19,7 @@ INSERT INTO public.zones (name, label, center_lat, center_lng, radius_km)
 VALUES
   ('Wuse 2',       'Wuse 2',       9.0765, 7.4851, 2.0),
   ('Garki',        'Garki',        9.0336, 7.4892, 2.5),
-  ('Maitama',      'Maitama',      9.0892, 7.4951, 2.5),
+  ('Gwarinpa',     'Gwarinpa',     9.1088, 7.4165, 3.5),
   ('Central Area', 'Central Area', 9.0579, 7.4951, 2.0),
   ('Asokoro',      'Asokoro',      9.0425, 7.5303, 2.5)
 ON CONFLICT (name) DO NOTHING;
@@ -34,7 +34,7 @@ ON CONFLICT (name) DO NOTHING;
 --   Asokoro        | Asokoro       |     9.0425 |     7.5303 |      2.50
 --   Central Area   | Central Area  |     9.0579 |     7.4951 |      2.00
 --   Garki          | Garki         |     9.0336 |     7.4892 |      2.50
---   Maitama        | Maitama       |     9.0892 |     7.4951 |      2.50
+--   Gwarinpa       | Gwarinpa      |     9.1088 |     7.4165 |      3.50
 --   Wuse 2         | Wuse 2        |     9.0765 |     7.4851 |      2.00
 -- =============================================================================
 
