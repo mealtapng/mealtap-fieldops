@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mealtap Field Ops
 
-## Getting Started
+Internal web app for Mealtap field agents to capture Abuja restaurant data. Built with Next.js 14 (App Router), Tailwind CSS, shadcn/ui, and Supabase.
 
-First, run the development server:
+## Tech Stack
+
+- **Frontend:** Next.js 14, TypeScript, Tailwind CSS, shadcn/ui (new-york)
+- **Backend:** Supabase (Postgres + PostGIS, Auth, Storage, Realtime)
+- **Font:** Poppins (Google Fonts)
+- **Deployment:** Vercel
+
+## Local Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Database Migrations
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Migrations live in `supabase/migrations/`. They must be run **in order** via the Supabase SQL Editor — there is no CLI runner set up yet.
 
-## Learn More
+### Prerequisites
+- Supabase project created
+- `uuid-ossp` extension enabled (`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`)
+- `postgis` extension enabled (`CREATE EXTENSION IF NOT EXISTS postgis;`)
 
-To learn more about Next.js, take a look at the following resources:
+### Step 1 — Run the initial schema
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Open your Supabase project → **SQL Editor**
+2. Click **New query**
+3. Paste the full contents of `supabase/migrations/001_initial_schema.sql`
+4. Click **Run**
+5. Verify: go to **Table Editor** — you should see all 9 tables:
+   `zones`, `users`, `restaurants`, `restaurant_photos`, `board_posts`,
+   `board_reactions`, `dm_threads`, `dm_messages`, `capture_events`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Optional verification queries:**
+```sql
+-- Check all tables were created
+SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;
 
-## Deploy on Vercel
+-- Check enums were created
+SELECT typname, enumlabel
+FROM pg_enum
+JOIN pg_type ON pg_enum.enumtypid = pg_type.oid
+ORDER BY typname, enumsortorder;
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+-- Check indexes
+SELECT indexname, tablename FROM pg_indexes WHERE schemaname = 'public';
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Step 2 — Run RLS policies
+
+1. In the SQL Editor, open a **new query**
+2. Paste the full contents of `supabase/migrations/002_rls_policies.sql`
+3. Click **Run**
+4. Verify: go to **Authentication → Policies** — you should see policies on:
+   `users`, `restaurants`, `restaurant_photos`, `board_posts`, `dm_threads`, `dm_messages`
+
+### Do not re-run migrations
+
+Each migration file is designed to be run once against a clean database. Re-running will produce "already exists" errors. If you need to reset, truncate or drop via the Supabase dashboard first.
