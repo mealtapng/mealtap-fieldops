@@ -40,7 +40,11 @@ export type PhotoType = 'storefront' | 'menu' | 'dish'
 export interface Zone {
   id: string
   name: string
+  label: string
   description: string | null
+  center_lat: number | null
+  center_lng: number | null
+  radius_km: number | null
   created_at: string
 }
 
@@ -191,7 +195,8 @@ export type Database = {
     Tables: {
       zones: {
         Row: Zone
-        Insert: Omit<Zone, 'id' | 'created_at'> & Partial<Pick<Zone, 'id' | 'created_at'>>
+        Insert: Omit<Zone, 'id' | 'created_at'> &
+          Partial<Pick<Zone, 'id' | 'created_at'>>
         Update: Partial<Omit<Zone, 'id'>>
       }
       users: {
