@@ -189,6 +189,10 @@ export interface CaptureEvent {
 // Allows createClient<Database>() for typed query results.
 // ---------------------------------------------------------------------------
 
+// Each table entry needs Relationships for Supabase's TypeScript generics
+// to infer column types correctly (without it, .select() returns `never`).
+type NoRelationships = { Relationships: [] }
+
 export type Database = {
   public: {
     Tables: {
@@ -197,56 +201,59 @@ export type Database = {
         Insert: Omit<Zone, 'id' | 'created_at'> &
           Partial<Pick<Zone, 'id' | 'created_at'>>
         Update: Partial<Omit<Zone, 'id'>>
-      }
+      } & NoRelationships
       users: {
         Row: User
         Insert: Omit<User, 'id' | 'created_at' | 'updated_at'> &
           Partial<Pick<User, 'id' | 'created_at' | 'updated_at'>>
         Update: Partial<Omit<User, 'id'>>
-      }
+      } & NoRelationships
       restaurants: {
         Row: Restaurant
         Insert: Omit<Restaurant, 'id' | 'created_at' | 'updated_at'> &
           Partial<Pick<Restaurant, 'id' | 'created_at' | 'updated_at'>>
         Update: Partial<Omit<Restaurant, 'id'>>
-      }
+      } & NoRelationships
       restaurant_photos: {
         Row: RestaurantPhoto
         Insert: Omit<RestaurantPhoto, 'id' | 'created_at'> &
           Partial<Pick<RestaurantPhoto, 'id' | 'created_at'>>
         Update: Partial<Omit<RestaurantPhoto, 'id'>>
-      }
+      } & NoRelationships
       board_posts: {
         Row: BoardPost
         Insert: Omit<BoardPost, 'id' | 'created_at' | 'updated_at'> &
           Partial<Pick<BoardPost, 'id' | 'created_at' | 'updated_at'>>
         Update: Partial<Omit<BoardPost, 'id'>>
-      }
+      } & NoRelationships
       board_reactions: {
         Row: BoardReaction
         Insert: Omit<BoardReaction, 'id' | 'created_at'> &
           Partial<Pick<BoardReaction, 'id' | 'created_at'>>
         Update: Partial<Omit<BoardReaction, 'id'>>
-      }
+      } & NoRelationships
       dm_threads: {
         Row: DMThread
         Insert: Omit<DMThread, 'id' | 'created_at'> &
           Partial<Pick<DMThread, 'id' | 'created_at'>>
         Update: Partial<Omit<DMThread, 'id'>>
-      }
+      } & NoRelationships
       dm_messages: {
         Row: DMMessage
         Insert: Omit<DMMessage, 'id' | 'sent_at'> &
           Partial<Pick<DMMessage, 'id' | 'sent_at'>>
         Update: Partial<Omit<DMMessage, 'id'>>
-      }
+      } & NoRelationships
       capture_events: {
         Row: CaptureEvent
         Insert: Omit<CaptureEvent, 'id' | 'created_at'> &
           Partial<Pick<CaptureEvent, 'id' | 'created_at'>>
         Update: Partial<Omit<CaptureEvent, 'id'>>
-      }
+      } & NoRelationships
     }
+    Views: Record<string, never>
+    Functions: Record<string, never>
+    CompositeTypes: Record<string, never>
     Enums: {
       user_role: UserRole
       lead_tag: LeadTag

@@ -2,11 +2,16 @@
 
 import Image from 'next/image'
 import { useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
+  const router = useRouter()
+
   const [phone, setPhone] = useState('')
   const [pin, setPin] = useState(['', '', '', ''])
   const [focusedPin, setFocusedPin] = useState(-1)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const pinRefs = [
     useRef<HTMLInputElement>(null),
@@ -31,9 +36,38 @@ export default function LoginPage() {
     }
   }
 
-  function handleSubmit() {
-    console.log('Phone:', `+234${phone}`)
-    console.log('PIN:', pin.join(''))
+  async function handleSubmit() {
+    setLoading(true)
+    setError('')
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, pin: pin.join('') }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error ?? 'Something went wrong. Please try again.')
+        setPin(['', '', '', ''])
+        pinRefs[0].current?.focus()
+        return
+      }
+
+      if (data.role === 'admin') {
+        router.push('/admin')
+      } else {
+        router.push('/dashboard')
+      }
+    } catch {
+      setError('Network error. Please try again.')
+      setPin(['', '', '', ''])
+      pinRefs[0].current?.focus()
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -109,10 +143,18 @@ export default function LoginPage() {
         {/* Sign In button */}
         <button
           onClick={handleSubmit}
-          className="w-full bg-terra hover:bg-terra-dark active:bg-terra-dark text-white font-semibold py-4 rounded-xl shadow-lg shadow-terra/20 transition-colors mb-4"
+          disabled={loading}
+          className="w-full bg-terra hover:bg-terra-dark active:bg-terra-dark disabled:opacity-60 text-white font-semibold py-4 rounded-xl shadow-lg shadow-terra/20 transition-colors mb-3"
         >
-          Sign in to Field Ops →
+          {loading ? 'Signing in…' : 'Sign in to Field Ops →'}
         </button>
+
+        {/* Error message */}
+        {error && (
+          <p className="text-center text-xs text-red-600 font-medium mb-3">
+            {error}
+          </p>
+        )}
 
         {/* Helper text */}
         <p className="text-center text-xs text-muted-brand">
