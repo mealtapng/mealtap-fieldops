@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import type { User } from '@/lib/types/database'
 
 export default async function DashboardPage() {
@@ -21,6 +22,9 @@ export default async function DashboardPage() {
         <p className="text-muted-brand text-sm">
           Welcome, {profile?.full_name ?? 'Agent'}
         </p>
+        <Link href="/profile" className="text-xs text-terra font-semibold mt-4 inline-block">
+          Profile →
+        </Link>
       </div>
     </main>
   )
