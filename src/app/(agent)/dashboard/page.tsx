@@ -4,15 +4,16 @@ import { DashboardView } from '@/components/agent/DashboardView'
 import type { User } from '@/lib/types/database'
 
 type ProfileRow = Pick<User, 'full_name' | 'quality_score' | 'assigned_zone_id'>
-type ZoneEmbed  = { zones: { name: string } | null }
 
 type RecentRow = {
   id: string
   name: string
   tag: string | null
   created_at: string
-  zones: { name: string } | null
+  zone_id: string | null
 }
+
+type ZoneRow = { id: string; name: string }
 
 /** Await a Supabase count query and return the numeric result (0 if null/error). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,12 +41,12 @@ export default async function DashboardPage() {
   const weekISO     = weekStart.toISOString()
   const lastWeekISO = lastWeekStart.toISOString()
 
-  // ── 1. Profile + assigned zone ───────────────────────────────────────────
+  // ── 1. Profile (needs user.id first) ────────────────────────────────────
   const { data: profile } = await supabase
     .from('users')
-    .select('full_name, quality_score, assigned_zone_id, zones(name)')
+    .select('full_name, quality_score, assigned_zone_id')
     .eq('id', user.id)
-    .single() as { data: (ProfileRow & ZoneEmbed) | null; error: unknown }
+    .single() as { data: ProfileRow | null; error: unknown }
 
   // ── 2. Stats + recent captures (parallel) ────────────────────────────────
   const uid = user.id
@@ -69,18 +70,35 @@ export default async function DashboardPage() {
     ),
     supabase
       .from('restaurants')
-      .select('id, name, tag, created_at, zones(name)')
+      .select('id, name, tag, created_at, zone_id')
       .eq('captured_by', uid)
       .order('created_at', { ascending: false })
       .limit(3) as unknown as Promise<{ data: RecentRow[] | null }>,
   ])
 
+  // ── 3. Resolve zone names from collected IDs ─────────────────────────────
+  // Fetch all zone IDs referenced on this page in a single query.
+  const zoneIds = Array.from(new Set([
+    profile?.assigned_zone_id,
+    ...((recentResult.data ?? []).map(r => r.zone_id)),
+  ].filter((id): id is string => !!id)))
+
+  const zoneMap: Record<string, string> = {}
+  if (zoneIds.length > 0) {
+    const { data: zones } = await supabase
+      .from('zones')
+      .select('id, name')
+      .in('id', zoneIds) as { data: ZoneRow[] | null; error: unknown }
+    for (const z of zones ?? []) zoneMap[z.id] = z.name
+  }
+
+  // ── Assemble props ────────────────────────────────────────────────────────
   const recentCaptures = (recentResult.data ?? []).map(r => ({
     id:         r.id,
     name:       r.name,
     tag:        r.tag,
     created_at: r.created_at,
-    zone_name:  r.zones?.name ?? null,
+    zone_name:  r.zone_id ? (zoneMap[r.zone_id] ?? null) : null,
   }))
 
   return (
@@ -88,7 +106,7 @@ export default async function DashboardPage() {
       user={{
         full_name:     profile?.full_name ?? 'Agent',
         quality_score: Number(profile?.quality_score ?? 0),
-        zone_name:     profile?.zones?.name ?? null,
+        zone_name:     profile?.assigned_zone_id ? (zoneMap[profile.assigned_zone_id] ?? null) : null,
       }}
       stats={{
         today_count:     todayCount,
