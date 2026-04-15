@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useRef, useState } from 'react'
 
 export default function LoginPage() {
@@ -39,9 +40,15 @@ export default function LoginPage() {
     <main className="min-h-screen bg-cream flex items-center justify-center px-4">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm px-8 py-10">
 
-        {/* Logo placeholder */}
-        <div className="w-10 h-10 bg-forest rounded-xl flex items-center justify-center mb-6">
-          <span className="text-white font-bold text-lg leading-none">M</span>
+        {/* Logo */}
+        <div className="flex justify-center mb-6">
+          <Image
+            src="/mealtap-logo.png"
+            alt="Mealtap"
+            width={80}
+            height={80}
+            priority
+          />
         </div>
 
         {/* Heading */}
