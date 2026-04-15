@@ -63,3 +63,36 @@ SELECT indexname, tablename FROM pg_indexes WHERE schemaname = 'public';
 ### Do not re-run migrations
 
 Each migration file is designed to be run once against a clean database. Re-running will produce "already exists" errors. If you need to reset, truncate or drop via the Supabase dashboard first.
+
+## Creating users
+
+Users must be created through the CLI script — never via raw SQL. Direct inserts into `auth.users` leave required GoTrue fields in a broken state and will cause all auth operations to fail.
+
+```bash
+npm run create-user -- --phone <number> --name "<name>" --role <role> [options]
+```
+
+**Required:**
+- `--phone` — Nigerian phone number (`08...`, `2348...`, or `+2348...`)
+- `--name` — Full name (quote names with spaces)
+- `--role` — `agent`, `field_lead`, or `admin`
+
+**Optional:**
+- `--pin` — 4-digit PIN (auto-generated and printed if omitted)
+- `--zone` — Zone name to assign (case-insensitive, must match a row in the `zones` table)
+- `--employee-id` — Override the auto-generated employee ID (e.g. `MT-FA-007`)
+
+**Examples:**
+
+```bash
+# Create a field agent — PIN auto-generated
+npm run create-user -- --phone 08039606540 --name "Amaka Obi" --role agent
+
+# Create a field lead with a zone
+npm run create-user -- --phone 08055001234 --name "Tunde Bello" --role field_lead --zone "Wuse 2"
+
+# Create an agent with a specific PIN
+npm run create-user -- --phone 08071112222 --name "Chisom Eze" --role agent --pin 4821
+```
+
+The script prints the PIN at the end — copy it to send to the agent via WhatsApp. Employee IDs are auto-incremented per role (`MT-FA-001`, `MT-FA-002`, …).
