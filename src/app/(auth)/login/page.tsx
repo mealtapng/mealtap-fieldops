@@ -41,15 +41,14 @@ export default function LoginPage() {
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm px-8 py-10">
 
         {/* Logo */}
-        <div className="flex justify-center mb-6">
-          <Image
-            src="/mealtap-logo.png"
-            alt="Mealtap"
-            width={80}
-            height={80}
-            priority
-          />
-        </div>
+        <Image
+          src="/mealtap-logo.png"
+          alt="Mealtap"
+          width={80}
+          height={80}
+          priority
+          className="mb-6"
+        />
 
         {/* Heading */}
         <h1 className="text-2xl font-bold text-forest mb-1">Welcome back</h1>
