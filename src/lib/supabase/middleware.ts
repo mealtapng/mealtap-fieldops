@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import type { User } from '@supabase/supabase-js'
 import type { Database } from '@/lib/types/database'
 
 /**
@@ -13,7 +14,9 @@ import type { Database } from '@/lib/types/database'
  *     server code in this request sees them) and the Response (so the
  *     browser stores the refreshed token).
  */
-export async function updateSession(request: NextRequest) {
+export async function updateSession(
+  request: NextRequest
+): Promise<{ response: NextResponse; user: User | null }> {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient<Database>(
@@ -42,7 +45,9 @@ export async function updateSession(request: NextRequest) {
 
   // This is the call that actually refreshes the session.
   // Do not remove it — without it, users get logged out randomly.
-  await supabase.auth.getUser()
+  // We also return the user so middleware.ts can make routing decisions
+  // without a second network call.
+  const { data: { user } } = await supabase.auth.getUser()
 
-  return supabaseResponse
+  return { response: supabaseResponse, user }
 }

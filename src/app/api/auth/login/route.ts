@@ -5,7 +5,6 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/li
 import { normalizePhone } from '@/lib/auth/phone'
 import { validatePinFormat, verifyPin } from '@/lib/auth/pin'
 import type { Database, User } from '@/lib/types/database'
-import type { CookieOptions } from '@supabase/ssr'
 
 type UserRow = Pick<
   User,
@@ -97,9 +96,17 @@ export async function POST(request: NextRequest) {
     .update({ failed_attempts: 0 })
     .eq('id', user.id)
 
+  // ── 9a. Embed role in user_metadata so JWT carries it for middleware ─────────
+  // Middleware reads user.user_metadata.role to make routing decisions without
+  // a DB query on every request. Must happen before signInWithPassword so the
+  // freshly-issued JWT already contains the role.
+  await adminClient.auth.admin.updateUserById(user.id, {
+    user_metadata: { role: user.role },
+  })
+
   // ── 9. Issue Supabase session ──────────────────────────────────────────────
-  // Collect cookies written by verifyOtp so we can attach them to the response.
-  const pendingCookies: Array<{ name: string; value: string; options: CookieOptions }> = []
+  // Collect cookies written by signInWithPassword so we can attach them to the response.
+  const pendingCookies: Array<{ name: string; value: string; options: object }> = []
 
   const serverClient = createServerClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
@@ -108,27 +115,17 @@ export async function POST(request: NextRequest) {
     },
   })
 
-  // Generate a magic-link token for the user's synthetic auth email.
-  // No email is sent — we immediately exchange the token for a session.
+  // Sign in using synthetic email + UUID as password.
+  // The UUID is deterministic but never exposed to the client.
   const authEmail = `${digits}@mealtap.internal`
 
-  const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
-    type: 'magiclink',
+  const { error: signInError } = await serverClient.auth.signInWithPassword({
     email: authEmail,
+    password: user.id,
   })
 
-  if (linkError || !linkData?.properties?.hashed_token) {
-    console.error('[login] generateLink error:', linkError)
-    return err('Authentication error. Please try again.', 500)
-  }
-
-  const { error: otpError } = await serverClient.auth.verifyOtp({
-    token_hash: linkData.properties.hashed_token,
-    type: 'email',
-  })
-
-  if (otpError) {
-    console.error('[login] verifyOtp error:', otpError)
+  if (signInError) {
+    console.error('[login] signInWithPassword error:', signInError)
     return err('Authentication error. Please try again.', 500)
   }
 
