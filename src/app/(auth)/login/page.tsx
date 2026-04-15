@@ -51,8 +51,12 @@ export default function LoginPage() {
 
       if (!res.ok) {
         setError(data.error ?? 'Something went wrong. Please try again.')
-        setPin(['', '', '', ''])
-        pinRefs[0].current?.focus()
+        // Don't clear PIN on rate-limit errors — the credentials may be correct,
+        // the user just needs to wait. Clear only for auth/validation failures.
+        if (res.status !== 429) {
+          setPin(['', '', '', ''])
+          pinRefs[0].current?.focus()
+        }
         return
       }
 

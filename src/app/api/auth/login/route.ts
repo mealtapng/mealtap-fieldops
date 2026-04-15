@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
 import { normalizePhone } from '@/lib/auth/phone'
 import { validatePinFormat, verifyPin } from '@/lib/auth/pin'
+import { checkRateLimit } from '@/lib/rate-limit'
 import type { Database, User } from '@/lib/types/database'
 
 type UserRow = Pick<
@@ -16,6 +17,25 @@ function err(message: string, status: number) {
 }
 
 export async function POST(request: NextRequest) {
+  // ── 0. IP-based rate limiting ──────────────────────────────────────────────
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
+    request.headers.get('x-real-ip') ??
+    'unknown'
+
+  const rl = checkRateLimit(ip, 10, 15 * 60 * 1000)
+
+  if (!rl.allowed) {
+    const res = NextResponse.json(
+      { error: 'Too many login attempts. Please try again in 15 minutes.' },
+      { status: 429 },
+    )
+    res.headers.set('X-RateLimit-Limit', '10')
+    res.headers.set('X-RateLimit-Remaining', '0')
+    res.headers.set('X-RateLimit-Reset', String(rl.resetAt))
+    return res
+  }
+
   // ── 1. Parse body ──────────────────────────────────────────────────────────
   let body: { phone?: unknown; pin?: unknown }
   try {
@@ -131,6 +151,9 @@ export async function POST(request: NextRequest) {
 
   // ── 10. Return success with session cookies ────────────────────────────────
   const response = NextResponse.json({ success: true, role: user.role })
+  response.headers.set('X-RateLimit-Limit', '10')
+  response.headers.set('X-RateLimit-Remaining', String(rl.remaining))
+  response.headers.set('X-RateLimit-Reset', String(rl.resetAt))
 
   pendingCookies.forEach(({ name, value, options }) =>
     response.cookies.set(name, value, options)
