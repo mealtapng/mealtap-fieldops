@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { timeAgo, formatNaira, dayLabel } from '@/lib/format'
+import { BottomNav } from '@/components/agent/BottomNav'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -136,67 +136,9 @@ function StatCard({
   )
 }
 
-// ── Bottom nav ────────────────────────────────────────────────────────────────
-
-function NavItem({
-  href,
-  label,
-  icon,
-  active,
-}: {
-  href: string
-  label: string
-  icon: React.ReactNode
-  active: boolean
-}) {
-  return (
-    <Link
-      href={href}
-      className={`flex flex-col items-center gap-0.5 py-2 flex-1 transition-colors ${
-        active ? 'text-forest' : 'text-muted-brand'
-      }`}
-    >
-      <span className="w-6 h-6">{icon}</span>
-      <span className={`text-[10px] font-semibold ${active ? 'text-forest' : 'text-muted-brand'}`}>
-        {label}
-      </span>
-    </Link>
-  )
-}
-
-// ── Inline SVG icons ──────────────────────────────────────────────────────────
-
-const HomeIcon = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z" />
-    <path d="M9 21V12h6v9" />
-  </svg>
-)
-
-const CaptureIcon = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="9" />
-    <path d="M12 8v8M8 12h8" />
-  </svg>
-)
-
-const MessagesIcon = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-  </svg>
-)
-
-const ProfileIcon = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="8" r="4" />
-    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-  </svg>
-)
-
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function DashboardView({ user, stats, recent_captures }: DashboardProps) {
-  const pathname  = usePathname()
   const firstName = user.full_name.split(' ')[0]
   const initials  = user.full_name
     .split(' ')
@@ -214,13 +156,6 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
 
   const weekDiff   = stats.week_count - stats.last_week_count
   const earnings   = stats.week_count * 400 + stats.hot_leads * 1_000
-
-  const navItems = [
-    { href: '/dashboard', label: 'Home',     icon: HomeIcon },
-    { href: '/capture',   label: 'Capture',  icon: CaptureIcon },
-    { href: '/messages',  label: 'Messages', icon: MessagesIcon },
-    { href: '/profile',   label: 'Profile',  icon: ProfileIcon },
-  ]
 
   return (
     <div className="min-h-screen bg-cream">
@@ -378,20 +313,7 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
 
         </div>
 
-        {/* ── Bottom nav ─────────────────────────────────────────────────── */}
-        <div className="fixed bottom-0 left-0 right-0 z-10">
-          <div className="max-w-md mx-auto bg-white border-t border-line flex items-stretch px-2">
-            {navItems.map(item => (
-              <NavItem
-                key={item.href}
-                href={item.href}
-                label={item.label}
-                icon={item.icon}
-                active={pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))}
-              />
-            ))}
-          </div>
-        </div>
+        <BottomNav />
 
       </div>
     </div>
