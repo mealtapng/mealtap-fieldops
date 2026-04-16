@@ -227,7 +227,7 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
       <div className="max-w-md mx-auto flex flex-col min-h-screen">
 
         {/* ── Hero section ───────────────────────────────────────────────── */}
-        <div className="bg-forest-dark px-6 pt-12 pb-10 relative">
+        <div className="bg-forest-dark px-6 pt-8 pb-8 relative">
 
           {/* Date + greeting row */}
           <div className="flex items-start justify-between">
@@ -249,7 +249,7 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
           </div>
 
           {/* Progress ring */}
-          <div className="flex flex-col items-center mt-6 gap-2">
+          <div className="flex flex-col items-center mt-4 gap-2">
             <div className="relative">
               <ProgressRing todayCount={stats.today_count} />
               {/* Centre label */}
@@ -300,7 +300,7 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
             {/* Earnings */}
             <StatCard
               label="Earnings (week)"
-              sub={<p className="text-[10px] text-muted-brand font-medium">₦400/cap + ₦1k hot</p>}
+              sub={<p className="text-[10px] text-muted-brand font-medium">This week</p>}
             >
               <span className="text-xl">{formatNaira(earnings)}</span>
             </StatCard>
@@ -358,10 +358,10 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
                   No captures yet. Tap + New Capture to start!
                 </div>
               ) : (
-                recent_captures.map(capture => (
+                recent_captures.map((capture, i) => (
                   <div key={capture.id} className="flex items-center gap-3 px-4 py-3.5">
                     <div className="w-9 h-9 rounded-xl bg-cream flex items-center justify-center flex-shrink-0 text-lg">
-                      🍽️
+                      {['🍲', '🍗', '🥘', '🍛', '🥗'][i % 5]}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-ink truncate">{capture.name}</p>
