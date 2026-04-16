@@ -58,10 +58,16 @@ CREATE POLICY users_self_read ON public.users
     OR public.get_my_role() IN ('admin', 'field_lead')
   );
 
--- Only admins and field leads can update user records.
+-- Only admins and field leads can update user records (all fields).
 CREATE POLICY users_admin_update ON public.users
   FOR UPDATE
   USING (public.get_my_role() IN ('admin', 'field_lead'));
+
+-- Agents can update their own passport photo URL (self-service photo upload).
+CREATE POLICY users_self_update_photo ON public.users
+  FOR UPDATE
+  USING (id = auth.uid())
+  WITH CHECK (id = auth.uid());
 
 -- ---------------------------------------------------------------------------
 -- restaurants policies
