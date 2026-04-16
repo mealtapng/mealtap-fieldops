@@ -23,12 +23,28 @@ $$;
 -- ENABLE ROW LEVEL SECURITY
 -- ---------------------------------------------------------------------------
 
+ALTER TABLE public.zones               ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.users               ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.restaurants         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.restaurant_photos   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.board_posts         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.dm_threads          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.dm_messages         ENABLE ROW LEVEL SECURITY;
+
+-- ---------------------------------------------------------------------------
+-- zones policies
+-- ---------------------------------------------------------------------------
+
+-- All authenticated users can read all zones (zone names are not sensitive).
+CREATE POLICY zones_read_all ON public.zones
+  FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+-- Only admins and field leads can create or modify zones.
+CREATE POLICY zones_admin_write ON public.zones
+  FOR ALL
+  USING (public.get_my_role() IN ('admin', 'field_lead'))
+  WITH CHECK (public.get_my_role() IN ('admin', 'field_lead'));
 
 -- ---------------------------------------------------------------------------
 -- users policies
