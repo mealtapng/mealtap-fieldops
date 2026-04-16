@@ -32,9 +32,9 @@ interface DashboardProps {
 
 // ── Progress ring ─────────────────────────────────────────────────────────────
 
-const RING_R    = 40
-const RING_SIZE = 104  // viewBox width/height (cx = cy = 52)
-const CIRCUMFERENCE = 2 * Math.PI * RING_R  // ≈ 251.3
+const RING_R    = 52
+const RING_SIZE = 120  // viewBox width/height (cx = cy = 60)
+const CIRCUMFERENCE = 2 * Math.PI * RING_R  // ≈ 326.7
 
 function ProgressRing({ todayCount }: { todayCount: number }) {
   const [offset, setOffset] = useState(CIRCUMFERENCE)
@@ -51,13 +51,13 @@ function ProgressRing({ todayCount }: { todayCount: number }) {
       viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
       className="block"
     >
-      {/* Track */}
+      {/* Track — white at low opacity so it's visible on the forest-dark bg */}
       <circle
         cx={RING_SIZE / 2}
         cy={RING_SIZE / 2}
         r={RING_R}
         fill="none"
-        stroke="#1F3F1B"
+        stroke="rgba(255,255,255,0.18)"
         strokeWidth={8}
       />
       {/* Progress arc */}
