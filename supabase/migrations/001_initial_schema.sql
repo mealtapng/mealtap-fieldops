@@ -84,7 +84,7 @@ CREATE TABLE public.users (
   assigned_zone_id     uuid REFERENCES public.zones(id) ON DELETE SET NULL,
   start_date           date,
   is_active            boolean NOT NULL DEFAULT true,
-  quality_score        numeric(4,2) DEFAULT 100,
+  quality_score        numeric(5,2) DEFAULT 100,
   failed_attempts      smallint NOT NULL DEFAULT 0,
   created_at           timestamptz NOT NULL DEFAULT now(),
   updated_at           timestamptz NOT NULL DEFAULT now()
