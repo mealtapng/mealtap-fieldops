@@ -84,12 +84,17 @@ export function PhotoUpload({ userId, initialPath, fullName }: PhotoUploadProps)
 
       if (uploadError) throw uploadError
 
-      const { error: dbError } = await (supabase as any)
-        .from('users')
-        .update({ passport_photo_url: storagePath })
-        .eq('id', userId)
-
-      if (dbError) throw dbError
+      // Use the server-side API route to write to the DB — this guarantees
+      // the request carries the session cookie and RLS resolves correctly.
+      const res = await fetch('/api/profile/update-photo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: storagePath }),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error ?? `HTTP ${res.status}`)
+      }
 
       // Keep the object URL as the new preview (no extra round-trip needed)
       prevUrlRef.current = objectUrl
@@ -120,6 +125,7 @@ export function PhotoUpload({ userId, initialPath, fullName }: PhotoUploadProps)
               src={previewUrl}
               alt={fullName}
               className="w-full h-full object-cover"
+              onError={() => setPreviewUrl(null)}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-terra to-forest flex items-center justify-center">
