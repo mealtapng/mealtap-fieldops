@@ -47,3 +47,27 @@ export function dayLabel(date: Date): string {
   const day     = date.getDate()
   return `${weekday} · ${month} ${day}`
 }
+
+/**
+ * Formats a Nigerian phone number for display.
+ *
+ * Example: "+2348039606540" → "+234 803 960 6540"
+ * Falls back to the raw string for non-standard formats.
+ */
+export function formatPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '')
+  if (digits.startsWith('234') && digits.length === 13) {
+    return `+234 ${digits.slice(3, 6)} ${digits.slice(6, 9)} ${digits.slice(9)}`
+  }
+  return phone
+}
+
+/**
+ * Formats an ISO date string for display.
+ *
+ * Example: "1999-03-14" → "14 March 1999"
+ */
+export function formatDate(dateStr: string): string {
+  const d = new Date(dateStr)
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+}

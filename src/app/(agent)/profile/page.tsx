@@ -1,58 +1,104 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { ProfileView } from '@/components/agent/ProfileView'
 import type { User } from '@/lib/types/database'
-import { SignOutButton } from './sign-out-button'
-import { BottomNav } from '@/components/agent/BottomNav'
 
-type ProfileRow = Pick<User, 'full_name' | 'employee_id' | 'phone' | 'role'>
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+async function awaitCount(query: any): Promise<number> {
+  const { count } = await query
+  return count ?? 0
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function ProfilePage() {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const { data: { user: authUser } } = await supabase.auth.getUser()
+  if (!authUser) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('full_name, employee_id, phone, role')
-    .eq('id', user.id)
-    .single() as { data: ProfileRow | null; error: Error | null }
+  // ── Parallel data fetches ──────────────────────────────────────────────────
 
-  const fields: { label: string; value: string | null | undefined }[] = [
-    { label: 'Name',        value: profile?.full_name },
-    { label: 'Employee ID', value: profile?.employee_id },
-    { label: 'Phone',       value: profile?.phone },
-    { label: 'Role',        value: profile?.role },
-  ]
+  const [
+    profileResult,
+    totalCaptures,
+    hotLeads,
+    captureRows,
+  ] = await Promise.all([
+    // Full user profile
+    supabase
+      .from('users')
+      .select('*')
+      .eq('id', authUser.id)
+      .single() as unknown as Promise<{ data: User | null; error: Error | null }>,
+
+    // Total captures count
+    awaitCount(
+      supabase
+        .from('restaurants')
+        .select('*', { count: 'exact', head: true })
+        .eq('captured_by', authUser.id)
+    ),
+
+    // Hot leads count
+    awaitCount(
+      supabase
+        .from('restaurants')
+        .select('*', { count: 'exact', head: true })
+        .eq('captured_by', authUser.id)
+        .eq('tag', 'hot')
+    ),
+
+    // All capture timestamps (for distinct-day count)
+    supabase
+      .from('restaurants')
+      .select('created_at')
+      .eq('captured_by', authUser.id),
+  ])
+
+  const profile = profileResult.data
+  if (!profile) redirect('/login')
+
+  // Days active: count distinct calendar dates
+  const daysActive = new Set(
+    (captureRows.data ?? []).map((r: { created_at: string }) => r.created_at.slice(0, 10))
+  ).size
+
+  // ── Zone name lookup ───────────────────────────────────────────────────────
+
+  let zoneName: string | null = null
+  if (profile.assigned_zone_id) {
+    const { data: zones } = await supabase
+      .from('zones')
+      .select('id, name')
+      .in('id', [profile.assigned_zone_id]) as unknown as { data: { id: string; name: string }[] | null }
+    zoneName = zones?.[0]?.name ?? null
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-cream">
-      <div className="max-w-md mx-auto flex flex-col min-h-screen">
-        <main className="flex-1 flex items-center justify-center px-4 pb-24">
-          <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm px-8 py-10">
-
-            <h1 className="text-2xl font-bold text-forest mb-1">My Profile</h1>
-            <p className="text-sm text-muted-brand mb-8">Your account details</p>
-
-            <div className="space-y-5 mb-10">
-              {fields.map(({ label, value }) => (
-                <div key={label}>
-                  <p className="text-xs font-semibold tracking-wider text-muted-brand uppercase mb-1">
-                    {label}
-                  </p>
-                  <p className="text-sm font-medium text-ink">{value ?? '—'}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="border-t border-line pt-6 text-center">
-              <SignOutButton />
-            </div>
-
-          </div>
-        </main>
-        <BottomNav />
-      </div>
-    </div>
+    <ProfileView
+      userId={profile.id}
+      fullName={profile.full_name}
+      employeeId={profile.employee_id}
+      role={profile.role}
+      phone={profile.phone}
+      email={profile.email}
+      dateOfBirth={profile.date_of_birth}
+      homeAddress={profile.home_address}
+      ninLast4={profile.nin_last_4}
+      nextOfKinName={profile.next_of_kin_name}
+      nextOfKinPhone={profile.next_of_kin_phone}
+      bankName={profile.bank_name}
+      bankAccountMasked={profile.bank_account_masked}
+      passportPhotoUrl={profile.passport_photo_url}
+      qualityScore={profile.quality_score}
+      zoneName={zoneName}
+      totalCaptures={totalCaptures}
+      hotLeads={hotLeads}
+      daysActive={daysActive}
+    />
   )
 }
