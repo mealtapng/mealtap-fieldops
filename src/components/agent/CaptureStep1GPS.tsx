@@ -5,6 +5,9 @@ import mapboxgl from 'mapbox-gl'
 import { useEffect, useRef, useState } from 'react'
 import type { Step1Data } from '@/lib/capture-state'
 
+// Set token once at module load — avoids timing issues inside effects
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -56,25 +59,33 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
     }
   }, [])
 
-  // ── Effect 2: init map once first position arrives ───────────────────────────
+  // ── Effect 2: init map on mount ─────────────────────────────────────────────
+  // Initialise immediately (don't wait for GPS) so tiles start loading right away.
+  // Effect 3 flies to the real position once it arrives.
 
   useEffect(() => {
-    if (!position || mapRef.current || !mapContainerRef.current) return
-    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!
+    if (!mapContainerRef.current || mapRef.current) return
+
+    // Default centre: previous lock → or Abuja city centre as fallback
+    const defaultCenter: [number, number] = initialData
+      ? [initialData.lng, initialData.lat]
+      : [7.4898, 9.0579]
+
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: [position.coords.longitude, position.coords.latitude],
+      center: defaultCenter,
       zoom: 17,
       attributionControl: false,
     })
     mapRef.current = map
+
     return () => {
       map.remove()
       mapRef.current = null
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [!!position])
+  }, [])
 
   // ── Effect 3: fly to updated position ───────────────────────────────────────
 
@@ -134,7 +145,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
 
   // ── Continue ──────────────────────────────────────────────────────────────────
 
-  const canContinue = !!position && position.coords.accuracy <= 10
+  const canContinue = !!position && position.coords.accuracy <= 100 // TODO: tighten to 10 before prod
 
   function handleContinue() {
     if (!position || !canContinue) return
@@ -209,12 +220,12 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
           {/* Mapbox container */}
           <div ref={mapContainerRef} className="absolute inset-0" />
 
-          {/* Loading skeleton until map initialises */}
+          {/* GPS acquiring overlay — shown until first position, sits on top of the already-loading map */}
           {!position && (
-            <div className="absolute inset-0 flex items-center justify-center bg-forest-light">
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-8 h-8 border-4 border-forest/30 border-t-forest rounded-full animate-spin" />
-                <p className="text-xs text-forest font-medium">Getting your location…</p>
+            <div className="absolute inset-0 flex items-end justify-center pb-3 pointer-events-none">
+              <div className="flex items-center gap-2 bg-black/50 rounded-full px-3 py-1.5">
+                <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin flex-shrink-0" />
+                <p className="text-[11px] text-white font-medium">Getting your location…</p>
               </div>
             </div>
           )}
