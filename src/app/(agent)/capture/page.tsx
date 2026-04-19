@@ -11,8 +11,10 @@ import {
   type CaptureWizardState,
   type Step1Data,
   type Step2Data,
+  type Step3Data,
 } from '@/lib/capture-state'
 import { CaptureStep2Details } from '@/components/agent/CaptureStep2Details'
+import { CaptureStep3Photos } from '@/components/agent/CaptureStep3Photos'
 
 // Load GPS step without SSR — mapbox-gl uses browser APIs
 const CaptureStep1GPS = dynamic(
@@ -41,6 +43,11 @@ export default function CapturePage() {
   function handleStep2Continue(data: Step2Data) {
     setCaptureData(prev => ({ ...prev, step2: data }))
     setStep(3)
+  }
+
+  function handleStep3Continue(data: Step3Data) {
+    setCaptureData(prev => ({ ...prev, step3: data }))
+    setStep(4)
   }
 
   return (
@@ -119,12 +126,18 @@ export default function CapturePage() {
               onContinue={handleStep2Continue}
             />
           )}
-          {(step === 3 || step === 4) && (
+          {step === 3 && (
+            <CaptureStep3Photos
+              initialData={captureData.step3}
+              onContinue={handleStep3Continue}
+            />
+          )}
+          {step === 4 && (
             <div className="flex-1 flex items-center justify-center px-4">
               <div className="text-center">
                 <p className="text-2xl mb-2">🚧</p>
                 <p className="text-sm font-semibold text-ink">
-                  {STEP_TITLES[step]}
+                  {STEP_TITLES[4]}
                 </p>
                 <p className="text-xs text-muted-brand mt-1">Coming in the next task</p>
               </div>
