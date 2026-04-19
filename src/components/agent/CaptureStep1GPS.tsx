@@ -145,7 +145,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
 
   // ── Continue ──────────────────────────────────────────────────────────────────
 
-  const canContinue = !!position && position.coords.accuracy <= 100 // TODO: tighten to 10 before prod
+  const canContinue = !!position && position.coords.accuracy <= 10
 
   function handleContinue() {
     if (!position || !canContinue) return
