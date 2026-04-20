@@ -29,9 +29,11 @@ export async function POST(request: NextRequest) {
 
   const now = new Date().toISOString()
 
-  const { error: msgError } = await (admin as any)
+  const { data: inserted, error: msgError } = await (admin as any)
     .from('dm_messages')
     .insert({ thread_id: threadId, sender_id: user.id, body: message })
+    .select('*')
+    .single()
 
   if (msgError) {
     console.error('[admin/send]', msgError.message)
@@ -44,5 +46,5 @@ export async function POST(request: NextRequest) {
     .update({ last_message_at: now })
     .eq('id', threadId)
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, message: inserted })
 }

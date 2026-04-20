@@ -123,10 +123,18 @@ export default function AdminThreadPage() {
     setInput('')
     inputRef.current?.focus()
 
-    await fetch('/api/admin/messages/send', {
+    const res = await fetch('/api/admin/messages/send', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ threadId, message: body }),
     })
+
+    const data = await res.json()
+    if (data.message) {
+      setMessages(prev => {
+        if (prev.find(m => m.id === data.message.id)) return prev
+        return [...prev, data.message as Message]
+      })
+    }
 
     setSending(false)
   }
