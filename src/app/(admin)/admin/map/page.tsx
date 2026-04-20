@@ -60,9 +60,9 @@ export default async function AdminMapPage() {
   }
 
   return (
-    <div className="absolute inset-0 flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="flex-shrink-0 px-8 py-4 border-b border-line bg-white flex items-center">
+    <div>
+      {/* Header — ~80px tall, matches the 80px offset in AdminMap's height calc */}
+      <div className="px-8 py-4 border-b border-line bg-white flex items-center">
         <div>
           <h1 className="text-2xl font-bold text-forest">Live Field Map · Abuja</h1>
           <p className="text-sm text-muted-brand">
@@ -71,14 +71,12 @@ export default async function AdminMapPage() {
         </div>
       </div>
 
-      {/* Map fills remaining height */}
-      <div className="flex-1 min-h-0 relative">
-        <AdminMap
-          restaurants={restaurants}
-          zones={zones}
-          tagCounts={tagCounts}
-        />
-      </div>
+      {/* AdminMap owns its own height via calc(100vh - 80px) */}
+      <AdminMap
+        restaurants={restaurants}
+        zones={zones}
+        tagCounts={tagCounts}
+      />
     </div>
   )
 }

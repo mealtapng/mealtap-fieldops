@@ -238,8 +238,10 @@ export default function AdminMap({
   ]
 
   return (
-    <div className="absolute inset-0">
-      {/* Map canvas */}
+    // Use an explicit viewport-height so Mapbox always gets a defined size,
+    // regardless of the parent flex/overflow chain.
+    <div className="relative w-full" style={{ height: 'calc(100vh - 80px)' }}>
+      {/* Map canvas — fills the relative wrapper */}
       <div ref={mapContainerRef} className="absolute inset-0" />
 
       {/* Legend overlay */}
