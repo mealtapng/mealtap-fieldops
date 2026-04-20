@@ -148,7 +148,7 @@ export default function ThreadPage() {
 
     const supabase = supabaseRef.current
 
-    await (supabase as any)
+    const { data: inserted } = await (supabase as any)
       .from('dm_messages')
       .insert({
         thread_id:       threadId,
@@ -157,6 +157,16 @@ export default function ThreadPage() {
         attachment_url:  attachmentUrl  ?? null,
         attachment_name: attachmentName ?? null,
       })
+      .select('*')
+      .single()
+
+    // Show own message immediately without waiting for Realtime
+    if (inserted) {
+      setMessages(prev => {
+        if (prev.find((m: Message) => m.id === inserted.id)) return prev
+        return [...prev, inserted as Message]
+      })
+    }
 
     // Update thread's last_message_at
     await (supabase as any)
