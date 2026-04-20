@@ -238,11 +238,13 @@ export default function AdminMap({
   ]
 
   return (
-    // Use an explicit viewport-height so Mapbox always gets a defined size,
-    // regardless of the parent flex/overflow chain.
-    <div className="relative w-full" style={{ height: 'calc(100vh - 80px)' }}>
-      {/* Map canvas — fills the relative wrapper */}
-      <div ref={mapContainerRef} className="absolute inset-0" />
+    <div className="relative">
+      {/* Explicit width + height on the ref div — Mapbox GL requires a pixel/
+          viewport-based height directly on the container element itself. */}
+      <div
+        ref={mapContainerRef}
+        style={{ width: '100%', height: 'calc(100vh - 120px)' }}
+      />
 
       {/* Legend overlay */}
       <div className="absolute top-4 right-4 z-10 bg-white rounded-xl shadow-sm border border-line p-3 min-w-[140px]">
