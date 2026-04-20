@@ -186,7 +186,7 @@ export default function AdminMap({
 }) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
-  const [dbg, setDbg] = useState({ w: 0, h: 0, token: 0 })
+  const [dbg, setDbg] = useState({ w: 0, h: 0, token: 0, loaded: false, err: '' })
 
   // useLayoutEffect fires synchronously after DOM mutations so the map
   // container already has its flex-allocated dimensions when Mapbox reads them.
@@ -194,11 +194,12 @@ export default function AdminMap({
     if (!mapContainerRef.current || mapRef.current) return
 
     const container = mapContainerRef.current
-    setDbg({
+    setDbg(prev => ({
+      ...prev,
       w: container.offsetWidth,
       h: container.offsetHeight,
       token: (process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '').length,
-    })
+    }))
 
     const map = new mapboxgl.Map({
       container,
@@ -211,7 +212,12 @@ export default function AdminMap({
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right')
 
+    map.on('error', (e) => {
+      setDbg(prev => ({ ...prev, err: e.error?.message ?? 'unknown map error' }))
+    })
+
     map.on('load', () => {
+      setDbg(prev => ({ ...prev, loaded: true }))
       map.resize()
       addZoneOverlays(map, zones)
       addRestaurantMarkers(map, restaurants)
@@ -244,7 +250,9 @@ export default function AdminMap({
       {/* Temporary debug panel — remove once map is working */}
       <div className="absolute bottom-4 left-4 z-50 bg-black/80 text-white text-xs font-mono p-2 rounded-lg leading-5">
         container: {dbg.w}×{dbg.h}px<br />
-        token chars: {dbg.token} {dbg.token === 0 ? '❌ MISSING' : '✓'}
+        token chars: {dbg.token} {dbg.token === 0 ? '❌ MISSING' : '✓'}<br />
+        style loaded: {dbg.loaded ? '✓' : 'waiting…'}<br />
+        {dbg.err && <span style={{color:'#ff6b6b'}}>error: {dbg.err}</span>}
       </div>
 
       {/* Legend overlay */}
