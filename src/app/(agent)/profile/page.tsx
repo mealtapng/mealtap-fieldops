@@ -22,9 +22,9 @@ export default async function ProfilePage() {
 
   const [
     profileResult,
-    totalCaptures,
-    hotLeads,
-    captureRows,
+    totalOnboardings,
+    conversions,
+    onboardingRows,
   ] = await Promise.all([
     // Full user profile
     supabase
@@ -33,28 +33,28 @@ export default async function ProfilePage() {
       .eq('id', authUser.id)
       .single() as unknown as Promise<{ data: User | null; error: Error | null }>,
 
-    // Total captures count
+    // Total onboardings count
     awaitCount(
       supabase
-        .from('restaurants')
+        .from('onboardings')
         .select('*', { count: 'exact', head: true })
-        .eq('captured_by', authUser.id)
+        .eq('agent_id', authUser.id)
     ),
 
-    // Hot leads count
+    // Conversions count
     awaitCount(
       supabase
-        .from('restaurants')
+        .from('onboardings')
         .select('*', { count: 'exact', head: true })
-        .eq('captured_by', authUser.id)
-        .eq('tag', 'hot')
+        .eq('agent_id', authUser.id)
+        .eq('conversion_status', 'converted')
     ),
 
-    // All capture timestamps (for distinct-day count)
+    // All onboarding timestamps (for distinct-day count)
     supabase
-      .from('restaurants')
+      .from('onboardings')
       .select('created_at')
-      .eq('captured_by', authUser.id),
+      .eq('agent_id', authUser.id),
   ])
 
   const profile = profileResult.data
@@ -62,7 +62,7 @@ export default async function ProfilePage() {
 
   // Days active: count distinct calendar dates
   const daysActive = new Set(
-    (captureRows.data ?? []).map((r: { created_at: string }) => r.created_at.slice(0, 10))
+    (onboardingRows.data ?? []).map((r: { created_at: string }) => r.created_at.slice(0, 10))
   ).size
 
   // ── Zone name lookup ───────────────────────────────────────────────────────
@@ -96,8 +96,9 @@ export default async function ProfilePage() {
       passportPhotoUrl={profile.passport_photo_url}
       qualityScore={profile.quality_score}
       zoneName={zoneName}
-      totalCaptures={totalCaptures}
-      hotLeads={hotLeads}
+      referralCode={profile.referral_code}
+      totalOnboardings={totalOnboardings}
+      conversions={conversions}
       daysActive={daysActive}
     />
   )

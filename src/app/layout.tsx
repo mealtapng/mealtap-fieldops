@@ -10,8 +10,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Mealtap Field Ops",
-  description: "Internal app for Mealtap field agents",
+  title: "PowerChat Field Ops",
+  description: "Internal app for PowerChat field agents",
 };
 
 export default function RootLayout({

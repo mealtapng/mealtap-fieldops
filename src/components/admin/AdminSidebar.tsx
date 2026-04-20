@@ -15,11 +15,11 @@ interface Props {
 }
 
 const NAV_ITEMS = [
-  { href: '/admin',               label: 'Dashboard',   icon: '📊', exact: true  },
-  { href: '/admin/map',           label: 'Live Map',    icon: '🗺️', exact: false },
-  { href: '/admin/restaurants',   label: 'Restaurants', icon: '🍽️', exact: false },
-  { href: '/admin/agents',        label: 'Agents',      icon: '👥', exact: false },
-  { href: '/admin/messages',      label: 'Messages',    icon: '💬', exact: false },
+  { href: '/admin',              label: 'Dashboard',   icon: '📊', exact: true  },
+  { href: '/admin/map',          label: 'Live Map',    icon: '🗺️', exact: false },
+  { href: '/admin/onboardings',  label: 'Onboardings', icon: '⚡', exact: false },
+  { href: '/admin/agents',       label: 'Agents',      icon: '👥', exact: false },
+  { href: '/admin/messages',     label: 'Messages',    icon: '💬', exact: false },
 ]
 
 const DISABLED_ITEMS = [
@@ -50,13 +50,13 @@ export function AdminSidebar({ user }: Props) {
   return (
     <>
       {/* Fixed sidebar */}
-      <aside className="w-[220px] flex-shrink-0 bg-forest flex flex-col h-screen fixed left-0 top-0 z-40">
+      <aside className="w-[220px] flex-shrink-0 bg-brand flex flex-col h-screen fixed left-0 top-0 z-40">
 
         {/* Logo */}
         <div className="px-5 pt-6 pb-5 border-b border-white/10">
           <p className="text-lg font-bold leading-none">
-            <span className="text-white">Meal</span>
-            <span className="text-terra">tap</span>
+            <span className="text-white">Power</span>
+            <span className="text-success">Chat</span>
           </p>
           <p className="text-white/60 text-xs mt-0.5">Field Ops</p>
           <p className="text-white/40 text-[10px] tracking-widest uppercase mt-1">Admin Console</p>
@@ -108,7 +108,7 @@ export function AdminSidebar({ user }: Props) {
         {user && (
           <div className="border-t border-white/10 p-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-terra flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-full bg-success flex items-center justify-center flex-shrink-0">
                 <span className="text-xs font-bold text-white">{initials(user.full_name)}</span>
               </div>
               <div className="min-w-0 flex-1">

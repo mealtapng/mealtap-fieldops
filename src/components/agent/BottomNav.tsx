@@ -6,7 +6,7 @@ import { Home, PlusCircle, MessageSquare, User } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Home',     Icon: Home          },
-  { href: '/capture',   label: 'Capture',  Icon: PlusCircle    },
+  { href: '/onboard',   label: 'Onboard',  Icon: PlusCircle    },
   { href: '/messages',  label: 'Messages', Icon: MessageSquare },
   { href: '/profile',   label: 'Profile',  Icon: User          },
 ] as const
@@ -28,7 +28,7 @@ export function BottomNav() {
               href={href}
               className={`flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[52px] py-2 transition-colors ${
                 active
-                  ? 'text-forest'
+                  ? 'text-brand'
                   : 'text-muted-brand hover:text-ink'
               }`}
             >

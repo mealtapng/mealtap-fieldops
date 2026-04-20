@@ -128,7 +128,7 @@ function NewPostModal({ currentUserId, onClose, onPosted }: NewPostModalProps) {
           onChange={e => setBody(e.target.value)}
           placeholder="Write your announcement…"
           rows={4}
-          className="w-full rounded-xl border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-brand/60 focus:outline-none focus:ring-2 focus:ring-terra/30 focus:border-terra resize-none"
+          className="w-full rounded-xl border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-brand/60 focus:outline-none focus:ring-2 focus:ring-success/30 focus:border-success resize-none"
         />
 
         <label className="flex items-center gap-2.5 mt-3 cursor-pointer">
@@ -136,7 +136,7 @@ function NewPostModal({ currentUserId, onClose, onPosted }: NewPostModalProps) {
             type="checkbox"
             checked={isPinned}
             onChange={e => setIsPinned(e.target.checked)}
-            className="w-4 h-4 rounded accent-terra"
+            className="w-4 h-4 rounded accent-success"
           />
           <span className="text-sm text-ink font-medium">📌 Pin this post</span>
         </label>
@@ -146,7 +146,7 @@ function NewPostModal({ currentUserId, onClose, onPosted }: NewPostModalProps) {
           disabled={!body.trim() || posting}
           className={`w-full mt-4 py-3.5 rounded-2xl font-bold text-sm transition-all ${
             body.trim() && !posting
-              ? 'bg-terra text-white shadow-lg shadow-terra/25 active:bg-terra-dark'
+              ? 'bg-success text-white shadow-lg shadow-success/25 active:bg-success-dark'
               : 'bg-line text-muted-brand cursor-not-allowed'
           }`}
         >
@@ -303,7 +303,7 @@ export function MessagesView({
                         disabled={creatingThread}
                         className="w-full flex items-center gap-3 bg-white rounded-2xl border border-line px-4 py-3.5 active:bg-cream transition-colors disabled:opacity-60"
                       >
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-forest to-terra flex items-center justify-center flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-success flex items-center justify-center flex-shrink-0">
                           <span className="text-xs font-bold text-white">
                             {initials(sup.full_name)}
                           </span>
@@ -343,7 +343,7 @@ export function MessagesView({
       {isAdminOrLead(currentUser.role) && activeTab === 'board' && (
         <button
           onClick={() => setShowNewPostModal(true)}
-          className="fixed bottom-20 right-4 w-13 h-13 w-14 h-14 bg-terra text-white rounded-full shadow-lg shadow-terra/30 flex items-center justify-center active:bg-terra-dark transition-colors z-30"
+          className="fixed bottom-20 right-4 w-13 h-13 w-14 h-14 bg-success text-white rounded-full shadow-lg shadow-success/30 flex items-center justify-center active:bg-success-dark transition-colors z-30"
           aria-label="New post"
         >
           <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">

@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 /**
- * GET /api/admin/export-restaurants
+ * GET /api/admin/export-onboardings
  * Requires admin or field_lead role.
- * Returns all restaurants as a downloadable CSV file.
+ * Returns all onboardings as a downloadable CSV file.
  */
 export async function GET() {
   const supabase = await createClient()
@@ -17,10 +17,15 @@ export async function GET() {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  // Fetch all restaurants
-  const { data: restaurants, error } = await (supabase as any)
-    .from('restaurants')
-    .select('id, name, owner_name, owner_phone, address, lat, lng, cuisine_type, tag, captured_by, zone_id, created_at')
+  // Fetch all onboardings
+  const { data: onboardings, error } = await (supabase as any)
+    .from('onboardings')
+    .select(`
+      id, user_name, user_phone, disco_area, meter_number,
+      conversion_status, referral_code,
+      checklist_saved_number, checklist_sent_hi, checklist_entered_code, checklist_purchased_token,
+      token_amount_purchased, address, lat, lng, agent_id, zone_id, created_at
+    `)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -28,8 +33,8 @@ export async function GET() {
   }
 
   // Resolve agent names and zone names
-  const agentIds = Array.from(new Set((restaurants ?? []).map((r: any) => r.captured_by).filter(Boolean)))
-  const zoneIds  = Array.from(new Set((restaurants ?? []).map((r: any) => r.zone_id).filter(Boolean)))
+  const agentIds = Array.from(new Set((onboardings ?? []).map((r: any) => r.agent_id).filter(Boolean)))
+  const zoneIds  = Array.from(new Set((onboardings ?? []).map((r: any) => r.zone_id).filter(Boolean)))
 
   const [usersResult, zonesResult] = await Promise.all([
     agentIds.length > 0
@@ -47,7 +52,13 @@ export async function GET() {
   for (const z of (zonesResult.data ?? [])) zoneMap[z.id] = z.name
 
   // Build CSV
-  const headers = ['id', 'name', 'owner_name', 'owner_phone', 'address', 'lat', 'lng', 'cuisine_type', 'tag', 'agent_name', 'zone_name', 'created_at']
+  const headers = [
+    'id', 'user_name', 'user_phone', 'disco_area', 'meter_number',
+    'conversion_status', 'referral_code',
+    'checklist_saved_number', 'checklist_sent_hi', 'checklist_entered_code', 'checklist_purchased_token',
+    'token_amount_purchased', 'address', 'lat', 'lng',
+    'agent_name', 'zone_name', 'created_at',
+  ]
 
   function escapeCsv(val: unknown): string {
     if (val == null) return ''
@@ -58,27 +69,34 @@ export async function GET() {
     return str
   }
 
-  const rows = (restaurants ?? []).map((r: any) => [
+  const rows = (onboardings ?? []).map((r: any) => [
     r.id,
-    r.name,
-    r.owner_name,
-    r.owner_phone,
+    r.user_name,
+    r.user_phone,
+    r.disco_area,
+    r.meter_number,
+    r.conversion_status,
+    r.referral_code,
+    r.checklist_saved_number,
+    r.checklist_sent_hi,
+    r.checklist_entered_code,
+    r.checklist_purchased_token,
+    r.token_amount_purchased,
     r.address,
     r.lat,
     r.lng,
-    r.cuisine_type,
-    r.tag,
-    userMap[r.captured_by] ?? '',
+    userMap[r.agent_id] ?? '',
     r.zone_id ? (zoneMap[r.zone_id] ?? '') : '',
     r.created_at,
   ].map(escapeCsv).join(','))
 
   const csv = [headers.join(','), ...rows].join('\n')
+  const date = new Date().toISOString().slice(0, 10)
 
   return new NextResponse(csv, {
     headers: {
       'Content-Type':        'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename="mealtap-restaurants-${new Date().toISOString().slice(0, 10)}.csv"`,
+      'Content-Disposition': `attachment; filename="powerchat-onboardings-${date}.csv"`,
     },
   })
 }

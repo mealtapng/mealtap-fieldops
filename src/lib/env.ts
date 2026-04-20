@@ -53,5 +53,5 @@ export const MAPBOX_TOKEN = requireEnv('NEXT_PUBLIC_MAPBOX_TOKEN')
 // App
 // ---------------------------------------------------------------------------
 
-/** Canonical app URL — e.g. http://localhost:3000 or https://field.mealtap.ng */
+/** Canonical app URL — e.g. http://localhost:3000 or https://field.powerchat.ng */
 export const APP_URL = requireEnv('NEXT_PUBLIC_APP_URL')

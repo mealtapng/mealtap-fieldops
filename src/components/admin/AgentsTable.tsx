@@ -13,8 +13,8 @@ interface Agent {
   quality_score:      number | null
   is_active:          boolean
   passport_photo_url: string | null
-  total_captures:     number
-  hot_leads:          number
+  total_onboardings:  number
+  conversions:        number
 }
 
 interface Zone {
@@ -33,9 +33,9 @@ function initials(name: string) {
 
 function qualityColor(score: number | null) {
   if (score == null) return 'text-muted-brand'
-  if (score >= 90) return 'text-forest font-semibold'
+  if (score >= 90) return 'text-brand font-semibold'
   if (score >= 70) return 'text-amber-600 font-semibold'
-  return 'text-terra font-semibold'
+  return 'text-red-500 font-semibold'
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -106,12 +106,12 @@ export function AgentsTable({ agents, zones }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-line">
           <div>
-            <h1 className="text-2xl font-bold text-forest">Agents</h1>
+            <h1 className="text-2xl font-bold text-brand">Agents</h1>
             <p className="text-sm text-muted-brand">{agents.length} field agent{agents.length !== 1 ? 's' : ''}</p>
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="px-4 py-2.5 bg-terra text-white rounded-xl font-semibold text-sm hover:bg-terra/90 transition-colors"
+            className="px-4 py-2.5 bg-success text-white rounded-xl font-semibold text-sm hover:bg-success-dark transition-colors"
           >
             + New Agent
           </button>
@@ -125,8 +125,8 @@ export function AgentsTable({ agents, zones }: Props) {
                 <th className="text-left px-6 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Agent</th>
                 <th className="text-left px-4 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Phone</th>
                 <th className="text-left px-4 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Zone</th>
-                <th className="text-center px-4 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Captures</th>
-                <th className="text-center px-4 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Hot Leads</th>
+                <th className="text-center px-4 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Onboardings</th>
+                <th className="text-center px-4 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Conversions</th>
                 <th className="text-center px-4 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Quality</th>
                 <th className="text-center px-4 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Status</th>
                 <th className="text-right px-6 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Actions</th>
@@ -151,7 +151,7 @@ export function AgentsTable({ agents, zones }: Props) {
                           className="w-9 h-9 rounded-full object-cover flex-shrink-0"
                         />
                       ) : (
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-forest to-forest/70 flex items-center justify-center flex-shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand to-success flex items-center justify-center flex-shrink-0">
                           <span className="text-white text-xs font-bold">{initials(agent.full_name)}</span>
                         </div>
                       )}
@@ -170,14 +170,14 @@ export function AgentsTable({ agents, zones }: Props) {
                   {/* Zone */}
                   <td className="px-4 py-4 text-sm text-ink">{agent.zone_name ?? <span className="text-muted-brand">—</span>}</td>
 
-                  {/* Captures */}
+                  {/* Onboardings */}
                   <td className="px-4 py-4 text-center">
-                    <span className="text-sm font-semibold text-ink">{agent.total_captures}</span>
+                    <span className="text-sm font-semibold text-ink">{agent.total_onboardings}</span>
                   </td>
 
-                  {/* Hot Leads */}
+                  {/* Conversions */}
                   <td className="px-4 py-4 text-center">
-                    <span className="text-sm font-semibold text-terra">{agent.hot_leads}</span>
+                    <span className="text-sm font-semibold text-success">{agent.conversions}</span>
                   </td>
 
                   {/* Quality */}
@@ -191,7 +191,7 @@ export function AgentsTable({ agents, zones }: Props) {
                   <td className="px-4 py-4 text-center">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                       agent.is_active
-                        ? 'bg-forest/10 text-forest'
+                        ? 'bg-brand/10 text-brand'
                         : 'bg-red-50 text-red-500'
                     }`}>
                       {agent.is_active ? 'Active' : 'Inactive'}
@@ -202,7 +202,7 @@ export function AgentsTable({ agents, zones }: Props) {
                   <td className="px-6 py-4 text-right">
                     <Link
                       href={`/admin/agents/${agent.id}`}
-                      className="text-sm font-semibold text-forest hover:text-forest/70 transition-colors"
+                      className="text-sm font-semibold text-brand hover:text-brand-dark transition-colors"
                     >
                       View →
                     </Link>
@@ -243,7 +243,7 @@ export function AgentsTable({ agents, zones }: Props) {
                   onChange={e => setFullName(e.target.value)}
                   required
                   placeholder="e.g. Amaka Obi"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
                 />
               </div>
 
@@ -262,7 +262,7 @@ export function AgentsTable({ agents, zones }: Props) {
                     onChange={e => setPhone(e.target.value)}
                     required
                     placeholder="08012345678"
-                    className="flex-1 px-3.5 py-2.5 rounded-r-xl border border-line text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
+                    className="flex-1 px-3.5 py-2.5 rounded-r-xl border border-line text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
                   />
                 </div>
               </div>
@@ -275,7 +275,7 @@ export function AgentsTable({ agents, zones }: Props) {
                 <select
                   value={role}
                   onChange={e => setRole(e.target.value as 'agent' | 'field_lead')}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink bg-white focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
                 >
                   <option value="agent">Agent</option>
                   <option value="field_lead">Field Lead</option>
@@ -290,7 +290,7 @@ export function AgentsTable({ agents, zones }: Props) {
                 <select
                   value={zoneId}
                   onChange={e => setZoneId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink bg-white focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
                 >
                   <option value="">— No zone —</option>
                   {zones.map(z => (
@@ -311,12 +311,12 @@ export function AgentsTable({ agents, zones }: Props) {
                   pattern="\d{4}"
                   maxLength={4}
                   placeholder="4 digits"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
                 />
               </div>
 
               {error && (
-                <p className="text-sm text-terra bg-terra/10 rounded-xl px-4 py-2.5">{error}</p>
+                <p className="text-sm text-red-500 bg-red-50 rounded-xl px-4 py-2.5">{error}</p>
               )}
 
               <div className="flex gap-3 pt-1">
@@ -330,7 +330,7 @@ export function AgentsTable({ agents, zones }: Props) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-terra text-white text-sm font-semibold hover:bg-terra/90 disabled:opacity-60 transition-colors"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-success text-white text-sm font-semibold hover:bg-success-dark disabled:opacity-60 transition-colors"
                 >
                   {loading ? 'Creating…' : 'Create Agent'}
                 </button>
@@ -364,7 +364,7 @@ export function AgentsTable({ agents, zones }: Props) {
 
             <button
               onClick={() => { setShowSuccess(false); setCopied(false); window.location.reload() }}
-              className="w-full px-4 py-2.5 rounded-xl bg-forest text-white text-sm font-semibold hover:bg-forest/90 transition-colors"
+              className="w-full px-4 py-2.5 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand-dark transition-colors"
             >
               Done
             </button>

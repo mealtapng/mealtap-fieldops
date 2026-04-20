@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 import { PhotoUpload } from '@/components/agent/PhotoUpload'
 import { SignOutButton } from '@/app/(agent)/profile/sign-out-button'
 import { BottomNav } from '@/components/agent/BottomNav'
@@ -25,8 +26,9 @@ export interface ProfileProps {
   passportPhotoUrl: string | null
   qualityScore: number | null
   zoneName: string | null
-  totalCaptures: number
-  hotLeads: number
+  referralCode: string | null
+  totalOnboardings: number
+  conversions: number
   daysActive: number
 }
 
@@ -85,6 +87,27 @@ function StatCol({ label, value }: { label: string; value: string | number }) {
   )
 }
 
+// ── CopyButton ────────────────────────────────────────────────────────────────
+
+function CopyButton({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false)
+  function handleCopy() {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="text-xs font-semibold text-brand flex-shrink-0"
+    >
+      {copied ? '✓ Copied' : 'Copy'}
+    </button>
+  )
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function ProfileView({
@@ -104,8 +127,9 @@ export function ProfileView({
   passportPhotoUrl,
   qualityScore,
   zoneName,
-  totalCaptures,
-  hotLeads,
+  referralCode,
+  totalOnboardings,
+  conversions,
   daysActive,
 }: ProfileProps) {
   const roleLabel =
@@ -113,14 +137,14 @@ export function ProfileView({
     role === 'admin'      ? 'Admin' :
                             'Field Agent'
 
-  const lifetimeEarnings = totalCaptures * 400 + hotLeads * 1_000
+  const lifetimeEarnings = conversions * 100
 
   return (
     <div className="min-h-screen bg-cream">
       <div className="max-w-md mx-auto flex flex-col min-h-screen">
 
         {/* ── Hero ──────────────────────────────────────────────────────────── */}
-        <div className="bg-forest-dark rounded-b-[2.5rem] h-44 px-5 pt-12 flex-shrink-0 relative">
+        <div className="bg-brand-dark rounded-b-[2.5rem] h-44 px-5 pt-12 flex-shrink-0 relative">
           <div className="flex items-center justify-between">
             <Link
               href="/dashboard"
@@ -169,7 +193,7 @@ export function ProfileView({
             {/* Badges */}
             <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
               {zoneName && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-forest-light text-forest text-xs font-semibold">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-brand/10 text-brand text-xs font-semibold">
                   <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                     <circle cx="12" cy="9" r="2.5" />
@@ -178,18 +202,33 @@ export function ProfileView({
                 </span>
               )}
               {(qualityScore ?? 0) >= 90 && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full bg-terra-light text-terra text-xs font-semibold">
+                <span className="inline-flex items-center px-3 py-1 rounded-full bg-success-light text-success text-xs font-semibold">
                   ⭐ Top performer
                 </span>
               )}
             </div>
+
+            {/* Referral code */}
+            {referralCode && (
+              <div className="mt-4 bg-brand/10 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-bold tracking-widest text-brand uppercase">
+                    Your referral code
+                  </p>
+                  <p className="text-lg font-bold text-brand tracking-wider mt-0.5">
+                    {referralCode}
+                  </p>
+                </div>
+                <CopyButton value={referralCode} />
+              </div>
+            )}
           </div>
 
           {/* ── Lifetime stats bar ──────────────────────────────────────────── */}
           <div className="bg-white rounded-2xl shadow-sm mx-4 mt-3 flex divide-x divide-line">
-            <StatCol label="Captures"   value={totalCaptures} />
-            <StatCol label="Hot leads"  value={hotLeads} />
-            <StatCol label="Days active" value={daysActive} />
+            <StatCol label="Onboardings" value={totalOnboardings} />
+            <StatCol label="Conversions" value={conversions} />
+            <StatCol label="Days active"  value={daysActive} />
           </div>
 
           {/* ── Info sections ───────────────────────────────────────────────── */}
@@ -219,7 +258,7 @@ export function ProfileView({
                 label="NIN"
                 value={
                   ninLast4
-                    ? <span>•••• •••• {ninLast4} <span className="text-terra">✓</span></span>
+                    ? <span>•••• •••• {ninLast4} <span className="text-success">✓</span></span>
                     : 'Not set'
                 }
                 valueClassName={ninLast4 ? 'text-ink' : 'text-muted-brand'}
@@ -250,7 +289,12 @@ export function ProfileView({
               <InfoRow
                 label="Lifetime earnings"
                 value={formatNaira(lifetimeEarnings)}
-                valueClassName="text-forest font-bold"
+                valueClassName="text-brand font-bold"
+              />
+              <InfoRow
+                label="Rate"
+                value="₦100 per conversion"
+                valueClassName="text-muted-brand"
               />
             </Section>
 

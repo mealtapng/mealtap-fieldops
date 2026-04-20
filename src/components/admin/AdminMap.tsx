@@ -6,44 +6,41 @@ import mapboxgl from 'mapbox-gl'
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 
-type Restaurant = {
-  id: string
-  name: string
-  address: string | null
-  lat: number | null
-  lng: number | null
-  tag: string | null
-  agent_name: string
-  created_at: string
+type Onboarding = {
+  id:                string
+  user_name:         string
+  address:           string | null
+  lat:               number | null
+  lng:               number | null
+  conversion_status: string | null
+  agent_name:        string
+  created_at:        string
 }
 
 type Zone = {
-  id: string
-  name: string
+  id:         string
+  name:       string
   center_lat: number | null
   center_lng: number | null
-  radius_km: number
+  radius_km:  number
 }
 
-type TagCounts = {
-  hot: number
-  warm: number
-  cold: number
-  not_a_fit: number
+type StatusCounts = {
+  converted: number
+  pending:   number
+  failed:    number
 }
 
-const TAG_COLORS: Record<string, string> = {
-  hot:       '#C8622A',
-  warm:      '#2D5A27',
-  cold:      '#9CA3AF',
-  not_a_fit: '#D1D5DB',
+const STATUS_COLORS: Record<string, string> = {
+  converted: '#34A853',
+  pending:   '#F59E0B',
+  failed:    '#9CA3AF',
 }
 
-const TAG_LABELS: Record<string, string> = {
-  hot:       'Hot',
-  warm:      'Warm',
-  cold:      'Cold',
-  not_a_fit: 'Not a fit',
+const STATUS_LABELS: Record<string, string> = {
+  converted: 'Converted',
+  pending:   'Pending',
+  failed:    'Not interested',
 }
 
 // Generates a circle polygon as [lng, lat] coordinate pairs
@@ -51,7 +48,6 @@ function makeCirclePolygon(lat: number, lng: number, radiusKm: number, steps = 6
   const coords: number[][] = []
   for (let i = 0; i <= steps; i++) {
     const angle = (i / steps) * 2 * Math.PI
-    // dx is longitude offset, dy is latitude offset
     const dx = (radiusKm / 111.32) / Math.cos((lat * Math.PI) / 180) * Math.cos(angle)
     const dy = (radiusKm / 111.32) * Math.sin(angle)
     coords.push([lng + dx, lat + dy])
@@ -65,7 +61,6 @@ function addZoneOverlays(map: mapboxgl.Map, zones: Zone[]) {
 
     const coords = makeCirclePolygon(zone.center_lat, zone.center_lng, zone.radius_km)
 
-    // Fill layer
     map.addSource(`zone-fill-${zone.id}`, {
       type: 'geojson',
       data: {
@@ -78,26 +73,20 @@ function addZoneOverlays(map: mapboxgl.Map, zones: Zone[]) {
       id: `zone-fill-${zone.id}`,
       type: 'fill',
       source: `zone-fill-${zone.id}`,
-      paint: {
-        'fill-color': '#2D5A27',
-        'fill-opacity': 0.06,
-      },
+      paint: { 'fill-color': '#1A73E8', 'fill-opacity': 0.06 },
     })
-
-    // Dashed border layer
     map.addLayer({
       id: `zone-line-${zone.id}`,
       type: 'line',
       source: `zone-fill-${zone.id}`,
       paint: {
-        'line-color': '#2D5A27',
+        'line-color': '#1A73E8',
         'line-opacity': 0.3,
         'line-width': 1.5,
         'line-dasharray': [3, 3],
       },
     })
 
-    // Zone name label at centre
     map.addSource(`zone-label-${zone.id}`, {
       type: 'geojson',
       data: {
@@ -117,7 +106,7 @@ function addZoneOverlays(map: mapboxgl.Map, zones: Zone[]) {
         'text-allow-overlap': false,
       },
       paint: {
-        'text-color': '#2D5A27',
+        'text-color': '#1A73E8',
         'text-opacity': 0.7,
         'text-halo-color': '#ffffff',
         'text-halo-width': 1.5,
@@ -126,15 +115,16 @@ function addZoneOverlays(map: mapboxgl.Map, zones: Zone[]) {
   }
 }
 
-function addRestaurantMarkers(map: mapboxgl.Map, restaurants: Restaurant[]) {
-  for (const r of restaurants) {
+function addOnboardingMarkers(map: mapboxgl.Map, onboardings: Onboarding[]) {
+  for (const r of onboardings) {
     if (r.lat == null || r.lng == null) continue
 
-    const color = TAG_COLORS[r.tag ?? ''] ?? '#9CA3AF'
-    const label = TAG_LABELS[r.tag ?? ''] ?? r.tag ?? '—'
-    const date  = r.created_at ? new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
+    const color = STATUS_COLORS[r.conversion_status ?? ''] ?? '#9CA3AF'
+    const label = STATUS_LABELS[r.conversion_status ?? ''] ?? r.conversion_status ?? '—'
+    const date  = r.created_at
+      ? new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+      : '—'
 
-    // Custom circle element — 18px so it's visible against streets-v12 roads
     const el = document.createElement('div')
     el.style.cssText = [
       'width: 18px',
@@ -150,7 +140,7 @@ function addRestaurantMarkers(map: mapboxgl.Map, restaurants: Restaurant[]) {
     const popup = new mapboxgl.Popup({ offset: 10, closeButton: false, maxWidth: '220px' })
       .setHTML(`
         <div style="font-family: Poppins, sans-serif; padding: 2px 0;">
-          <p style="font-weight: 700; font-size: 14px; margin: 0 0 4px; color: #1a1a1a; line-height: 1.3;">${r.name}</p>
+          <p style="font-weight: 700; font-size: 14px; margin: 0 0 4px; color: #202124; line-height: 1.3;">${r.user_name}</p>
           <p style="font-size: 11px; color: #6B7280; margin: 0 0 8px; line-height: 1.4;">${r.address ?? ''}</p>
           <span style="
             display: inline-block;
@@ -177,31 +167,28 @@ function addRestaurantMarkers(map: mapboxgl.Map, restaurants: Restaurant[]) {
 }
 
 export default function AdminMap({
-  restaurants,
+  onboardings,
   zones,
-  tagCounts,
+  statusCounts,
 }: {
-  restaurants: Restaurant[]
-  zones: Zone[]
-  tagCounts: TagCounts
+  onboardings:  Onboarding[]
+  zones:        Zone[]
+  statusCounts: StatusCounts
 }) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
+
   useEffect(() => {
     if (!mapContainerRef.current) return
     const container = mapContainerRef.current
 
-    // Defer initialisation by one tick. In React 18 Strict Mode (dev only)
-    // effects run twice: mount → cleanup → remount. Without this defer the
-    // first timer is cleared by cleanup before it fires, so only the genuine
-    // second mount actually creates the map — avoiding a double WebGL context.
     const timer = setTimeout(() => {
       if (mapRef.current) return
 
       const map = new mapboxgl.Map({
         container,
         style: 'mapbox://styles/mapbox/streets-v12',
-        center: [7.49, 9.06], // Abuja [lng, lat]
+        center: [3.3792, 6.5244], // Lagos [lng, lat]
         zoom: 12,
         attributionControl: false,
       })
@@ -209,11 +196,10 @@ export default function AdminMap({
 
       map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right')
 
-      // Guard: if style loaded from cache before listener registered, run immediately
       const onLoad = () => {
         map.resize()
         addZoneOverlays(map, zones)
-        addRestaurantMarkers(map, restaurants)
+        addOnboardingMarkers(map, onboardings)
       }
       if (map.isStyleLoaded()) {
         onLoad()
@@ -221,7 +207,6 @@ export default function AdminMap({
         map.on('load', onLoad)
       }
 
-      // Resize whenever the container changes size
       const observer = new ResizeObserver(() => map.resize())
       observer.observe(container)
       map.once('remove', () => observer.disconnect())
@@ -238,30 +223,27 @@ export default function AdminMap({
   }, [])
 
   const legendItems = [
-    { tag: 'hot',       label: 'Hot',       count: tagCounts.hot },
-    { tag: 'warm',      label: 'Warm',      count: tagCounts.warm },
-    { tag: 'cold',      label: 'Cold',      count: tagCounts.cold },
-    { tag: 'not_a_fit', label: 'Not a fit', count: tagCounts.not_a_fit },
+    { status: 'converted', label: 'Converted',      count: statusCounts.converted },
+    { status: 'pending',   label: 'Pending',         count: statusCounts.pending   },
+    { status: 'failed',    label: 'Not interested',  count: statusCounts.failed    },
   ]
 
   return (
     <div className="relative">
-      {/* Explicit width + height on the ref div — Mapbox GL requires a pixel/
-          viewport-based height directly on the container element itself. */}
       <div
         ref={mapContainerRef}
         style={{ width: '100%', height: 'calc(100vh - 120px)' }}
       />
 
       {/* Legend overlay */}
-      <div className="absolute top-4 right-4 z-10 bg-white rounded-xl shadow-sm border border-line p-3 min-w-[140px]">
+      <div className="absolute top-4 right-4 z-10 bg-white rounded-xl shadow-sm border border-line p-3 min-w-[150px]">
         <p className="text-[10px] font-bold tracking-widest text-muted-brand uppercase mb-2">Legend</p>
         <div className="space-y-1.5">
-          {legendItems.map(({ tag, label, count }) => (
-            <div key={tag} className="flex items-center gap-2">
+          {legendItems.map(({ status, label, count }) => (
+            <div key={status} className="flex items-center gap-2">
               <div
                 className="w-3 h-3 rounded-full border-2 border-white shadow-sm flex-shrink-0"
-                style={{ background: TAG_COLORS[tag] }}
+                style={{ background: STATUS_COLORS[status] }}
               />
               <span className="text-xs text-muted-brand">{label}</span>
               <span className="ml-auto text-xs font-semibold text-ink">{count}</span>

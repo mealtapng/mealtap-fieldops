@@ -48,7 +48,7 @@ export function BoardPostCard({ post, reactions, currentUserId, onReactionsChang
     <div className="space-y-1">
       {post.is_pinned && (
         <div className="flex items-center gap-1.5 px-1">
-          <span className="text-[10px] font-bold tracking-widest text-terra uppercase">
+          <span className="text-[10px] font-bold tracking-widest text-success uppercase">
             📌 Pinned · {roleLabel(post.author?.role ?? 'admin')}
           </span>
         </div>
@@ -57,7 +57,7 @@ export function BoardPostCard({ post, reactions, currentUserId, onReactionsChang
       <div className="bg-white rounded-2xl shadow-sm border border-line p-4">
         {/* Author row */}
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-forest to-terra flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-success flex items-center justify-center flex-shrink-0">
             <span className="text-xs font-bold text-white">
               {post.author ? initials(post.author.full_name) : '?'}
             </span>

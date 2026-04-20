@@ -7,11 +7,11 @@ import { BottomNav } from '@/components/agent/BottomNav'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-interface RecentCapture {
+interface RecentOnboarding {
   id: string
   name: string
-  zone_name: string | null
-  tag: string | null
+  disco_area: string | null
+  conversion_status: string | null
   created_at: string
 }
 
@@ -20,14 +20,15 @@ interface DashboardProps {
     full_name: string
     quality_score: number
     zone_name: string | null
+    referral_code: string | null
   }
   stats: {
     today_count: number
     week_count: number
     last_week_count: number
-    hot_leads: number
+    conversions: number
   }
-  recent_captures: RecentCapture[]
+  recent_onboardings: RecentOnboarding[]
 }
 
 // ── Progress ring ─────────────────────────────────────────────────────────────
@@ -40,7 +41,7 @@ function ProgressRing({ todayCount }: { todayCount: number }) {
   const [offset, setOffset] = useState(CIRCUMFERENCE)
 
   useEffect(() => {
-    const fraction = Math.min(todayCount / 20, 1)
+    const fraction = Math.min(todayCount / 25, 1)
     setOffset(CIRCUMFERENCE * (1 - fraction))
   }, [todayCount])
 
@@ -51,7 +52,7 @@ function ProgressRing({ todayCount }: { todayCount: number }) {
       viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
       className="block"
     >
-      {/* Track — white at low opacity so it's visible on the forest-dark bg */}
+      {/* Track */}
       <circle
         cx={RING_SIZE / 2}
         cy={RING_SIZE / 2}
@@ -66,7 +67,7 @@ function ProgressRing({ todayCount }: { todayCount: number }) {
         cy={RING_SIZE / 2}
         r={RING_R}
         fill="none"
-        stroke="#C8622A"
+        stroke="#34A853"
         strokeWidth={8}
         strokeLinecap="round"
         strokeDasharray={CIRCUMFERENCE}
@@ -78,22 +79,23 @@ function ProgressRing({ todayCount }: { todayCount: number }) {
   )
 }
 
-// ── Tag chip ──────────────────────────────────────────────────────────────────
+// ── Status chip ───────────────────────────────────────────────────────────────
 
-function TagChip({ tag }: { tag: string | null }) {
-  if (!tag) return null
+function StatusChip({ status }: { status: string | null }) {
+  if (!status) return null
   const styles: Record<string, string> = {
-    hot:        'bg-terra-light text-terra',
-    warm:       'bg-forest-light text-forest',
-    cold:       'bg-line text-muted-brand',
-    not_a_fit:  'bg-line text-muted-brand',
+    converted: 'bg-success-light text-success',
+    pending:   'bg-amber-50 text-amber-700',
+    failed:    'bg-line text-muted-brand',
   }
   const label: Record<string, string> = {
-    hot: 'Hot', warm: 'Warm', cold: 'Cold', not_a_fit: 'Not a fit',
+    converted: 'Converted',
+    pending:   'Pending',
+    failed:    'Not interested',
   }
   return (
-    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${styles[tag] ?? 'bg-line text-muted-brand'}`}>
-      {label[tag] ?? tag}
+    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${styles[status] ?? 'bg-line text-muted-brand'}`}>
+      {label[status] ?? status}
     </span>
   )
 }
@@ -107,7 +109,7 @@ function QualityBar({ score }: { score: number }) {
       {Array.from({ length: 5 }, (_, i) => (
         <div
           key={i}
-          className={`h-1.5 flex-1 rounded-full ${i < filled ? 'bg-forest' : 'bg-line'}`}
+          className={`h-1.5 flex-1 rounded-full ${i < filled ? 'bg-brand' : 'bg-line'}`}
         />
       ))}
     </div>
@@ -138,7 +140,7 @@ function StatCard({
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function DashboardView({ user, stats, recent_captures }: DashboardProps) {
+export function DashboardView({ user, stats, recent_onboardings }: DashboardProps) {
   const firstName = user.full_name.split(' ')[0]
   const initials  = user.full_name
     .split(' ')
@@ -154,15 +156,15 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
     hour < 17 ? 'Good afternoon' :
                'Good evening'
 
-  const weekDiff   = stats.week_count - stats.last_week_count
-  const earnings   = stats.week_count * 400 + stats.hot_leads * 1_000
+  const weekDiff = stats.week_count - stats.last_week_count
+  const earnings = stats.conversions * 100
 
   return (
     <div className="min-h-screen bg-cream">
       <div className="max-w-md mx-auto flex flex-col min-h-screen">
 
         {/* ── Hero section ───────────────────────────────────────────────── */}
-        <div className="bg-forest-dark px-6 pt-8 pb-8 relative">
+        <div className="bg-brand-dark px-6 pt-8 pb-8 relative">
 
           {/* Date + greeting row */}
           <div className="flex items-start justify-between">
@@ -173,11 +175,16 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
               <h1 className="text-2xl font-bold text-white leading-tight">
                 {greeting},<br />{firstName}
               </h1>
+              {user.referral_code && (
+                <p className="text-xs text-white/60 font-medium mt-1">
+                  Your code: <span className="text-white font-bold">{user.referral_code}</span>
+                </p>
+              )}
             </div>
 
             {/* Avatar */}
             <Link href="/profile" className="flex-shrink-0 mt-1">
-              <div className="w-11 h-11 rounded-full bg-terra flex items-center justify-center shadow-md">
+              <div className="w-11 h-11 rounded-full bg-success flex items-center justify-center shadow-md">
                 <span className="text-sm font-bold text-white">{initials}</span>
               </div>
             </Link>
@@ -190,11 +197,11 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
               {/* Centre label */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-2xl font-bold text-white">{stats.today_count}</span>
-                <span className="text-[10px] text-white/60 font-medium">of 20</span>
+                <span className="text-[10px] text-white/60 font-medium">of 25</span>
               </div>
             </div>
             <p className="text-xs font-semibold text-white/70">
-              🔥 5-day streak
+              ⚡ Today&apos;s onboardings
             </p>
           </div>
         </div>
@@ -204,10 +211,10 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
 
           {/* CTA */}
           <Link
-            href="/capture"
-            className="block w-full bg-terra hover:bg-terra-dark active:bg-terra-dark text-white font-bold text-base py-4 rounded-2xl text-center shadow-lg shadow-terra/25 transition-colors"
+            href="/onboard"
+            className="block w-full bg-success hover:bg-success-dark active:bg-success-dark text-white font-bold text-base py-4 rounded-2xl text-center shadow-lg shadow-success/25 transition-colors"
           >
-            + New Capture →
+            + New Onboarding →
           </Link>
 
           {/* 2×2 stats grid */}
@@ -216,7 +223,7 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
             <StatCard
               label="This week"
               sub={
-                <p className={`text-xs font-semibold ${weekDiff > 0 ? 'text-terra' : 'text-muted-brand'}`}>
+                <p className={`text-xs font-semibold ${weekDiff > 0 ? 'text-brand' : 'text-muted-brand'}`}>
                   {weekDiff > 0 ? `↑${weekDiff}` : weekDiff < 0 ? `↓${Math.abs(weekDiff)}` : '—'} vs last week
                 </p>
               }
@@ -224,18 +231,18 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
               {stats.week_count}
             </StatCard>
 
-            {/* Hot leads */}
+            {/* Conversions */}
             <StatCard
-              label="Hot leads"
+              label="Conversions"
               sub={<p className="text-xs text-muted-brand font-medium">this week</p>}
             >
-              {stats.hot_leads}
+              {stats.conversions}
             </StatCard>
 
             {/* Earnings */}
             <StatCard
               label="Earnings (week)"
-              sub={<p className="text-[10px] text-muted-brand font-medium">This week</p>}
+              sub={<p className="text-[10px] text-muted-brand font-medium">₦100 per conversion</p>}
             >
               <span className="text-xl">{formatNaira(earnings)}</span>
             </StatCard>
@@ -260,8 +267,8 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
               className="flex items-center justify-between bg-white rounded-2xl px-5 py-4 shadow-sm"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-forest-light flex items-center justify-center">
-                  <svg className="w-5 h-5 text-forest" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                <div className="w-9 h-9 rounded-xl bg-brand/10 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                     <circle cx="12" cy="9" r="2.5" />
                   </svg>
@@ -276,35 +283,35 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
             </Link>
           </div>
 
-          {/* Recent captures */}
+          {/* Recent onboardings */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <p className="text-[10px] font-semibold tracking-widest text-muted-brand uppercase">
-                Recent captures
+                Recent onboardings
               </p>
-              <Link href="/captures" className="text-xs font-semibold text-terra">
+              <Link href="/onboardings" className="text-xs font-semibold text-brand">
                 View all
               </Link>
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-line">
-              {recent_captures.length === 0 ? (
+              {recent_onboardings.length === 0 ? (
                 <div className="px-5 py-6 text-center text-sm text-muted-brand">
-                  No captures yet. Tap + New Capture to start!
+                  No onboardings yet. Tap + New Onboarding to start!
                 </div>
               ) : (
-                recent_captures.map((capture, i) => (
-                  <div key={capture.id} className="flex items-center gap-3 px-4 py-3.5">
+                recent_onboardings.map((item, i) => (
+                  <div key={item.id} className="flex items-center gap-3 px-4 py-3.5">
                     <div className="w-9 h-9 rounded-xl bg-cream flex items-center justify-center flex-shrink-0 text-lg">
-                      {['🍲', '🍗', '🥘', '🍛', '🥗'][i % 5]}
+                      {['⚡', '🔌', '💡', '🔋', '📱'][i % 5]}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-ink truncate">{capture.name}</p>
+                      <p className="text-sm font-semibold text-ink truncate">{item.name}</p>
                       <p className="text-xs text-muted-brand truncate">
-                        {capture.zone_name ?? 'Unknown zone'} · {timeAgo(capture.created_at)}
+                        {item.disco_area ?? 'Unknown DISCO'} · {timeAgo(item.created_at)}
                       </p>
                     </div>
-                    <TagChip tag={capture.tag} />
+                    <StatusChip status={item.conversion_status} />
                   </div>
                 ))
               )}

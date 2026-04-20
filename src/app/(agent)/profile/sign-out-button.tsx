@@ -15,7 +15,7 @@ export function SignOutButton() {
     <button
       onClick={handleSignOut}
       disabled={loading}
-      className="text-terra font-semibold disabled:opacity-60 transition-opacity"
+      className="text-success font-semibold disabled:opacity-60 transition-opacity"
     >
       {loading ? 'Signing out…' : 'Sign out'}
     </button>

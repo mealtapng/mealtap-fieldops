@@ -41,19 +41,19 @@ const config: Config = {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
-        // Mealtap brand colours
-        forest: {
-          DEFAULT: "#2D5A27",
-          dark: "#1F3F1B",
-          light: "#E8F3EC",
+        // PowerChat brand colours
+        brand: {
+          DEFAULT: "#1A73E8",
+          dark: "#1557B0",
+          light: "#E8F0FE",
         },
-        terra: {
-          DEFAULT: "#C8622A",
-          dark: "#A14F1F",
-          light: "#FBEFE6",
+        success: {
+          DEFAULT: "#34A853",
+          dark: "#2D9249",
+          light: "#E6F4EA",
         },
-        cream: "#F5F5F0",
-        ink: "#1A1A1A",
+        cream: "#F8F9FA",
+        ink: "#202124",
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",

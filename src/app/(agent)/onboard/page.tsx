@@ -3,22 +3,22 @@
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { BottomNav } from '@/components/agent/BottomNav'
 import {
-  EMPTY_CAPTURE_STATE,
+  EMPTY_ONBOARDING_STATE,
   STEP_TITLES,
   TOTAL_STEPS,
-  type CaptureWizardState,
+  type OnboardingWizardState,
   type Step1Data,
   type Step2Data,
   type Step3Data,
   type Step4Data,
-} from '@/lib/capture-state'
-import { CaptureStep2Details } from '@/components/agent/CaptureStep2Details'
-import { CaptureStep3Photos } from '@/components/agent/CaptureStep3Photos'
-import { CaptureStep4Qualification } from '@/components/agent/CaptureStep4Qualification'
+} from '@/lib/onboarding-state'
+import { OnboardingStep2Details } from '@/components/agent/OnboardingStep2Details'
+import { OnboardingStep3Checklist } from '@/components/agent/OnboardingStep3Checklist'
+import { OnboardingStep4Outcome } from '@/components/agent/OnboardingStep4Outcome'
 
 // Load GPS step without SSR — mapbox-gl uses browser APIs
 const CaptureStep1GPS = dynamic(
@@ -35,69 +35,57 @@ const CaptureStep1GPS = dynamic(
 
 // ── Wizard page ───────────────────────────────────────────────────────────────
 
-export default function CapturePage() {
+export default function OnboardPage() {
   const router = useRouter()
-  const [step, setStep]               = useState(1)
-  const [captureData, setCaptureData] = useState<CaptureWizardState>(EMPTY_CAPTURE_STATE)
-  const [submitting, setSubmitting]   = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [step, setStep]                   = useState(1)
+  const [onboardingData, setOnboardingData] = useState<OnboardingWizardState>(EMPTY_ONBOARDING_STATE)
+  const [submitting, setSubmitting]        = useState(false)
+  const [submitError, setSubmitError]      = useState<string | null>(null)
+  const [referralCode, setReferralCode]    = useState('')
+
+  // Fetch the agent's referral code on mount
+  useEffect(() => {
+    async function fetchReferralCode() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase
+        .from('users')
+        .select('referral_code')
+        .eq('id', user.id)
+        .single()
+      if (data?.referral_code) setReferralCode(data.referral_code)
+    }
+    fetchReferralCode()
+  }, [])
 
   function handleStep1Continue(data: Step1Data) {
-    setCaptureData(prev => ({ ...prev, step1: data }))
+    setOnboardingData(prev => ({ ...prev, step1: data }))
     setStep(2)
   }
 
   function handleStep2Continue(data: Step2Data) {
-    setCaptureData(prev => ({ ...prev, step2: data }))
+    setOnboardingData(prev => ({ ...prev, step2: data }))
     setStep(3)
   }
 
   function handleStep3Continue(data: Step3Data) {
-    setCaptureData(prev => ({ ...prev, step3: data }))
+    setOnboardingData(prev => ({ ...prev, step3: data }))
     setStep(4)
   }
 
   async function handleSubmit(step4: Step4Data) {
-    const { step1, step2, step3 } = captureData
+    const { step1, step2, step3 } = onboardingData
     if (!step1 || !step2) return
 
     setSubmitting(true)
     setSubmitError(null)
 
     try {
-      // 1. Upload photos client-side to Supabase Storage
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
-      const timestamp = Date.now()
-      const photoBase = `${user.id}/${timestamp}`
-      const photos: { storefront: string | null; menu: string | null; dish: string | null } = {
-        storefront: null,
-        menu: null,
-        dish: null,
-      }
-
-      const uploadPhoto = async (file: File, type: keyof typeof photos) => {
-        const path = `${photoBase}/${type}.jpg`
-        const { error } = await supabase.storage
-          .from('restaurant-photos')
-          .upload(path, file, { upsert: true, contentType: 'image/jpeg' })
-        if (error) throw new Error(`Photo upload failed (${type}): ${error.message}`)
-        photos[type] = path
-      }
-
-      const uploads: Promise<void>[] = []
-      if (step3?.storefrontPhoto) uploads.push(uploadPhoto(step3.storefrontPhoto, 'storefront'))
-      if (step3?.menuPhoto)       uploads.push(uploadPhoto(step3.menuPhoto,       'menu'))
-      if (step3?.dishPhoto)       uploads.push(uploadPhoto(step3.dishPhoto,       'dish'))
-      await Promise.all(uploads)
-
-      // 2. Submit all text data + photo paths to server route
-      const res = await fetch('/api/capture/submit', {
-        method: 'POST',
+      const res = await fetch('/api/onboard/submit', {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ step1, step2, step4, photos }),
+        body:    JSON.stringify({ step1, step2, step3, step4 }),
       })
 
       if (!res.ok) {
@@ -105,7 +93,7 @@ export default function CapturePage() {
         throw new Error(json.error ?? `Server error ${res.status}`)
       }
 
-      // 3. Success — back to dashboard
+      // Success — back to dashboard
       router.push('/dashboard')
 
     } catch (err: unknown) {
@@ -124,9 +112,9 @@ export default function CapturePage() {
             <div
               key={s}
               className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-                s < step  ? 'bg-forest' :
-                s === step ? 'bg-terra'  :
-                            'bg-line'
+                s < step   ? 'bg-brand'  :
+                s === step ? 'bg-success' :
+                             'bg-line'
               }`}
             />
           ))}
@@ -134,7 +122,7 @@ export default function CapturePage() {
 
         {/* ── Step header ───────────────────────────────────────────────── */}
         <div className="flex items-center px-4 py-3 flex-shrink-0">
-          {/* Back button — disabled while submitting */}
+          {/* Back button */}
           {step === 1 ? (
             <Link
               href="/dashboard"
@@ -170,8 +158,8 @@ export default function CapturePage() {
 
           {/* Save draft */}
           <button
-            onClick={() => console.log('save draft', captureData)}
-            className="text-sm font-semibold text-terra"
+            onClick={() => console.log('save draft', onboardingData)}
+            className="text-sm font-semibold text-success"
           >
             Save draft
           </button>
@@ -181,25 +169,26 @@ export default function CapturePage() {
         <div className="flex-1 flex flex-col overflow-hidden pb-[52px]">
           {step === 1 && (
             <CaptureStep1GPS
-              initialData={captureData.step1}
+              initialData={onboardingData.step1}
               onContinue={handleStep1Continue}
             />
           )}
           {step === 2 && (
-            <CaptureStep2Details
-              initialData={captureData.step2}
+            <OnboardingStep2Details
+              initialData={onboardingData.step2}
+              referralCode={referralCode}
               onContinue={handleStep2Continue}
             />
           )}
           {step === 3 && (
-            <CaptureStep3Photos
-              initialData={captureData.step3}
+            <OnboardingStep3Checklist
+              initialData={onboardingData.step3}
               onContinue={handleStep3Continue}
             />
           )}
           {step === 4 && (
-            <CaptureStep4Qualification
-              initialData={captureData.step4}
+            <OnboardingStep4Outcome
+              initialData={onboardingData.step4}
               submitting={submitting}
               submitError={submitError}
               onSubmit={handleSubmit}

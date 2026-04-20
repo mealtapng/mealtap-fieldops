@@ -101,7 +101,7 @@ function BroadcastModal({
           onChange={e => setBody(e.target.value)}
           placeholder="Write your announcement to all agents…"
           rows={5}
-          className="w-full rounded-xl border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest resize-none"
+          className="w-full rounded-xl border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none"
         />
 
         <label className="flex items-center gap-2.5 mt-3 cursor-pointer">
@@ -109,12 +109,12 @@ function BroadcastModal({
             type="checkbox"
             checked={isPinned}
             onChange={e => setIsPinned(e.target.checked)}
-            className="w-4 h-4 rounded accent-terra"
+            className="w-4 h-4 rounded accent-success"
           />
           <span className="text-sm text-ink font-medium">📌 Pin this post</span>
         </label>
 
-        {error && <p className="text-sm text-terra mt-3">{error}</p>}
+        {error && <p className="text-sm text-success mt-3">{error}</p>}
 
         <div className="flex gap-3 mt-5">
           <button
@@ -126,7 +126,7 @@ function BroadcastModal({
           <button
             onClick={submit}
             disabled={!body.trim() || posting}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-terra text-white text-sm font-semibold hover:bg-terra/90 disabled:opacity-60 transition-colors"
+            className="flex-1 px-4 py-2.5 rounded-xl bg-success text-white text-sm font-semibold hover:bg-success/90 disabled:opacity-60 transition-colors"
           >
             {posting ? 'Posting…' : 'Post to Team Board'}
           </button>
@@ -171,7 +171,7 @@ function NewMessageModal({
           onChange={e => setSearch(e.target.value)}
           placeholder="Search agents…"
           autoFocus
-          className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest mb-3"
+          className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand mb-3"
         />
 
         <div className="space-y-2 max-h-72 overflow-y-auto">
@@ -184,7 +184,7 @@ function NewMessageModal({
               disabled={loading}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream transition-colors disabled:opacity-60 text-left"
             >
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-forest to-terra flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand to-success flex items-center justify-center flex-shrink-0">
                 <span className="text-xs font-bold text-white">{initials(agent.full_name)}</span>
               </div>
               <div>
@@ -302,13 +302,13 @@ export function AdminMessagesView({
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-5 border-b border-line bg-white flex-shrink-0">
         <div>
-          <h1 className="text-2xl font-bold text-forest">Messages</h1>
+          <h1 className="text-2xl font-bold text-brand">Messages</h1>
         </div>
         <div className="flex gap-2">
           {activeTab === 'board' && (
             <button
               onClick={() => setShowBroadcast(true)}
-              className="px-4 py-2.5 bg-terra text-white rounded-xl font-semibold text-sm hover:bg-terra/90 transition-colors"
+              className="px-4 py-2.5 bg-success text-white rounded-xl font-semibold text-sm hover:bg-success/90 transition-colors"
             >
               + New Broadcast
             </button>
@@ -316,7 +316,7 @@ export function AdminMessagesView({
           {activeTab === 'direct' && (
             <button
               onClick={() => setShowNewMessage(true)}
-              className="px-4 py-2.5 bg-forest text-white rounded-xl font-semibold text-sm hover:bg-forest/90 transition-colors"
+              className="px-4 py-2.5 bg-brand text-white rounded-xl font-semibold text-sm hover:bg-brand/90 transition-colors"
             >
               + New Message
             </button>
@@ -400,7 +400,7 @@ export function AdminMessagesView({
                   className="w-full flex items-center gap-3 bg-white rounded-2xl shadow-sm border border-line px-4 py-3.5 hover:bg-cream/40 transition-colors text-left"
                 >
                   <div className="relative flex-shrink-0">
-                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-forest to-terra flex items-center justify-center">
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-brand to-success flex items-center justify-center">
                       <span className="text-xs font-bold text-white">{initials(otherUser.full_name)}</span>
                     </div>
                     {unread > 0 && (

@@ -41,7 +41,7 @@ export function DMThreadItem({ thread, otherUser, unreadCount }: Props) {
     >
       {/* Avatar */}
       <div className="relative flex-shrink-0">
-        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-forest to-terra flex items-center justify-center">
+        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-brand to-success flex items-center justify-center">
           <span className="text-xs font-bold text-white">{initials(otherUser.full_name)}</span>
         </div>
         {unreadCount > 0 && (

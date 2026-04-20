@@ -13,10 +13,10 @@ const AdminMap = dynamic(() => import('@/components/admin/AdminMap'), {
 export default async function AdminMapPage() {
   const supabase = await createClient()
 
-  const [restaurantsResult, zonesResult] = await Promise.all([
+  const [onboardingsResult, zonesResult] = await Promise.all([
     (supabase as any)
-      .from('restaurants')
-      .select('id, name, address, lat, lng, tag, captured_by, created_at'),
+      .from('onboardings')
+      .select('id, user_name, address, lat, lng, conversion_status, agent_id, created_at'),
     (supabase as any)
       .from('zones')
       .select('id, name, center_lat, center_lng, radius_km'),
@@ -25,7 +25,7 @@ export default async function AdminMapPage() {
   // Resolve agent names
   const agentIds = Array.from(
     new Set(
-      (restaurantsResult.data ?? []).map((r: any) => r.captured_by).filter(Boolean)
+      (onboardingsResult.data ?? []).map((r: any) => r.agent_id).filter(Boolean)
     )
   )
   const usersResult = agentIds.length
@@ -35,15 +35,15 @@ export default async function AdminMapPage() {
   const userMap: Record<string, string> = {}
   for (const u of (usersResult.data ?? [])) userMap[u.id] = u.full_name
 
-  const restaurants = (restaurantsResult.data ?? []).map((r: any) => ({
-    id:         r.id,
-    name:       r.name,
-    address:    r.address,
-    lat:        r.lat,
-    lng:        r.lng,
-    tag:        r.tag,
-    agent_name: userMap[r.captured_by] ?? 'Unknown',
-    created_at: r.created_at,
+  const onboardings = (onboardingsResult.data ?? []).map((r: any) => ({
+    id:                r.id,
+    user_name:         r.user_name,
+    address:           r.address,
+    lat:               r.lat,
+    lng:               r.lng,
+    conversion_status: r.conversion_status,
+    agent_name:        userMap[r.agent_id] ?? 'Unknown',
+    created_at:        r.created_at,
   }))
 
   const zones = (zonesResult.data ?? []).map((z: any) => ({
@@ -54,28 +54,29 @@ export default async function AdminMapPage() {
     radius_km:  z.radius_km ?? 2.0,
   }))
 
-  const tagCounts = { hot: 0, warm: 0, cold: 0, not_a_fit: 0 }
-  for (const r of restaurants) {
-    if (r.tag in tagCounts) tagCounts[r.tag as keyof typeof tagCounts]++
+  const statusCounts = { converted: 0, pending: 0, failed: 0 }
+  for (const r of onboardings) {
+    if (r.conversion_status in statusCounts) {
+      statusCounts[r.conversion_status as keyof typeof statusCounts]++
+    }
   }
 
   return (
     <div>
-      {/* Header — ~80px tall, matches the 80px offset in AdminMap's height calc */}
+      {/* Header */}
       <div className="px-8 py-4 border-b border-line bg-white flex items-center">
         <div>
-          <h1 className="text-2xl font-bold text-forest">Live Field Map · Abuja</h1>
+          <h1 className="text-2xl font-bold text-brand">Live Field Map</h1>
           <p className="text-sm text-muted-brand">
-            {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''} captured across {zones.length} zone{zones.length !== 1 ? 's' : ''}
+            {onboardings.length} onboarding{onboardings.length !== 1 ? 's' : ''} recorded across {zones.length} zone{zones.length !== 1 ? 's' : ''}
           </p>
         </div>
       </div>
 
-      {/* AdminMap owns its own height via calc(100vh - 80px) */}
       <AdminMap
-        restaurants={restaurants}
+        onboardings={onboardings}
         zones={zones}
-        tagCounts={tagCounts}
+        statusCounts={statusCounts}
       />
     </div>
   )

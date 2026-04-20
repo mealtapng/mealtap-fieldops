@@ -3,12 +3,13 @@ import { redirect } from 'next/navigation'
 import { DashboardView } from '@/components/agent/DashboardView'
 import type { User } from '@/lib/types/database'
 
-type ProfileRow = Pick<User, 'full_name' | 'quality_score' | 'assigned_zone_id'>
+type ProfileRow = Pick<User, 'full_name' | 'quality_score' | 'assigned_zone_id' | 'referral_code'>
 
 type RecentRow = {
   id: string
-  name: string
-  tag: string | null
+  user_name: string
+  conversion_status: string | null
+  disco_area: string | null
   created_at: string
   zone_id: string | null
 }
@@ -41,43 +42,42 @@ export default async function DashboardPage() {
   const weekISO     = weekStart.toISOString()
   const lastWeekISO = lastWeekStart.toISOString()
 
-  // ── 1. Profile (needs user.id first) ────────────────────────────────────
+  // ── 1. Profile ────────────────────────────────────────────────────────────
   const { data: profile } = await supabase
     .from('users')
-    .select('full_name, quality_score, assigned_zone_id')
+    .select('full_name, quality_score, assigned_zone_id, referral_code')
     .eq('id', user.id)
     .single() as { data: ProfileRow | null; error: unknown }
 
-  // ── 2. Stats + recent captures (parallel) ────────────────────────────────
+  // ── 2. Stats + recent onboardings (parallel) ─────────────────────────────
   const uid = user.id
 
-  const [todayCount, weekCount, lastWeekCount, hotLeads, recentResult] = await Promise.all([
+  const [todayCount, weekCount, lastWeekCount, conversions, recentResult] = await Promise.all([
     awaitCount(
-      supabase.from('restaurants').select('*', { count: 'exact', head: true })
-        .eq('captured_by', uid).gte('created_at', todayISO)
+      supabase.from('onboardings').select('*', { count: 'exact', head: true })
+        .eq('agent_id', uid).gte('created_at', todayISO)
     ),
     awaitCount(
-      supabase.from('restaurants').select('*', { count: 'exact', head: true })
-        .eq('captured_by', uid).gte('created_at', weekISO)
+      supabase.from('onboardings').select('*', { count: 'exact', head: true })
+        .eq('agent_id', uid).gte('created_at', weekISO)
     ),
     awaitCount(
-      supabase.from('restaurants').select('*', { count: 'exact', head: true })
-        .eq('captured_by', uid).gte('created_at', lastWeekISO).lt('created_at', weekISO)
+      supabase.from('onboardings').select('*', { count: 'exact', head: true })
+        .eq('agent_id', uid).gte('created_at', lastWeekISO).lt('created_at', weekISO)
     ),
     awaitCount(
-      supabase.from('restaurants').select('*', { count: 'exact', head: true })
-        .eq('captured_by', uid).gte('created_at', weekISO).eq('tag', 'hot')
+      supabase.from('onboardings').select('*', { count: 'exact', head: true })
+        .eq('agent_id', uid).gte('created_at', weekISO).eq('conversion_status', 'converted')
     ),
     supabase
-      .from('restaurants')
-      .select('id, name, tag, created_at, zone_id')
-      .eq('captured_by', uid)
+      .from('onboardings')
+      .select('id, user_name, conversion_status, disco_area, created_at, zone_id')
+      .eq('agent_id', uid)
       .order('created_at', { ascending: false })
       .limit(3) as unknown as Promise<{ data: RecentRow[] | null }>,
   ])
 
-  // ── 3. Resolve zone names from collected IDs ─────────────────────────────
-  // Fetch all zone IDs referenced on this page in a single query.
+  // ── 3. Resolve zone names ─────────────────────────────────────────────────
   const zoneIds = Array.from(new Set([
     profile?.assigned_zone_id,
     ...((recentResult.data ?? []).map(r => r.zone_id)),
@@ -93,12 +93,12 @@ export default async function DashboardPage() {
   }
 
   // ── Assemble props ────────────────────────────────────────────────────────
-  const recentCaptures = (recentResult.data ?? []).map(r => ({
-    id:         r.id,
-    name:       r.name,
-    tag:        r.tag,
-    created_at: r.created_at,
-    zone_name:  r.zone_id ? (zoneMap[r.zone_id] ?? null) : null,
+  const recentOnboardings = (recentResult.data ?? []).map(r => ({
+    id:                r.id,
+    name:              r.user_name,
+    disco_area:        r.disco_area,
+    conversion_status: r.conversion_status,
+    created_at:        r.created_at,
   }))
 
   return (
@@ -107,14 +107,15 @@ export default async function DashboardPage() {
         full_name:     profile?.full_name ?? 'Agent',
         quality_score: Number(profile?.quality_score ?? 0),
         zone_name:     profile?.assigned_zone_id ? (zoneMap[profile.assigned_zone_id] ?? null) : null,
+        referral_code: profile?.referral_code ?? null,
       }}
       stats={{
         today_count:     todayCount,
         week_count:      weekCount,
         last_week_count: lastWeekCount,
-        hot_leads:       hotLeads,
+        conversions,
       }}
-      recent_captures={recentCaptures}
+      recent_onboardings={recentOnboardings}
     />
   )
 }

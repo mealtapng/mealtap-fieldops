@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -102,17 +101,13 @@ export default function LoginPage() {
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm px-8 py-10">
 
         {/* Logo */}
-        <Image
-          src="/mealtap-logo.png"
-          alt="Mealtap"
-          width={80}
-          height={80}
-          priority
-          className="mb-6"
-        />
+        <div className="mb-6 flex items-center gap-0.5">
+          <span className="text-3xl font-bold text-brand">Power</span>
+          <span className="text-3xl font-bold text-success">Chat</span>
+        </div>
 
         {/* Heading */}
-        <h1 className="text-2xl font-bold text-forest mb-1">Welcome back</h1>
+        <h1 className="text-2xl font-bold text-brand mb-1">Welcome back</h1>
         <p className="text-sm text-muted-brand mb-8">Sign in to start your shift</p>
 
         {/* Phone field */}
@@ -121,7 +116,7 @@ export default function LoginPage() {
             Phone Number
           </label>
           <div className="flex items-center bg-cream border border-line rounded-xl overflow-hidden">
-            <span className="flex items-center gap-1.5 px-3 py-3.5 text-sm font-semibold text-forest border-r border-line whitespace-nowrap select-none">
+            <span className="flex items-center gap-1.5 px-3 py-3.5 text-sm font-semibold text-brand border-r border-line whitespace-nowrap select-none">
               🇳🇬 +234
             </span>
             <input
@@ -157,9 +152,9 @@ export default function LoginPage() {
                 }}
                 onBlur={() => setFocusedPin(-1)}
                 className={[
-                  'w-14 h-14 text-center text-2xl font-bold text-forest bg-cream rounded-xl outline-none transition-colors',
+                  'w-14 h-14 text-center text-2xl font-bold text-brand bg-cream rounded-xl outline-none transition-colors',
                   focusedPin === i
-                    ? 'border-2 border-forest'
+                    ? 'border-2 border-brand'
                     : 'border border-line',
                 ].join(' ')}
               />
@@ -171,7 +166,7 @@ export default function LoginPage() {
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="w-full bg-terra hover:bg-terra-dark active:bg-terra-dark disabled:opacity-60 text-white font-semibold py-4 rounded-xl shadow-lg shadow-terra/20 transition-colors mb-3"
+          className="w-full bg-success hover:bg-success-dark active:bg-success-dark disabled:opacity-60 text-white font-semibold py-4 rounded-xl shadow-lg shadow-success/20 transition-colors mb-3"
         >
           {loading ? 'Signing in…' : 'Sign in to Field Ops →'}
         </button>

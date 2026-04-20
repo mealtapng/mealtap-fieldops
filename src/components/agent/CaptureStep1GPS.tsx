@@ -3,7 +3,7 @@
 import 'mapbox-gl/dist/mapbox-gl.css'
 import mapboxgl from 'mapbox-gl'
 import { useEffect, useRef, useState } from 'react'
-import type { Step1Data } from '@/lib/capture-state'
+import type { Step1Data } from '@/lib/onboarding-state'
 
 // Set token once at module load — avoids timing issues inside effects
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
@@ -19,7 +19,7 @@ interface Props {
 
 function accuracyInfo(acc: number) {
   if (acc <= 10) return { label: 'Strong',   badge: 'bg-green-50 text-green-700',  dot: 'bg-green-500' }
-  if (acc <= 30) return { label: 'Moderate', badge: 'bg-terra-light text-terra',   dot: 'bg-terra'     }
+  if (acc <= 30) return { label: 'Moderate', badge: 'bg-amber-50 text-amber-700',  dot: 'bg-amber-400' }
   return              { label: 'Weak',     badge: 'bg-red-50 text-red-600',     dot: 'bg-red-500'   }
 }
 
@@ -66,10 +66,10 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return
 
-    // Default centre: previous lock → or Abuja city centre as fallback
+    // Default centre: previous lock → or Lagos city centre as fallback
     const defaultCenter: [number, number] = initialData
       ? [initialData.lng, initialData.lat]
-      : [7.4898, 9.0579]
+      : [3.3792, 6.5244]
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
@@ -163,7 +163,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
   if (noGeo) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-4">
-        <div className="w-14 h-14 rounded-full bg-terra-light flex items-center justify-center">
+        <div className="w-14 h-14 rounded-full bg-brand/10 flex items-center justify-center">
           <span className="text-2xl">📍</span>
         </div>
         <p className="text-sm text-ink font-semibold">
@@ -175,21 +175,21 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
 
   if (geoError && !position) {
     const msgs: Record<number, string> = {
-      1: 'Location access is required to capture restaurants. Please enable location in your browser settings.',
+      1: 'Location access is required to record customer location. Please enable location in your browser settings.',
       2: 'Unable to get your location. Move to an area with better signal and try again.',
       3: 'Unable to get your location. Move to an area with better signal and try again.',
     }
     const msg = msgs[geoError.code] ?? 'Unable to get your location.'
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-4">
-        <div className="w-14 h-14 rounded-full bg-terra-light flex items-center justify-center">
+        <div className="w-14 h-14 rounded-full bg-brand/10 flex items-center justify-center">
           <span className="text-2xl">📍</span>
         </div>
         <p className="text-sm text-ink font-semibold leading-relaxed">{msg}</p>
         {geoError.code !== 1 && (
           <button
             onClick={repin}
-            className="px-6 py-2.5 rounded-xl bg-terra text-white text-sm font-semibold"
+            className="px-6 py-2.5 rounded-xl bg-brand text-white text-sm font-semibold"
           >
             Try again
           </button>
@@ -216,7 +216,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
       <div className="flex-1 overflow-y-auto">
 
         {/* ── Map ──────────────────────────────────────────────────────── */}
-        <div className="relative bg-forest-light" style={{ height: 280 }}>
+        <div className="relative bg-brand-light" style={{ height: 280 }}>
           {/* Mapbox container */}
           <div ref={mapContainerRef} className="absolute inset-0" />
 
@@ -237,7 +237,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
           >
             <div className="relative flex items-center justify-center">
               {/* Pulsing ring */}
-              <div className="absolute w-14 h-14 rounded-full bg-terra/20 animate-ping" />
+              <div className="absolute w-14 h-14 rounded-full bg-brand/20 animate-ping" />
               {/* Pin SVG */}
               <svg
                 width="36"
@@ -249,7 +249,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
               >
                 <path
                   d="M18 0C10.268 0 4 6.268 4 14C4 24.5 18 44 18 44C18 44 32 24.5 32 14C32 6.268 25.732 0 18 0Z"
-                  fill="#C8622A"
+                  fill="#1A73E8"
                 />
                 <circle cx="18" cy="14" r="5.5" fill="white" />
               </svg>
@@ -303,7 +303,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
           <div className="bg-white rounded-2xl shadow-sm px-5 py-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-2 flex-1 min-w-0">
-                <svg className="w-4 h-4 text-terra flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="w-4 h-4 text-brand flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z" />
                 </svg>
                 <div className="flex-1 min-w-0">
@@ -313,7 +313,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
                       value={address}
                       onChange={e => setAddress(e.target.value)}
                       onBlur={() => setEditingAddr(false)}
-                      className="w-full text-sm text-ink font-medium border-b border-terra outline-none pb-0.5 bg-transparent"
+                      className="w-full text-sm text-ink font-medium border-b border-brand outline-none pb-0.5 bg-transparent"
                       placeholder="Enter address…"
                     />
                   ) : isGeocoding ? (
@@ -331,7 +331,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
               {!editingAddr && (
                 <button
                   onClick={() => setEditingAddr(true)}
-                  className="text-xs font-semibold text-terra flex-shrink-0"
+                  className="text-xs font-semibold text-brand flex-shrink-0"
                 >
                   Edit
                 </button>
@@ -340,10 +340,10 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
           </div>
 
           {/* Tip card */}
-          <div className="bg-terra-light rounded-2xl px-4 py-3.5 flex items-start gap-3">
+          <div className="bg-brand/10 rounded-2xl px-4 py-3.5 flex items-start gap-3">
             <span className="text-lg flex-shrink-0">💡</span>
-            <p className="text-xs text-terra font-medium leading-relaxed">
-              Tip: If the pin is off, walk closer to the entrance and tap Re-pin.
+            <p className="text-xs text-brand font-medium leading-relaxed">
+              Tip: If the pin is off, walk closer to the customer&apos;s meter and tap Re-pin.
               Accuracy under ±10m is required to continue.
             </p>
           </div>
@@ -351,7 +351,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
           {/* Re-pin button */}
           <button
             onClick={repin}
-            className="w-full py-3.5 rounded-2xl border-2 border-forest text-forest font-semibold text-sm bg-white flex items-center justify-center gap-2 active:bg-forest-light transition-colors"
+            className="w-full py-3.5 rounded-2xl border-2 border-brand text-brand font-semibold text-sm bg-white flex items-center justify-center gap-2 active:bg-brand/10 transition-colors"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3" />
@@ -370,7 +370,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
           onClick={handleContinue}
           className={`w-full py-4 rounded-2xl font-bold text-base transition-all ${
             canContinue
-              ? 'bg-terra text-white shadow-lg shadow-terra/25 active:bg-terra-dark'
+              ? 'bg-brand text-white shadow-lg shadow-brand/25 active:bg-brand-dark'
               : 'bg-line text-muted-brand cursor-not-allowed'
           }`}
         >

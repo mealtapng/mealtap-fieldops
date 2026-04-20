@@ -13,40 +13,38 @@ interface Agent {
 }
 
 interface LeaderboardEntry {
-  agent_id:  string
-  full_name: string
-  zone_name: string | null
-  total:     number
-  hot:       number
+  agent_id:    string
+  full_name:   string
+  zone_name:   string | null
+  total:       number
+  conversions: number
 }
 
-interface Capture {
-  id:            string
-  name:          string
-  address:       string | null
-  tag:           string | null
-  quality_score: number | null
-  created_at:    string
-  agent_name:    string
-  zone_name:     string | null
+interface Onboarding {
+  id:                string
+  name:              string
+  disco_area:        string | null
+  conversion_status: string | null
+  created_at:        string
+  agent_name:        string
+  zone_name:         string | null
 }
 
-interface TagCounts {
-  hot:       number
-  warm:      number
-  cold:      number
-  not_a_fit: number
+interface StatusCounts {
+  converted: number
+  pending:   number
+  failed:    number
 }
 
 interface Props {
-  todayCount:       number
-  yesterdayCount:   number
-  weekHotCount:     number
-  totalCount:       number
-  tagCounts:        TagCounts
-  activeAgents:     Agent[]
-  leaderboard:      LeaderboardEntry[]
-  captures:         Capture[]
+  todayCount:          number
+  yesterdayCount:      number
+  weekConversionsCount: number
+  totalCount:          number
+  statusCounts:        StatusCounts
+  activeAgents:        Agent[]
+  leaderboard:         LeaderboardEntry[]
+  captures:            Onboarding[]
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -64,13 +62,13 @@ function pctChange(today: number, yesterday: number): string {
 // ── KPI Card ──────────────────────────────────────────────────────────────────
 
 interface KPICardProps {
-  title:         string
-  value:         string | number
-  sub?:          string
-  subColour?:    string
-  progress?:     number
+  title:          string
+  value:          string | number
+  sub?:           string
+  subColour?:     string
+  progress?:      number
   progressLabel?: string
-  children?:     React.ReactNode
+  children?:      React.ReactNode
 }
 
 function KPICard({ title, value, sub, subColour, progress, progressLabel, children }: KPICardProps) {
@@ -85,7 +83,7 @@ function KPICard({ title, value, sub, subColour, progress, progressLabel, childr
         <div className="mt-3">
           <div className="h-1.5 bg-line rounded-full overflow-hidden">
             <div
-              className="h-full bg-terra rounded-full transition-all duration-500"
+              className="h-full bg-success rounded-full transition-all duration-500"
               style={{ width: `${Math.min(100, progress)}%` }}
             />
           </div>
@@ -104,17 +102,17 @@ function KPICard({ title, value, sub, subColour, progress, progressLabel, childr
 export function AdminDashboard({
   todayCount,
   yesterdayCount,
-  weekHotCount,
+  weekConversionsCount,
   totalCount,
-  tagCounts,
+  statusCounts,
   activeAgents,
   leaderboard,
   captures,
 }: Props) {
-  const todayPct    = pctChange(todayCount, yesterdayCount)
-  const todayTarget = 80
+  const todayPct      = pctChange(todayCount, yesterdayCount)
+  const todayTarget   = 80
   const todayProgress = Math.min(100, (todayCount / todayTarget) * 100)
-  const pctColour   = todayCount >= yesterdayCount ? 'text-forest' : 'text-red-500'
+  const pctColour     = todayCount >= yesterdayCount ? 'text-brand' : 'text-red-500'
 
   return (
     <div className="p-8 space-y-6">
@@ -123,20 +121,18 @@ export function AdminDashboard({
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-muted-brand">{dayLabel(new Date())}</p>
-          <h1 className="text-3xl font-bold text-forest mt-0.5">Operations Dashboard</h1>
+          <h1 className="text-3xl font-bold text-brand mt-0.5">Operations Dashboard</h1>
         </div>
         <div className="flex items-center gap-3">
-          {/* Static date filter */}
           <div className="flex items-center gap-1.5 px-3.5 py-2 bg-white rounded-xl border border-line text-sm font-semibold text-ink cursor-default select-none">
             Today
             <svg className="w-3.5 h-3.5 text-muted-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
               <path d="M6 9l6 6 6-6"/>
             </svg>
           </div>
-          {/* Broadcast button */}
           <a
             href="/admin/messages"
-            className="flex items-center gap-2 px-4 py-2 bg-terra text-white rounded-xl text-sm font-semibold shadow-sm shadow-terra/20 hover:bg-terra-dark transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-success text-white rounded-xl text-sm font-semibold shadow-sm shadow-success/20 hover:bg-success-dark transition-colors"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -149,9 +145,9 @@ export function AdminDashboard({
       {/* ── KPI grid ───────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-4 gap-4">
 
-        {/* Card 1: Captures today */}
+        {/* Card 1: Onboardings today */}
         <KPICard
-          title="Captures today"
+          title="Onboardings today"
           value={todayCount}
           sub={`${todayPct} vs yesterday`}
           subColour={pctColour}
@@ -159,22 +155,22 @@ export function AdminDashboard({
           progressLabel={`${todayCount} of ${todayTarget} target`}
         />
 
-        {/* Card 2: Hot leads this week */}
+        {/* Card 2: Conversions this week */}
         <KPICard
-          title="Hot leads (week)"
-          value={weekHotCount}
-          sub="hot leads this week"
+          title="Conversions (week)"
+          value={weekConversionsCount}
+          sub="verified conversions this week"
         />
 
-        {/* Card 3: Total in DB */}
+        {/* Card 3: Total onboardings */}
         <KPICard
-          title="Total in DB"
+          title="Total onboardings"
           value={totalCount}
         >
           <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
-            <span className="text-[11px] text-muted-brand">🟠 {tagCounts.hot} Hot</span>
-            <span className="text-[11px] text-muted-brand">🟢 {tagCounts.warm} Warm</span>
-            <span className="text-[11px] text-muted-brand">⚪ {tagCounts.cold} Cold</span>
+            <span className="text-[11px] text-muted-brand">✅ {statusCounts.converted} Converted</span>
+            <span className="text-[11px] text-muted-brand">⏳ {statusCounts.pending} Pending</span>
+            <span className="text-[11px] text-muted-brand">✕ {statusCounts.failed} Failed</span>
           </div>
         </KPICard>
 
@@ -190,7 +186,7 @@ export function AdminDashboard({
                 <div
                   key={a.id}
                   title={a.full_name}
-                  className="w-8 h-8 rounded-full bg-gradient-to-br from-forest to-terra border-2 border-white flex items-center justify-center"
+                  className="w-8 h-8 rounded-full bg-gradient-to-br from-brand to-success border-2 border-white flex items-center justify-center"
                 >
                   <span className="text-[9px] font-bold text-white">{initials(a.full_name)}</span>
                 </div>
@@ -211,21 +207,21 @@ export function AdminDashboard({
         <p className="font-bold text-ink mb-4">🏆 Leaderboard — This week</p>
 
         {leaderboard.length === 0 ? (
-          <p className="text-sm text-muted-brand py-4 text-center">No captures this week yet</p>
+          <p className="text-sm text-muted-brand py-4 text-center">No onboardings this week yet</p>
         ) : (
           <div className="space-y-1">
             {leaderboard.map((entry, i) => (
               <div
                 key={entry.agent_id}
-                className={`flex items-center gap-4 px-4 py-3 rounded-xl ${i === 0 ? 'bg-terra-light' : 'hover:bg-cream/50'} transition-colors`}
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl ${i === 0 ? 'bg-success-light' : 'hover:bg-cream/50'} transition-colors`}
               >
                 {/* Rank */}
-                <span className={`text-sm font-bold w-5 text-center flex-shrink-0 ${i === 0 ? 'text-terra' : 'text-muted-brand'}`}>
+                <span className={`text-sm font-bold w-5 text-center flex-shrink-0 ${i === 0 ? 'text-success' : 'text-muted-brand'}`}>
                   {i + 1}
                 </span>
 
                 {/* Avatar */}
-                <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${i === 0 ? 'border-terra bg-terra' : 'border-transparent bg-gradient-to-br from-forest to-terra'}`}>
+                <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${i === 0 ? 'border-success bg-success' : 'border-transparent bg-gradient-to-br from-brand to-success'}`}>
                   <span className="text-xs font-bold text-white">{initials(entry.full_name)}</span>
                 </div>
 
@@ -235,15 +231,15 @@ export function AdminDashboard({
                   <p className="text-[11px] text-muted-brand">{entry.zone_name ?? 'No zone'}</p>
                 </div>
 
-                {/* Hot leads */}
+                {/* Conversions */}
                 <div className="text-right flex-shrink-0">
-                  <p className="text-xs text-muted-brand">Hot leads</p>
-                  <p className="text-sm font-bold text-terra">{entry.hot}</p>
+                  <p className="text-xs text-muted-brand">Conversions</p>
+                  <p className="text-sm font-bold text-success">{entry.conversions}</p>
                 </div>
 
                 {/* Total */}
                 <div className="text-right flex-shrink-0 w-16">
-                  <p className="text-xs text-muted-brand">Captures</p>
+                  <p className="text-xs text-muted-brand">Onboardings</p>
                   <p className="text-sm font-bold text-ink">{entry.total}</p>
                 </div>
               </div>
@@ -252,7 +248,7 @@ export function AdminDashboard({
         )}
       </div>
 
-      {/* ── Captures table ─────────────────────────────────────────────────── */}
+      {/* ── Recent onboardings table ────────────────────────────────────────── */}
       <CapturesTable captures={captures} />
 
     </div>

@@ -8,6 +8,18 @@ const ROLE_LABELS: Record<string, string> = {
   field_lead: 'Field Lead',
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  converted: '✅ Converted',
+  pending:   '⏳ Pending',
+  failed:    '✕ Not interested',
+}
+
+const STATUS_STYLES: Record<string, string> = {
+  converted: 'bg-success-light text-success',
+  pending:   'bg-amber-50 text-amber-700',
+  failed:    'bg-line text-muted-brand',
+}
+
 function initials(name: string) {
   return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
 }
@@ -17,16 +29,16 @@ export default async function AgentDetailPage({ params }: { params: { id: string
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [agentResult, capturesResult, zonesResult] = await Promise.all([
+  const [agentResult, onboardingsResult, zonesResult] = await Promise.all([
     (supabase as any)
       .from('users')
       .select('id, full_name, employee_id, phone, role, assigned_zone_id, quality_score, is_active, created_at, passport_photo_url')
       .eq('id', params.id)
       .single(),
     (supabase as any)
-      .from('restaurants')
-      .select('id, name, tag, created_at')
-      .eq('captured_by', params.id)
+      .from('onboardings')
+      .select('id, user_name, disco_area, conversion_status, created_at')
+      .eq('agent_id', params.id)
       .order('created_at', { ascending: false })
       .limit(10),
     (supabase as any)
@@ -40,9 +52,10 @@ export default async function AgentDetailPage({ params }: { params: { id: string
   const zoneMap: Record<string, string> = {}
   for (const z of (zonesResult.data ?? [])) zoneMap[z.id] = z.name
 
-  const captures = capturesResult.data ?? []
-  const totalCaptures = captures.length
-  const hotLeads      = captures.filter((r: any) => r.tag === 'hot').length
+  const onboardings = onboardingsResult.data ?? []
+  const totalOnboardings = onboardings.length
+  const conversions      = onboardings.filter((r: any) => r.conversion_status === 'converted').length
+  const earnings         = conversions * 100
 
   const joinedDate = a.created_at
     ? new Date(a.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -51,7 +64,7 @@ export default async function AgentDetailPage({ params }: { params: { id: string
   return (
     <div className="p-6 max-w-2xl">
       {/* Back */}
-      <a href="/admin/agents" className="inline-flex items-center gap-1 text-sm text-muted-brand hover:text-forest transition-colors mb-6">
+      <a href="/admin/agents" className="inline-flex items-center gap-1 text-sm text-muted-brand hover:text-brand transition-colors mb-6">
         ← All Agents
       </a>
 
@@ -65,7 +78,7 @@ export default async function AgentDetailPage({ params }: { params: { id: string
               className="w-16 h-16 rounded-full object-cover flex-shrink-0"
             />
           ) : (
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-forest to-forest/70 flex items-center justify-center flex-shrink-0">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand to-success flex items-center justify-center flex-shrink-0">
               <span className="text-white text-xl font-bold">{initials(a.full_name)}</span>
             </div>
           )}
@@ -74,7 +87,7 @@ export default async function AgentDetailPage({ params }: { params: { id: string
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-xl font-bold text-ink">{a.full_name}</h1>
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                a.is_active ? 'bg-forest/10 text-forest' : 'bg-red-50 text-red-500'
+                a.is_active ? 'bg-brand/10 text-brand' : 'bg-red-50 text-red-500'
               }`}>
                 {a.is_active ? 'Active' : 'Inactive'}
               </span>
@@ -105,17 +118,52 @@ export default async function AgentDetailPage({ params }: { params: { id: string
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-line">
+        <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-line">
           <div className="bg-cream rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-ink">{totalCaptures}</p>
-            <p className="text-xs text-muted-brand mt-1">Total Captures</p>
+            <p className="text-2xl font-bold text-ink">{totalOnboardings}</p>
+            <p className="text-xs text-muted-brand mt-1">Onboardings</p>
           </div>
-          <div className="bg-terra/5 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-terra">{hotLeads}</p>
-            <p className="text-xs text-muted-brand mt-1">Hot Leads</p>
+          <div className="bg-success-light rounded-xl p-4 text-center">
+            <p className="text-2xl font-bold text-success">{conversions}</p>
+            <p className="text-xs text-muted-brand mt-1">Conversions</p>
+          </div>
+          <div className="bg-brand/5 rounded-xl p-4 text-center">
+            <p className="text-2xl font-bold text-brand">₦{earnings.toLocaleString()}</p>
+            <p className="text-xs text-muted-brand mt-1">Earnings</p>
           </div>
         </div>
       </div>
+
+      {/* Recent onboardings */}
+      {onboardings.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-sm border border-line overflow-hidden mb-6">
+          <div className="px-6 py-4 border-b border-line">
+            <p className="font-bold text-ink">Recent onboardings</p>
+          </div>
+          <div className="divide-y divide-line">
+            {onboardings.map((r: any) => {
+              const date = r.created_at
+                ? new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+                : '—'
+              return (
+                <div key={r.id} className="flex items-center gap-4 px-6 py-3.5">
+                  <span className="text-base">⚡</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-ink truncate">{r.user_name}</p>
+                    <p className="text-xs text-muted-brand">{r.disco_area ?? '—'}</p>
+                  </div>
+                  {r.conversion_status && (
+                    <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${STATUS_STYLES[r.conversion_status] ?? 'bg-line text-muted-brand'}`}>
+                      {STATUS_LABELS[r.conversion_status] ?? r.conversion_status}
+                    </span>
+                  )}
+                  <span className="text-xs text-muted-brand flex-shrink-0">{date}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Danger / recovery zone */}
       {a.is_active ? (
@@ -127,7 +175,7 @@ export default async function AgentDetailPage({ params }: { params: { id: string
           <DeactivateButton agentId={a.id} agentName={a.full_name} />
         </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-forest/20 p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-brand/20 p-6">
           <h2 className="text-sm font-bold text-ink mb-1">Reactivate agent</h2>
           <p className="text-sm text-muted-brand mb-4">
             Restores login access and resets failed attempts.
