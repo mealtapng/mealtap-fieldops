@@ -136,7 +136,7 @@ export function AgentsTable({ agents, zones }: Props) {
               {agents.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-12 text-center text-sm text-muted-brand">
-                    No agents yet. Click "+ New Agent" to add one.
+                    No agents yet. Click &quot;+ New Agent&quot; to add one.
                   </td>
                 </tr>
               ) : agents.map(agent => (

@@ -253,7 +253,7 @@ export function DashboardView({ user, stats, recent_captures }: DashboardProps) 
           {/* Today's zone */}
           <div>
             <p className="text-[10px] font-semibold tracking-widest text-muted-brand uppercase mb-2">
-              Today's zone
+              Today&apos;s zone
             </p>
             <Link
               href="/zone"

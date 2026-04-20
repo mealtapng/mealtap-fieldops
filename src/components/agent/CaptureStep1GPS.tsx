@@ -145,7 +145,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
 
   // ── Continue ──────────────────────────────────────────────────────────────────
 
-  const canContinue = !!position && position.coords.accuracy <= 10
+  const canContinue = !!position && position.coords.accuracy <= 100 // TODO: tighten to 10 before prod
 
   function handleContinue() {
     if (!position || !canContinue) return
@@ -167,7 +167,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
           <span className="text-2xl">📍</span>
         </div>
         <p className="text-sm text-ink font-semibold">
-          Your device doesn't support GPS location.
+          Your device doesn&apos;t support GPS location.
         </p>
       </div>
     )
@@ -196,7 +196,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
         )}
         {geoError.code === 1 && (
           <p className="text-xs text-muted-brand">
-            Tap the lock icon in your browser's address bar to allow location.
+            Tap the lock icon in your browser&apos;s address bar to allow location.
           </p>
         )}
       </div>
