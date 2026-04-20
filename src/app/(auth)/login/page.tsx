@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
@@ -9,6 +9,8 @@ export default function LoginPage() {
 
   const [phone, setPhone] = useState('')
   const [pin, setPin] = useState(['', '', '', ''])
+  // pinVisible[i] = true means the digit is briefly shown before masking
+  const [pinVisible, setPinVisible] = useState([false, false, false, false])
   const [focusedPin, setFocusedPin] = useState(-1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -19,14 +21,35 @@ export default function LoginPage() {
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
   ]
+  const maskTimers = useRef<(ReturnType<typeof setTimeout> | null)[]>([null, null, null, null])
+
+  // Clean up any pending mask timers on unmount
+  useEffect(() => {
+    const timers = maskTimers.current
+    return () => { timers.forEach(t => { if (t) clearTimeout(t) }) }
+  }, [])
+
+  // Display value: show digit briefly, then replace with bullet
+  const displayPin = pin.map((d, i) => d ? (pinVisible[i] ? d : '•') : '')
 
   function handlePinChange(index: number, value: string) {
     const digit = value.replace(/\D/g, '').slice(-1)
     const next = [...pin]
     next[index] = digit
     setPin(next)
-    if (digit && index < 3) {
-      pinRefs[index + 1].current?.focus()
+
+    if (digit) {
+      // Flash the digit for 150ms then mask it
+      setPinVisible(prev => { const v = [...prev]; v[index] = true; return v })
+      if (maskTimers.current[index]) clearTimeout(maskTimers.current[index]!)
+      maskTimers.current[index] = setTimeout(() => {
+        setPinVisible(prev => { const v = [...prev]; v[index] = false; return v })
+      }, 150)
+      if (index < 3) pinRefs[index + 1].current?.focus()
+    } else {
+      // Digit cleared — mask immediately
+      if (maskTimers.current[index]) clearTimeout(maskTimers.current[index]!)
+      setPinVisible(prev => { const v = [...prev]; v[index] = false; return v })
     }
   }
 
@@ -118,14 +141,14 @@ export default function LoginPage() {
             4-Digit PIN
           </label>
           <div className="flex justify-center gap-3">
-            {pin.map((digit, i) => (
+            {displayPin.map((displayed, i) => (
               <input
                 key={i}
                 ref={pinRefs[i]}
-                type="password"
+                type="text"
                 inputMode="numeric"
-                maxLength={1}
-                value={digit}
+                maxLength={2}
+                value={displayed}
                 onChange={(e) => handlePinChange(i, e.target.value)}
                 onKeyDown={(e) => handlePinKeyDown(i, e)}
                 onFocus={() => {
