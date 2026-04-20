@@ -60,7 +60,7 @@ export default async function AdminMapPage() {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="absolute inset-0 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex-shrink-0 px-8 py-4 border-b border-line bg-white flex items-center">
         <div>
