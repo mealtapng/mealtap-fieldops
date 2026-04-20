@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import mapboxgl from 'mapbox-gl'
 
@@ -187,11 +187,15 @@ export default function AdminMap({
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
 
-  useEffect(() => {
+  // useLayoutEffect fires synchronously after DOM mutations so the map
+  // container already has its flex-allocated dimensions when Mapbox reads them.
+  useLayoutEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return
 
+    const container = mapContainerRef.current
+
     const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
+      container,
       style: 'mapbox://styles/mapbox/streets-v12',
       center: [7.49, 9.06], // Abuja [lng, lat]
       zoom: 12,
@@ -199,19 +203,21 @@ export default function AdminMap({
     })
     mapRef.current = map
 
-    // Force Mapbox to re-measure the container after the flex layout settles.
-    // Without this the canvas can initialise at 0×0 and never draw tiles.
-    requestAnimationFrame(() => map.resize())
-
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right')
 
     map.on('load', () => {
-      map.resize() // second safety call after style loads
+      map.resize()
       addZoneOverlays(map, zones)
       addRestaurantMarkers(map, restaurants)
     })
 
+    // Resize the map whenever the container changes size (e.g. sidebar toggle,
+    // window resize, or dynamic layout settling after hydration).
+    const observer = new ResizeObserver(() => map.resize())
+    observer.observe(container)
+
     return () => {
+      observer.disconnect()
       map.remove()
       mapRef.current = null
     }

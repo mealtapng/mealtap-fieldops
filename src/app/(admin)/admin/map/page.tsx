@@ -72,7 +72,7 @@ export default async function AdminMapPage() {
       </div>
 
       {/* Map fills remaining height */}
-      <div className="flex-1 relative">
+      <div className="flex-1 min-h-0 relative">
         <AdminMap
           restaurants={restaurants}
           zones={zones}
