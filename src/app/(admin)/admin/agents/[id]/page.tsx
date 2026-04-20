@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { DeactivateButton } from '@/components/admin/DeactivateButton'
+import { ReactivateButton } from '@/components/admin/ReactivateButton'
 
 const ROLE_LABELS: Record<string, string> = {
   agent:      'Agent',
@@ -116,14 +117,22 @@ export default async function AgentDetailPage({ params }: { params: { id: string
         </div>
       </div>
 
-      {/* Danger zone */}
-      {a.is_active && (
+      {/* Danger / recovery zone */}
+      {a.is_active ? (
         <div className="bg-white rounded-2xl shadow-sm border border-red-100 p-6">
           <h2 className="text-sm font-bold text-ink mb-1">Danger zone</h2>
           <p className="text-sm text-muted-brand mb-4">
             Deactivating this agent revokes their login immediately.
           </p>
           <DeactivateButton agentId={a.id} agentName={a.full_name} />
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl shadow-sm border border-forest/20 p-6">
+          <h2 className="text-sm font-bold text-ink mb-1">Reactivate agent</h2>
+          <p className="text-sm text-muted-brand mb-4">
+            Restores login access and resets failed attempts.
+          </p>
+          <ReactivateButton agentId={a.id} agentName={a.full_name} />
         </div>
       )}
     </div>
