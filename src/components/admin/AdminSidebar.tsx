@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 interface User {
   id:        string
@@ -38,6 +39,13 @@ function roleLabel(role: string) {
 
 export function AdminSidebar({ user }: Props) {
   const pathname = usePathname()
+  const router   = useRouter()
+
+  async function signOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
 
   return (
     <>
@@ -98,14 +106,27 @@ export function AdminSidebar({ user }: Props) {
 
         {/* User section */}
         {user && (
-          <div className="border-t border-white/10 p-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-terra flex items-center justify-center flex-shrink-0">
-              <span className="text-xs font-bold text-white">{initials(user.full_name)}</span>
+          <div className="border-t border-white/10 p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-terra flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-bold text-white">{initials(user.full_name)}</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-white truncate">{user.full_name}</p>
+                <p className="text-[11px] text-white/50">{roleLabel(user.role)}</p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-white truncate">{user.full_name}</p>
-              <p className="text-[11px] text-white/50">{roleLabel(user.role)}</p>
-            </div>
+            <button
+              onClick={signOut}
+              className="mt-3 w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-white/60 hover:bg-white/5 hover:text-white/90 transition-colors"
+            >
+              <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              Sign out
+            </button>
           </div>
         )}
       </aside>
