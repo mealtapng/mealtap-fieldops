@@ -187,35 +187,45 @@ export default function AdminMap({
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
   useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return
-
+    if (!mapContainerRef.current) return
     const container = mapContainerRef.current
-    const map = new mapboxgl.Map({
-      container,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [7.49, 9.06], // Abuja [lng, lat]
-      zoom: 12,
-      attributionControl: false,
-    })
-    mapRef.current = map
 
-    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right')
+    // Defer initialisation by one tick. In React 18 Strict Mode (dev only)
+    // effects run twice: mount → cleanup → remount. Without this defer the
+    // first timer is cleared by cleanup before it fires, so only the genuine
+    // second mount actually creates the map — avoiding a double WebGL context.
+    const timer = setTimeout(() => {
+      if (mapRef.current) return
 
-    map.on('load', () => {
-      map.resize()
-      addZoneOverlays(map, zones)
-      addRestaurantMarkers(map, restaurants)
-    })
+      const map = new mapboxgl.Map({
+        container,
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [7.49, 9.06], // Abuja [lng, lat]
+        zoom: 12,
+        attributionControl: false,
+      })
+      mapRef.current = map
 
-    // Resize the map whenever the container changes size (e.g. sidebar toggle,
-    // window resize, or dynamic layout settling after hydration).
-    const observer = new ResizeObserver(() => map.resize())
-    observer.observe(container)
+      map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right')
+
+      map.on('load', () => {
+        map.resize()
+        addZoneOverlays(map, zones)
+        addRestaurantMarkers(map, restaurants)
+      })
+
+      // Resize whenever the container changes size
+      const observer = new ResizeObserver(() => map.resize())
+      observer.observe(container)
+      map.once('remove', () => observer.disconnect())
+    }, 0)
 
     return () => {
-      observer.disconnect()
-      map.remove()
-      mapRef.current = null
+      clearTimeout(timer)
+      if (mapRef.current) {
+        mapRef.current.remove()
+        mapRef.current = null
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
