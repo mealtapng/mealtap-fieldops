@@ -14,13 +14,15 @@ export async function POST(request: NextRequest) {
   if (!user) return err('Unauthorized', 401)
   if (user.user_metadata?.role !== 'admin') return err('Forbidden', 403)
 
-  let body: { threadId?: unknown; message?: unknown }
+  let body: { threadId?: unknown; message?: unknown; attachmentUrl?: unknown; attachmentName?: unknown }
   try { body = await request.json() } catch { return err('Invalid body', 400) }
 
-  const threadId = typeof body.threadId === 'string' ? body.threadId.trim() : null
-  const message  = typeof body.message  === 'string' ? body.message.trim()  : null
+  const threadId      = typeof body.threadId      === 'string' ? body.threadId.trim()      : null
+  const message       = typeof body.message       === 'string' ? body.message.trim()       : ''
+  const attachmentUrl  = typeof body.attachmentUrl  === 'string' ? body.attachmentUrl.trim()  : null
+  const attachmentName = typeof body.attachmentName === 'string' ? body.attachmentName.trim() : null
   if (!threadId) return err('threadId is required', 400)
-  if (!message)  return err('message is required', 400)
+  if (!message && !attachmentUrl) return err('message or attachment is required', 400)
   if (message.length > 1000) return err('Message too long', 400)
 
   const admin = createAdminClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -31,7 +33,13 @@ export async function POST(request: NextRequest) {
 
   const { data: inserted, error: msgError } = await (admin as any)
     .from('dm_messages')
-    .insert({ thread_id: threadId, sender_id: user.id, body: message })
+    .insert({
+      thread_id:       threadId,
+      sender_id:       user.id,
+      body:            message,
+      attachment_url:  attachmentUrl  ?? null,
+      attachment_name: attachmentName ?? null,
+    })
     .select('*')
     .single()
 

@@ -7,12 +7,14 @@ import { createClient } from '@/lib/supabase/client'
 import { ChatBubble } from '@/components/agent/ChatBubble'
 
 interface Message {
-  id:        string
-  thread_id: string
-  sender_id: string
-  body:      string
-  sent_at:   string
-  read_at:   string | null
+  id:              string
+  thread_id:       string
+  sender_id:       string
+  body:            string
+  sent_at:         string
+  read_at:         string | null
+  attachment_url:  string | null
+  attachment_name: string | null
 }
 
 interface OtherUser {
@@ -35,9 +37,11 @@ export default function AdminThreadPage() {
   const [input,         setInput]         = useState('')
   const [sending,       setSending]       = useState(false)
   const [loading,       setLoading]       = useState(true)
+  const [uploadingFile, setUploadingFile] = useState(false)
 
   const bottomRef   = useRef<HTMLDivElement>(null)
   const inputRef    = useRef<HTMLTextAreaElement>(null)
+  const fileRef     = useRef<HTMLInputElement>(null)
   const supabaseRef = useRef(createClient())
 
   // ── Load thread + messages ──────────────────────────────────────────────────
@@ -115,9 +119,10 @@ export default function AdminThreadPage() {
   }, [messages])
 
   // ── Send ────────────────────────────────────────────────────────────────────
-  async function send() {
+  async function send(attachmentUrl?: string, attachmentName?: string) {
     const body = input.trim()
-    if (!body || sending || !currentUserId) return
+    if (!body && !attachmentUrl) return
+    if (sending || !currentUserId) return
 
     setSending(true)
     setInput('')
@@ -125,7 +130,7 @@ export default function AdminThreadPage() {
 
     const res = await fetch('/api/admin/messages/send', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ threadId, message: body }),
+      body: JSON.stringify({ threadId, message: body, attachmentUrl, attachmentName }),
     })
 
     const data = await res.json()
@@ -137,6 +142,38 @@ export default function AdminThreadPage() {
     }
 
     setSending(false)
+  }
+
+  // ── File attachment ──────────────────────────────────────────────────────────
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+
+    const MAX = 10 * 1024 * 1024 // 10 MB
+    if (file.size > MAX) { alert('File must be under 10 MB.'); return }
+
+    setUploadingFile(true)
+    const supabase = supabaseRef.current
+    const ext  = file.name.split('.').pop()
+    const path = `${threadId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+    const { error } = await supabase.storage
+      .from('dm-attachments')
+      .upload(path, file, { upsert: false })
+
+    if (error) {
+      alert('Upload failed. Please try again.')
+      setUploadingFile(false)
+      return
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('dm-attachments')
+      .getPublicUrl(path)
+
+    setUploadingFile(false)
+    await send(publicUrl, file.name)
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -194,6 +231,8 @@ export default function AdminThreadPage() {
               sentAt={msg.sent_at}
               isMine={msg.sender_id === currentUserId}
               otherInitials={otherUser ? initials(otherUser.full_name) : '?'}
+              attachmentUrl={msg.attachment_url}
+              attachmentName={msg.attachment_name}
             />
           ))}
           <div ref={bottomRef} />
@@ -202,7 +241,33 @@ export default function AdminThreadPage() {
 
       {/* Input */}
       <div className="flex-shrink-0 border-t border-line bg-white px-6 py-4">
-        <div className="max-w-2xl mx-auto flex items-end gap-3">
+        <div className="max-w-2xl mx-auto flex items-end gap-2">
+
+          {/* Hidden file input */}
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*,.pdf"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+
+          {/* Paperclip button */}
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={sending || uploadingFile}
+            title="Attach image or PDF"
+            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-muted-brand hover:text-ink hover:bg-cream transition-colors disabled:opacity-40"
+          >
+            {uploadingFile ? (
+              <div className="w-4 h-4 border-2 border-terra/30 border-t-terra rounded-full animate-spin" />
+            ) : (
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+            )}
+          </button>
+
           <textarea
             ref={inputRef}
             value={input}
@@ -219,7 +284,7 @@ export default function AdminThreadPage() {
             }}
           />
           <button
-            onClick={send}
+            onClick={() => send()}
             disabled={!input.trim() || sending}
             className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
               input.trim() && !sending
