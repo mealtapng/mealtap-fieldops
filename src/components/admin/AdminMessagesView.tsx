@@ -1,0 +1,459 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { BoardPostCard } from '@/components/agent/BoardPostCard'
+import { timeAgo } from '@/lib/format'
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface CurrentUser { id: string; full_name: string; role: string }
+
+interface Author { id: string; full_name: string; role: string }
+
+interface Post {
+  id: string; body: string; is_pinned: boolean; post_type: string
+  created_at: string; author: Author | null
+}
+
+interface Reaction {
+  id: string; post_id: string; user_id: string; emoji: string; created_at: string
+}
+
+interface OtherUser { id: string; full_name: string; role: string }
+
+interface Thread {
+  id: string; agent_id: string; supervisor_id: string
+  created_at: string; last_message_at: string | null
+  agent: OtherUser; supervisor: OtherUser
+}
+
+interface Agent { id: string; full_name: string; employee_id: string; role: string }
+
+interface Props {
+  currentUser:  CurrentUser
+  posts:        Post[]
+  reactions:    Reaction[]
+  threads:      Thread[]
+  unreadCounts: Record<string, number>
+  agents:       Agent[]
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function initials(name: string) {
+  return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
+}
+
+function roleLabel(role: string) {
+  if (role === 'admin')      return 'Admin'
+  if (role === 'field_lead') return 'Field Lead'
+  return 'Agent'
+}
+
+// ── New Broadcast Modal ───────────────────────────────────────────────────────
+
+function BroadcastModal({
+  currentUserId,
+  onClose,
+  onPosted,
+}: {
+  currentUserId: string
+  onClose:       () => void
+  onPosted:      (post: Post) => void
+}) {
+  const [body,     setBody]     = useState('')
+  const [isPinned, setIsPinned] = useState(false)
+  const [posting,  setPosting]  = useState(false)
+  const [error,    setError]    = useState<string | null>(null)
+
+  async function submit() {
+    if (!body.trim() || posting) return
+    setPosting(true)
+    setError(null)
+    const supabase = createClient()
+    const { data, error: err } = await (supabase as any)
+      .from('board_posts')
+      .insert({ posted_by: currentUserId, body: body.trim(), is_pinned: isPinned, post_type: 'announcement' })
+      .select('*, author:users!posted_by(id, full_name, role)')
+      .single()
+    setPosting(false)
+    if (err) { setError('Failed to post. Try again.'); return }
+    onPosted(data as Post)
+    onClose()
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-xl">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-bold text-ink">New Broadcast</h2>
+          <button onClick={onClose} className="text-muted-brand hover:text-ink text-xl leading-none">×</button>
+        </div>
+
+        <textarea
+          autoFocus
+          value={body}
+          onChange={e => setBody(e.target.value)}
+          placeholder="Write your announcement to all agents…"
+          rows={5}
+          className="w-full rounded-xl border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest resize-none"
+        />
+
+        <label className="flex items-center gap-2.5 mt-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isPinned}
+            onChange={e => setIsPinned(e.target.checked)}
+            className="w-4 h-4 rounded accent-terra"
+          />
+          <span className="text-sm text-ink font-medium">📌 Pin this post</span>
+        </label>
+
+        {error && <p className="text-sm text-terra mt-3">{error}</p>}
+
+        <div className="flex gap-3 mt-5">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-line text-sm font-semibold text-muted-brand hover:text-ink hover:border-ink/20 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={submit}
+            disabled={!body.trim() || posting}
+            className="flex-1 px-4 py-2.5 rounded-xl bg-terra text-white text-sm font-semibold hover:bg-terra/90 disabled:opacity-60 transition-colors"
+          >
+            {posting ? 'Posting…' : 'Post to Team Board'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── New Message Modal (agent picker) ─────────────────────────────────────────
+
+function NewMessageModal({
+  agents,
+  onClose,
+  onSelect,
+  loading,
+}: {
+  agents:   Agent[]
+  onClose:  () => void
+  onSelect: (agentId: string) => void
+  loading:  boolean
+}) {
+  const [search, setSearch] = useState('')
+  const filtered = agents.filter(a =>
+    a.full_name.toLowerCase().includes(search.toLowerCase())
+  )
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-ink">New Message</h2>
+          <button onClick={onClose} className="text-muted-brand hover:text-ink text-xl leading-none">×</button>
+        </div>
+
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search agents…"
+          autoFocus
+          className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest mb-3"
+        />
+
+        <div className="space-y-2 max-h-72 overflow-y-auto">
+          {filtered.length === 0 ? (
+            <p className="text-sm text-muted-brand text-center py-6">No agents found</p>
+          ) : filtered.map(agent => (
+            <button
+              key={agent.id}
+              onClick={() => onSelect(agent.id)}
+              disabled={loading}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cream transition-colors disabled:opacity-60 text-left"
+            >
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-forest to-terra flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-bold text-white">{initials(agent.full_name)}</span>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-ink">{agent.full_name}</p>
+                <p className="text-xs text-muted-brand">{agent.employee_id} · {roleLabel(agent.role)}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+
+export function AdminMessagesView({
+  currentUser,
+  posts: initialPosts,
+  reactions: initialReactions,
+  threads: initialThreads,
+  unreadCounts: initialUnreadCounts,
+  agents,
+}: Props) {
+  const router = useRouter()
+
+  const [activeTab,         setActiveTab]         = useState<'board' | 'direct'>('board')
+  const [posts,             setPosts]             = useState<Post[]>(initialPosts)
+  const [reactions,         setReactions]         = useState<Reaction[]>(initialReactions)
+  const [threads]                                  = useState<Thread[]>(initialThreads)
+  const [unreadCounts,      setUnreadCounts]      = useState<Record<string, number>>(initialUnreadCounts)
+  const [showBroadcast,     setShowBroadcast]     = useState(false)
+  const [showNewMessage,    setShowNewMessage]    = useState(false)
+  const [startingThread,    setStartingThread]    = useState(false)
+  const [deletingPostId,    setDeletingPostId]    = useState<string | null>(null)
+
+  const totalUnread = Object.values(unreadCounts).reduce((a, b) => a + b, 0)
+
+  // ── Board Realtime ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel('admin-board-posts-realtime')
+      .on('postgres_changes' as any, { event: 'INSERT', schema: 'public', table: 'board_posts' },
+        async (payload: any) => {
+          const { data } = await (supabase as any)
+            .from('board_posts')
+            .select('*, author:users!posted_by(id, full_name, role)')
+            .eq('id', payload.new.id)
+            .single()
+          if (data) {
+            setPosts(prev => {
+              if (prev.find(p => p.id === data.id)) return prev
+              return data.is_pinned ? [data, ...prev] : (() => {
+                const first = prev.findIndex(p => !p.is_pinned)
+                if (first === -1) return [...prev, data]
+                return [...prev.slice(0, first), data, ...prev.slice(first)]
+              })()
+            })
+          }
+        }
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [])
+
+  // ── DM Realtime — watch for new messages across all threads ─────────────────
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel('admin-dm-unread-realtime')
+      .on('postgres_changes' as any, { event: 'INSERT', schema: 'public', table: 'dm_messages' },
+        (payload: any) => {
+          const msg = payload.new
+          if (msg.sender_id === currentUser.id) return // our own message
+          setUnreadCounts(prev => ({ ...prev, [msg.thread_id]: (prev[msg.thread_id] ?? 0) + 1 }))
+        }
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [currentUser.id])
+
+  // ── Reactions handler ───────────────────────────────────────────────────────
+  function handleReactionsChange(postId: string, updated: Reaction[]) {
+    setReactions(prev => [...prev.filter(r => r.post_id !== postId), ...updated])
+  }
+
+  // ── Delete post ─────────────────────────────────────────────────────────────
+  async function handleDeletePost(postId: string) {
+    if (!window.confirm('Delete this post? Agents will no longer see it.')) return
+    setDeletingPostId(postId)
+    const res = await fetch('/api/admin/messages/delete-post', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ postId }),
+    })
+    setDeletingPostId(null)
+    if (res.ok) setPosts(prev => prev.filter(p => p.id !== postId))
+  }
+
+  // ── Start thread ────────────────────────────────────────────────────────────
+  async function handleStartThread(agentId: string) {
+    setStartingThread(true)
+    const res = await fetch('/api/admin/messages/start-thread', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agentId }),
+    })
+    const json = await res.json()
+    setStartingThread(false)
+    setShowNewMessage(false)
+    if (json.threadId) router.push(`/admin/messages/${json.threadId}`)
+  }
+
+  return (
+    <div className="flex flex-col h-screen">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-5 border-b border-line bg-white flex-shrink-0">
+        <div>
+          <h1 className="text-2xl font-bold text-forest">Messages</h1>
+        </div>
+        <div className="flex gap-2">
+          {activeTab === 'board' && (
+            <button
+              onClick={() => setShowBroadcast(true)}
+              className="px-4 py-2.5 bg-terra text-white rounded-xl font-semibold text-sm hover:bg-terra/90 transition-colors"
+            >
+              + New Broadcast
+            </button>
+          )}
+          {activeTab === 'direct' && (
+            <button
+              onClick={() => setShowNewMessage(true)}
+              className="px-4 py-2.5 bg-forest text-white rounded-xl font-semibold text-sm hover:bg-forest/90 transition-colors"
+            >
+              + New Message
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Tab bar */}
+      <div className="flex gap-1 px-6 pt-4 flex-shrink-0">
+        {(['board', 'direct'] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+              activeTab === tab
+                ? 'bg-white shadow-sm border border-line text-ink'
+                : 'text-muted-brand hover:text-ink'
+            }`}
+          >
+            {tab === 'board' ? '📢 Team Board' : '💬 Direct'}
+            {tab === 'direct' && totalUnread > 0 && (
+              <span className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                {totalUnread > 9 ? '9+' : totalUnread}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto px-6 py-4">
+
+        {/* ── Board ─────────────────────────────────────────────────────────── */}
+        {activeTab === 'board' && (
+          <div className="max-w-2xl space-y-4">
+            {posts.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-line p-12 text-center">
+                <p className="text-3xl mb-3">📢</p>
+                <p className="text-sm font-semibold text-ink">No posts yet</p>
+                <p className="text-xs text-muted-brand mt-1">Click &quot;+ New Broadcast&quot; to post to all agents.</p>
+              </div>
+            ) : posts.map(post => (
+              <div key={post.id} className="relative group">
+                <BoardPostCard
+                  post={post}
+                  reactions={reactions.filter(r => r.post_id === post.id)}
+                  currentUserId={currentUser.id}
+                  onReactionsChange={handleReactionsChange}
+                />
+                {/* Delete button overlay */}
+                <button
+                  onClick={() => handleDeletePost(post.id)}
+                  disabled={deletingPostId === post.id}
+                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity px-2.5 py-1 rounded-lg bg-white border border-red-200 text-xs font-semibold text-red-500 hover:bg-red-50 disabled:opacity-40"
+                >
+                  {deletingPostId === post.id ? '…' : 'Delete'}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── Direct ────────────────────────────────────────────────────────── */}
+        {activeTab === 'direct' && (
+          <div className="max-w-xl space-y-2">
+            {threads.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-line p-12 text-center">
+                <p className="text-3xl mb-3">💬</p>
+                <p className="text-sm font-semibold text-ink">No threads yet</p>
+                <p className="text-xs text-muted-brand mt-1">Click &quot;+ New Message&quot; to start a conversation.</p>
+              </div>
+            ) : threads.map(thread => {
+              const otherUser = thread.supervisor_id === currentUser.id ? thread.agent : thread.supervisor
+              const unread    = unreadCounts[thread.id] ?? 0
+              const timestamp = thread.last_message_at ?? thread.created_at
+
+              return (
+                <button
+                  key={thread.id}
+                  onClick={() => router.push(`/admin/messages/${thread.id}`)}
+                  className="w-full flex items-center gap-3 bg-white rounded-2xl shadow-sm border border-line px-4 py-3.5 hover:bg-cream/40 transition-colors text-left"
+                >
+                  <div className="relative flex-shrink-0">
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-forest to-terra flex items-center justify-center">
+                      <span className="text-xs font-bold text-white">{initials(otherUser.full_name)}</span>
+                    </div>
+                    {unread > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white" />
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-bold text-ink truncate">{otherUser.full_name}</p>
+                      <p className="text-[11px] text-muted-brand flex-shrink-0">{timeAgo(timestamp)}</p>
+                    </div>
+                    <p className="text-[11px] text-muted-brand">{roleLabel(otherUser.role)}</p>
+                  </div>
+
+                  {unread > 0 && (
+                    <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                      <span className="text-[9px] font-bold text-white">{unread > 9 ? '9+' : unread}</span>
+                    </div>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      {showBroadcast && (
+        <BroadcastModal
+          currentUserId={currentUser.id}
+          onClose={() => setShowBroadcast(false)}
+          onPosted={post => {
+            setPosts(prev => post.is_pinned
+              ? [post, ...prev]
+              : (() => {
+                  const first = prev.findIndex(p => !p.is_pinned)
+                  if (first === -1) return [...prev, post]
+                  return [...prev.slice(0, first), post, ...prev.slice(first)]
+                })()
+            )
+          }}
+        />
+      )}
+
+      {showNewMessage && (
+        <NewMessageModal
+          agents={agents}
+          onClose={() => setShowNewMessage(false)}
+          onSelect={handleStartThread}
+          loading={startingThread}
+        />
+      )}
+    </div>
+  )
+}
