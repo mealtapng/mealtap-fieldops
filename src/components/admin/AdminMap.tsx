@@ -1,6 +1,6 @@
 'use client'
 
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import mapboxgl from 'mapbox-gl'
 
@@ -188,9 +188,7 @@ export default function AdminMap({
   const mapRef = useRef<mapboxgl.Map | null>(null)
   const [dbg, setDbg] = useState({ w: 0, h: 0, token: 0, loaded: false, err: '' })
 
-  // useLayoutEffect fires synchronously after DOM mutations so the map
-  // container already has its flex-allocated dimensions when Mapbox reads them.
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return
 
     const container = mapContainerRef.current
