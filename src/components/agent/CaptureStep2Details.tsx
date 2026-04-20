@@ -128,11 +128,19 @@ function TriToggle({ label, value, onChange }: TriToggleProps) {
 }
 
 interface DeliveryChipsProps {
-  value: string
-  onChange: (v: string) => void
+  value: string[]
+  onChange: (v: string[]) => void
 }
 
 function DeliveryChips({ value, onChange }: DeliveryChipsProps) {
+  function toggle(opt: string) {
+    if (value.includes(opt)) {
+      onChange(value.filter(v => v !== opt))
+    } else {
+      onChange([...value, opt])
+    }
+  }
+
   return (
     <div className="px-4 pb-4">
       <p className="text-[10px] font-bold tracking-widest text-muted-brand uppercase mb-2">
@@ -140,12 +148,12 @@ function DeliveryChips({ value, onChange }: DeliveryChipsProps) {
       </p>
       <div className="flex flex-wrap gap-2">
         {DELIVERY_OPTIONS.map(opt => {
-          const active = value === opt.value
+          const active = value.includes(opt.value)
           return (
             <button
               key={opt.value}
               type="button"
-              onClick={() => onChange(opt.value)}
+              onClick={() => toggle(opt.value)}
               className={`px-3.5 py-1.5 rounded-full border text-xs font-semibold transition-colors
                 ${active
                   ? 'bg-forest-light border-forest text-forest'
@@ -171,7 +179,7 @@ export function CaptureStep2Details({ initialData: initial, onContinue }: Props)
   const [avgPrice,        setAvgPrice]       = useState(initial?.avgPrice != null ? String(initial.avgPrice) : '')
   const [dailyVolume,     setDailyVolume]    = useState(initial?.dailyOrderVolume != null ? String(initial.dailyOrderVolume) : '')
   const [delivers,        setDelivers]       = useState<boolean | null>(initial?.currentlyDelivers ?? null)
-  const [deliveryMethod,  setDeliveryMethod] = useState(initial?.deliveryMethod && initial.deliveryMethod !== 'none' ? initial.deliveryMethod : 'calls')
+  const [deliveryMethods, setDeliveryMethods] = useState<string[]>(initial?.deliveryMethods ?? [])
   const [hasSmartphone,   setHasSmartphone]  = useState<boolean | null>(initial?.hasSmartphone ?? null)
   const [hasBankAccount,  setHasBankAccount] = useState<boolean | null>(initial?.hasBankAccount ?? null)
   const [hasPOS,          setHasPOS]         = useState<boolean | null>(initial?.hasPOS ?? null)
@@ -179,8 +187,7 @@ export function CaptureStep2Details({ initialData: initial, onContinue }: Props)
 
   function handleDeliversChange(v: boolean | null) {
     setDelivers(v)
-    // Reset delivery method when toggling off
-    if (v !== true) setDeliveryMethod('calls')
+    if (v !== true) setDeliveryMethods([])
   }
 
   const canContinue = name.trim().length > 0
@@ -196,7 +203,7 @@ export function CaptureStep2Details({ initialData: initial, onContinue }: Props)
       avgPrice:          avgPrice !== '' ? Number(avgPrice) : null,
       dailyOrderVolume:  dailyVolume !== '' ? Number(dailyVolume) : null,
       currentlyDelivers: delivers,
-      deliveryMethod:    delivers === true ? deliveryMethod : 'none',
+      deliveryMethods:   delivers === true ? deliveryMethods : [],
       hasSmartphone,
       hasBankAccount,
       hasPOS,
@@ -285,8 +292,8 @@ export function CaptureStep2Details({ initialData: initial, onContinue }: Props)
             />
             {delivers === true && (
               <DeliveryChips
-                value={deliveryMethod}
-                onChange={setDeliveryMethod}
+                value={deliveryMethods}
+                onChange={setDeliveryMethods}
               />
             )}
           </FormCard>

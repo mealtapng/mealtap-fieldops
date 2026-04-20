@@ -26,7 +26,7 @@ export interface Step2Data {
   avgPrice: number | null
   dailyOrderVolume: number | null
   currentlyDelivers: boolean | null
-  deliveryMethod: string
+  deliveryMethods: string[]
   hasSmartphone: boolean | null
   hasBankAccount: boolean | null
   hasPOS: boolean | null
