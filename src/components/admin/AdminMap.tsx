@@ -192,16 +192,21 @@ export default function AdminMap({
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/light-v11',
+      style: 'mapbox://styles/mapbox/streets-v12',
       center: [7.49, 9.06], // Abuja [lng, lat]
       zoom: 12,
       attributionControl: false,
     })
     mapRef.current = map
 
+    // Force Mapbox to re-measure the container after the flex layout settles.
+    // Without this the canvas can initialise at 0×0 and never draw tiles.
+    requestAnimationFrame(() => map.resize())
+
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right')
 
     map.on('load', () => {
+      map.resize() // second safety call after style loads
       addZoneOverlays(map, zones)
       addRestaurantMarkers(map, restaurants)
     })
