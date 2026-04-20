@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import mapboxgl from 'mapbox-gl'
 
@@ -186,6 +186,7 @@ export default function AdminMap({
 }) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
+  const [dbg, setDbg] = useState({ w: 0, h: 0, token: 0 })
 
   // useLayoutEffect fires synchronously after DOM mutations so the map
   // container already has its flex-allocated dimensions when Mapbox reads them.
@@ -193,6 +194,11 @@ export default function AdminMap({
     if (!mapContainerRef.current || mapRef.current) return
 
     const container = mapContainerRef.current
+    setDbg({
+      w: container.offsetWidth,
+      h: container.offsetHeight,
+      token: (process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '').length,
+    })
 
     const map = new mapboxgl.Map({
       container,
@@ -235,6 +241,11 @@ export default function AdminMap({
     <div className="absolute inset-0">
       {/* Map canvas */}
       <div ref={mapContainerRef} className="absolute inset-0" />
+      {/* Temporary debug panel — remove once map is working */}
+      <div className="absolute bottom-4 left-4 z-50 bg-black/80 text-white text-xs font-mono p-2 rounded-lg leading-5">
+        container: {dbg.w}×{dbg.h}px<br />
+        token chars: {dbg.token} {dbg.token === 0 ? '❌ MISSING' : '✓'}
+      </div>
 
       {/* Legend overlay */}
       <div className="absolute top-4 right-4 z-10 bg-white rounded-xl shadow-sm border border-line p-3 min-w-[140px]">
