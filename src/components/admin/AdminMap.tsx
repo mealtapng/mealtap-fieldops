@@ -134,16 +134,17 @@ function addRestaurantMarkers(map: mapboxgl.Map, restaurants: Restaurant[]) {
     const label = TAG_LABELS[r.tag ?? ''] ?? r.tag ?? '—'
     const date  = r.created_at ? new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
 
-    // Custom circle element
+    // Custom circle element — 18px so it's visible against streets-v12 roads
     const el = document.createElement('div')
     el.style.cssText = [
-      'width: 12px',
-      'height: 12px',
+      'width: 18px',
+      'height: 18px',
       'border-radius: 50%',
       `background: ${color}`,
-      'border: 2px solid white',
-      'box-shadow: 0 1px 4px rgba(0,0,0,0.3)',
+      'border: 3px solid white',
+      'box-shadow: 0 2px 6px rgba(0,0,0,0.5)',
       'cursor: pointer',
+      'z-index: 1',
     ].join('; ')
 
     const popup = new mapboxgl.Popup({ offset: 10, closeButton: false, maxWidth: '220px' })
@@ -208,11 +209,17 @@ export default function AdminMap({
 
       map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right')
 
-      map.on('load', () => {
+      // Guard: if style loaded from cache before listener registered, run immediately
+      const onLoad = () => {
         map.resize()
         addZoneOverlays(map, zones)
         addRestaurantMarkers(map, restaurants)
-      })
+      }
+      if (map.isStyleLoaded()) {
+        onLoad()
+      } else {
+        map.on('load', onLoad)
+      }
 
       // Resize whenever the container changes size
       const observer = new ResizeObserver(() => map.resize())
