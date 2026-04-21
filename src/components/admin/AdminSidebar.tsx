@@ -22,12 +22,10 @@ const NAV_ITEMS = [
   { href: '/admin/onboardings',  label: 'Onboardings', icon: '⚡', exact: false },
   { href: '/admin/agents',       label: 'Agents',      icon: '👥', exact: false },
   { href: '/admin/messages',     label: 'Messages',    icon: '💬', exact: false },
+  { href: '/admin/payouts',      label: 'Payouts',     icon: '💰', exact: false },
+  { href: '/admin/settings',     label: 'Settings',    icon: '⚙️', exact: false },
 ]
 
-const DISABLED_ITEMS = [
-  { label: 'Payouts',  icon: '💰' },
-  { label: 'Settings', icon: '⚙️' },
-]
 
 function initials(name: string) {
   return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
@@ -93,24 +91,6 @@ export function AdminSidebar({ user }: Props) {
             )
           })}
 
-          {/* Separator */}
-          <div className="pt-2 pb-1 px-3">
-            <div className="border-t border-white/10" />
-          </div>
-
-          {/* Disabled items */}
-          {DISABLED_ITEMS.map(item => (
-            <div
-              key={item.label}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/30 cursor-not-allowed"
-            >
-              <span className="text-base leading-none opacity-50">{item.icon}</span>
-              {item.label}
-              <span className="ml-auto text-[9px] font-bold tracking-wider bg-white/10 text-white/40 px-1.5 py-0.5 rounded-full">
-                v2
-              </span>
-            </div>
-          ))}
         </nav>
 
         {/* User section */}
