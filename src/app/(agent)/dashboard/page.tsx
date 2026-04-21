@@ -43,11 +43,13 @@ export default async function DashboardPage() {
   const lastWeekISO = lastWeekStart.toISOString()
 
   // ── 1. Profile ────────────────────────────────────────────────────────────
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('users')
     .select('full_name, quality_score, assigned_zone_id, referral_code')
     .eq('id', user.id)
-    .single() as { data: ProfileRow | null; error: unknown }
+    .single() as { data: ProfileRow | null; error: { message: string } | null }
+
+  if (profileError) console.error('[dashboard] profile fetch failed:', profileError.message, 'uid:', user.id)
 
   // ── 2. Stats + recent onboardings (parallel) ─────────────────────────────
   const uid = user.id
@@ -104,7 +106,7 @@ export default async function DashboardPage() {
   return (
     <DashboardView
       user={{
-        full_name:     profile?.full_name ?? 'Agent',
+        full_name:     profile?.full_name ?? (user.user_metadata?.full_name as string | undefined) ?? 'there',
         quality_score: Number(profile?.quality_score ?? 0),
         zone_name:     profile?.assigned_zone_id ? (zoneMap[profile.assigned_zone_id] ?? null) : null,
         referral_code: profile?.referral_code ?? null,
