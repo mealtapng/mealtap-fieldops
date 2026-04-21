@@ -44,7 +44,7 @@ export default function AdminThreadPage() {
   const fileRef     = useRef<HTMLInputElement>(null)
   const supabaseRef = useRef(createClient())
 
-  // ── Load thread + messages ──────────────────────────────────────────────────
+  // ── Load thread + messages via API (bypasses RLS) ──────────────────────────
   useEffect(() => {
     const supabase = supabaseRef.current
 
@@ -53,30 +53,18 @@ export default function AdminThreadPage() {
       if (!user) { router.push('/login'); return }
       setCurrentUserId(user.id)
 
-      // Fetch thread — admin can see any thread (no RLS filter)
-      const { data: thread } = await (supabase as any)
-        .from('dm_threads')
-        .select('id, agent_id, supervisor_id, agent:users!agent_id(id, full_name, role), supervisor:users!supervisor_id(id, full_name, role)')
-        .eq('id', threadId)
-        .maybeSingle()
+      const res = await fetch(`/api/admin/messages/fetch?threadId=${threadId}`)
+      if (!res.ok) { router.push('/admin/messages'); return }
+      const data = await res.json()
 
+      const thread = data.thread
       if (!thread) { router.push('/admin/messages'); return }
 
-      const other = (thread as any).supervisor_id === user.id
-        ? (thread as any).agent
-        : (thread as any).supervisor
+      const other = thread.supervisor_id === user.id ? thread.agent : thread.supervisor
       setOtherUser(other)
-
-      const { data: msgs } = await (supabase as any)
-        .from('dm_messages')
-        .select('*')
-        .eq('thread_id', threadId)
-        .order('sent_at', { ascending: true })
-
-      setMessages((msgs ?? []) as Message[])
+      setMessages(data.messages ?? [])
       setLoading(false)
 
-      // Mark messages as read
       fetch('/api/messages/mark-read', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ threadId }),
@@ -86,52 +74,20 @@ export default function AdminThreadPage() {
     load()
   }, [threadId, router])
 
-  // ── Realtime ────────────────────────────────────────────────────────────────
+  // ── Polling (catches messages every 4 s) ───────────────────────────────────
   useEffect(() => {
     if (!currentUserId) return
-    const supabase = supabaseRef.current
-
-    const channel = supabase
-      .channel(`admin-dm-thread-${threadId}`)
-      .on('postgres_changes' as any, {
-        event: 'INSERT', schema: 'public', table: 'dm_messages',
-        filter: `thread_id=eq.${threadId}`,
-      }, (payload: any) => {
-        setMessages(prev => {
-          if (prev.find(m => m.id === payload.new.id)) return prev
-          return [...prev, payload.new as Message]
-        })
-        if (payload.new.sender_id !== currentUserId) {
-          fetch('/api/messages/mark-read', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ threadId }),
-          }).catch(() => {})
-        }
-      })
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [threadId, currentUserId])
-
-  // ── Polling fallback (catches messages when Realtime WebSocket drops) ───────
-  useEffect(() => {
-    if (!currentUserId) return
-    const supabase = supabaseRef.current
 
     const interval = setInterval(async () => {
-      const { data: msgs } = await (supabase as any)
-        .from('dm_messages')
-        .select('*')
-        .eq('thread_id', threadId)
-        .order('sent_at', { ascending: true })
-
-      if (msgs) {
-        setMessages(prev => {
-          const existingIds = new Set(prev.map((m: Message) => m.id))
-          const newMsgs = (msgs as Message[]).filter(m => !existingIds.has(m.id))
-          return newMsgs.length > 0 ? [...prev, ...newMsgs] : prev
-        })
-      }
+      const res = await fetch(`/api/admin/messages/fetch?threadId=${threadId}`)
+      if (!res.ok) return
+      const data = await res.json()
+      const fetched: Message[] = data.messages ?? []
+      setMessages(prev => {
+        const existingIds = new Set(prev.map(m => m.id))
+        const newMsgs = fetched.filter(m => !existingIds.has(m.id))
+        return newMsgs.length > 0 ? [...prev, ...newMsgs] : prev
+      })
     }, 4000)
 
     return () => clearInterval(interval)
@@ -174,7 +130,7 @@ export default function AdminThreadPage() {
     if (!file) return
     e.target.value = ''
 
-    const MAX = 10 * 1024 * 1024 // 10 MB
+    const MAX = 10 * 1024 * 1024
     if (file.size > MAX) { alert('File must be under 10 MB.'); return }
 
     setUploadingFile(true)
@@ -267,7 +223,6 @@ export default function AdminThreadPage() {
       <div className="flex-shrink-0 border-t border-line bg-white px-6 py-4">
         <div className="max-w-2xl mx-auto flex items-end gap-2">
 
-          {/* Hidden file input */}
           <input
             ref={fileRef}
             type="file"
@@ -276,7 +231,6 @@ export default function AdminThreadPage() {
             onChange={handleFileChange}
           />
 
-          {/* Paperclip button */}
           <button
             onClick={() => fileRef.current?.click()}
             disabled={sending || uploadingFile}

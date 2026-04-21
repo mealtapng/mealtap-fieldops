@@ -6,8 +6,6 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { ChatBubble } from '@/components/agent/ChatBubble'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
 interface Message {
   id:              string
   thread_id:       string
@@ -25,13 +23,9 @@ interface OtherUser {
   role:      string
 }
 
-// ── Helper ────────────────────────────────────────────────────────────────────
-
 function initials(name: string) {
   return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
 }
-
-// ── Page (client component — handles auth + data itself) ──────────────────────
 
 export default function ThreadPage() {
   const { threadId } = useParams<{ threadId: string }>()
@@ -50,42 +44,27 @@ export default function ThreadPage() {
   const fileRef     = useRef<HTMLInputElement>(null)
   const supabaseRef = useRef(createClient())
 
-  // ── Initial load ────────────────────────────────────────────────────────────
+  // ── Load thread + messages via API (bypasses RLS) ──────────────────────────
   useEffect(() => {
     const supabase = supabaseRef.current
 
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-
       setCurrentUserId(user.id)
 
-      // Fetch thread to verify access and get other user
-      const { data: thread } = await supabase
-        .from('dm_threads' as any)
-        .select('id, agent_id, supervisor_id, agent:users!agent_id(id, full_name, role), supervisor:users!supervisor_id(id, full_name, role)')
-        .eq('id', threadId)
-        .or(`agent_id.eq.${user.id},supervisor_id.eq.${user.id}`)
-        .maybeSingle()
+      const res = await fetch(`/api/messages/fetch?threadId=${threadId}`)
+      if (!res.ok) { router.push('/messages'); return }
+      const data = await res.json()
 
+      const thread = data.thread
       if (!thread) { router.push('/messages'); return }
 
-      const other = (thread as any).agent_id === user.id
-        ? (thread as any).supervisor
-        : (thread as any).agent
+      const other = thread.agent_id === user.id ? thread.supervisor : thread.agent
       setOtherUser(other)
-
-      // Fetch messages
-      const { data: msgs } = await supabase
-        .from('dm_messages' as any)
-        .select('*')
-        .eq('thread_id', threadId)
-        .order('sent_at', { ascending: true })
-
-      setMessages((msgs ?? []) as Message[])
+      setMessages(data.messages ?? [])
       setLoading(false)
 
-      // Mark messages as read (non-blocking)
       fetch('/api/messages/mark-read', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -96,60 +75,20 @@ export default function ThreadPage() {
     load()
   }, [threadId, router])
 
-  // ── Realtime subscription ────────────────────────────────────────────────────
+  // ── Polling (catches messages every 4 s) ───────────────────────────────────
   useEffect(() => {
     if (!currentUserId) return
-    const supabase = supabaseRef.current
-
-    const channel = supabase
-      .channel(`dm-thread-${threadId}`)
-      .on(
-        'postgres_changes' as any,
-        {
-          event:  'INSERT',
-          schema: 'public',
-          table:  'dm_messages',
-          filter: `thread_id=eq.${threadId}`,
-        },
-        (payload: any) => {
-          setMessages(prev => {
-            if (prev.find(m => m.id === payload.new.id)) return prev
-            return [...prev, payload.new as Message]
-          })
-          // Mark read if message is from the other person
-          if (payload.new.sender_id !== currentUserId) {
-            fetch('/api/messages/mark-read', {
-              method:  'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body:    JSON.stringify({ threadId }),
-            }).catch(() => {})
-          }
-        }
-      )
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [threadId, currentUserId])
-
-  // ── Polling fallback (catches messages when Realtime WebSocket drops) ───────
-  useEffect(() => {
-    if (!currentUserId) return
-    const supabase = supabaseRef.current
 
     const interval = setInterval(async () => {
-      const { data: msgs } = await supabase
-        .from('dm_messages' as any)
-        .select('*')
-        .eq('thread_id', threadId)
-        .order('sent_at', { ascending: true })
-
-      if (msgs) {
-        setMessages(prev => {
-          const existingIds = new Set(prev.map((m: Message) => m.id))
-          const newMsgs = (msgs as Message[]).filter(m => !existingIds.has(m.id))
-          return newMsgs.length > 0 ? [...prev, ...newMsgs] : prev
-        })
-      }
+      const res = await fetch(`/api/messages/fetch?threadId=${threadId}`)
+      if (!res.ok) return
+      const data = await res.json()
+      const fetched: Message[] = data.messages ?? []
+      setMessages(prev => {
+        const existingIds = new Set(prev.map(m => m.id))
+        const newMsgs = fetched.filter(m => !existingIds.has(m.id))
+        return newMsgs.length > 0 ? [...prev, ...newMsgs] : prev
+      })
     }, 4000)
 
     return () => clearInterval(interval)
@@ -160,7 +99,7 @@ export default function ThreadPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // ── Send message ─────────────────────────────────────────────────────────────
+  // ── Send message via API ─────────────────────────────────────────────────────
   async function send(attachmentUrl?: string, attachmentName?: string) {
     const body = input.trim()
     if (!body && !attachmentUrl) return
@@ -170,33 +109,19 @@ export default function ThreadPage() {
     setInput('')
     inputRef.current?.focus()
 
-    const supabase = supabaseRef.current
+    const res = await fetch('/api/messages/send', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ threadId, message: body, attachmentUrl, attachmentName }),
+    })
 
-    const { data: inserted } = await (supabase as any)
-      .from('dm_messages')
-      .insert({
-        thread_id:       threadId,
-        sender_id:       currentUserId,
-        body:            body,
-        attachment_url:  attachmentUrl  ?? null,
-        attachment_name: attachmentName ?? null,
-      })
-      .select('*')
-      .single()
-
-    // Show own message immediately without waiting for Realtime
-    if (inserted) {
+    const data = await res.json()
+    if (data.message) {
       setMessages(prev => {
-        if (prev.find((m: Message) => m.id === inserted.id)) return prev
-        return [...prev, inserted as Message]
+        if (prev.find(m => m.id === data.message.id)) return prev
+        return [...prev, data.message as Message]
       })
     }
-
-    // Update thread's last_message_at
-    await (supabase as any)
-      .from('dm_threads')
-      .update({ last_message_at: new Date().toISOString() })
-      .eq('id', threadId)
 
     setSending(false)
   }
@@ -207,7 +132,7 @@ export default function ThreadPage() {
     if (!file) return
     e.target.value = ''
 
-    const MAX = 10 * 1024 * 1024 // 10 MB
+    const MAX = 10 * 1024 * 1024
     if (file.size > MAX) { alert('File must be under 10 MB.'); return }
 
     setUploadingFile(true)
@@ -239,8 +164,6 @@ export default function ThreadPage() {
       send()
     }
   }
-
-  // ── Render ───────────────────────────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -306,7 +229,6 @@ export default function ThreadPage() {
         {/* ── Input bar ───────────────────────────────────────────────────── */}
         <div className="flex-shrink-0 border-t border-line bg-cream px-4 py-3 flex items-end gap-2">
 
-          {/* Hidden file input */}
           <input
             ref={fileRef}
             type="file"
@@ -315,7 +237,6 @@ export default function ThreadPage() {
             onChange={handleFileChange}
           />
 
-          {/* Paperclip button */}
           <button
             onClick={() => fileRef.current?.click()}
             disabled={sending || uploadingFile}
