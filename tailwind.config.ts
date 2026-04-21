@@ -41,28 +41,35 @@ const config: Config = {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
-        // PowerChat brand colours
+        // ── PowerChat brand — matches powerchat.ng ────────────────────────────
         brand: {
-          DEFAULT: "#1A73E8",
-          dark: "#1557B0",
-          light: "#E8F0FE",
+          DEFAULT: "#1B5E20",   // green-deep
+          dark:    "#0D1B0E",   // near-black green (footer / hero dark)
+          light:   "#E8F5E9",   // green-pale
         },
         success: {
-          DEFAULT: "#34A853",
-          dark: "#2D9249",
-          light: "#E6F4EA",
+          DEFAULT: "#25D366",   // WhatsApp green (primary CTA)
+          dark:    "#128C7E",   // WhatsApp dark
+          light:   "#DCF8C6",   // bubble green / success bg
         },
-        cream: "#F8F9FA",
-        ink: "#202124",
+        gold: {
+          DEFAULT: "#F9A825",   // gold accent
+          dark:    "#F57F17",
+          light:   "#FFF8E1",
+        },
+        cream:      "#fafdfb",  // off-white with green tint (body bg)
+        ink:        "#1a2e1b",  // primary text (dark green-black)
+        "muted-brand": "#4a6b4c", // secondary text
+        line:       "#d4e6d5",  // borders / dividers (green-tinted)
         muted: {
-          DEFAULT: "hsl(var(--muted))",
+          DEFAULT:    "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
-          brand: "#6B6B6B",
+          brand:      "#4a6b4c",
         },
-        line: "#E5E5E0",
       },
       fontFamily: {
-        sans: ["var(--font-poppins)", ...fontFamily.sans],
+        sans:    ["var(--font-jakarta)", ...fontFamily.sans],
+        display: ["var(--font-bricolage)", ...fontFamily.sans],
       },
       borderRadius: {
         lg: "var(--radius)",

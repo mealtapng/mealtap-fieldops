@@ -26,11 +26,8 @@ export function BottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[52px] py-2 transition-colors ${
-                active
-                  ? 'text-brand'
-                  : 'text-muted-brand hover:text-ink'
-              }`}
+              className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[52px] py-2 transition-colors"
+              style={{ color: active ? '#1B5E20' : '#7a9a7c' }}
             >
               <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
               <span className="text-[10px] font-semibold">{label}</span>

@@ -119,7 +119,10 @@ export function PhotoUpload({ userId, initialPath, fullName }: PhotoUploadProps)
         aria-label="Change profile photo"
       >
         {/* Avatar */}
-        <div className="w-28 h-28 rounded-full ring-4 ring-success overflow-hidden flex items-center justify-center">
+        <div
+          className="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center"
+          style={{ boxShadow: '0 0 0 4px #25D366' }}
+        >
           {previewUrl ? (
             <img
               src={previewUrl}
@@ -128,7 +131,10 @@ export function PhotoUpload({ userId, initialPath, fullName }: PhotoUploadProps)
               onError={() => setPreviewUrl(null)}
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-success to-brand flex items-center justify-center">
+            <div
+              className="w-full h-full flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #1B5E20, #2E7D32)' }}
+            >
               <span className="text-3xl font-bold text-white">{initials}</span>
             </div>
           )}
@@ -159,7 +165,7 @@ export function PhotoUpload({ userId, initialPath, fullName }: PhotoUploadProps)
         {/* Camera badge */}
         <div className="absolute bottom-0.5 right-0.5 w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center">
           <svg
-            className="w-4 h-4 text-brand"
+            className="w-4 h-4" style={{ color: '#1B5E20' }}
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"

@@ -73,22 +73,25 @@ interface KPICardProps {
 
 function KPICard({ title, value, sub, subColour, progress, progressLabel, children }: KPICardProps) {
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-line">
-      <p className="text-[10px] font-bold tracking-widest text-muted-brand uppercase">{title}</p>
-      <p className="text-4xl font-bold text-ink mt-2 leading-none">{value}</p>
+    <div
+      className="bg-white rounded-2xl p-5"
+      style={{ border: '1px solid rgba(27,94,32,0.08)', boxShadow: '0 2px 8px rgba(27,94,32,0.06)' }}
+    >
+      <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: '#4a6b4c' }}>{title}</p>
+      <p className="text-4xl font-display font-bold mt-2 leading-none" style={{ color: '#1a2e1b' }}>{value}</p>
       {sub && (
         <p className={`text-xs mt-1 ${subColour ?? 'text-muted-brand'}`}>{sub}</p>
       )}
       {progress != null && (
         <div className="mt-3">
-          <div className="h-1.5 bg-line rounded-full overflow-hidden">
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#E8F5E9' }}>
             <div
-              className="h-full bg-success rounded-full transition-all duration-500"
-              style={{ width: `${Math.min(100, progress)}%` }}
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${Math.min(100, progress)}%`, background: '#25D366' }}
             />
           </div>
           {progressLabel && (
-            <p className="text-[10px] text-muted-brand mt-1">{progressLabel}</p>
+            <p className="text-[10px] mt-1" style={{ color: '#7a9a7c' }}>{progressLabel}</p>
           )}
         </div>
       )}
@@ -120,19 +123,23 @@ export function AdminDashboard({
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-muted-brand">{dayLabel(new Date())}</p>
-          <h1 className="text-3xl font-bold text-brand mt-0.5">Operations Dashboard</h1>
+          <p className="text-sm" style={{ color: '#7a9a7c' }}>{dayLabel(new Date())}</p>
+          <h1 className="text-3xl font-display font-bold mt-0.5" style={{ color: '#1B5E20' }}>Operations Dashboard</h1>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-3.5 py-2 bg-white rounded-xl border border-line text-sm font-semibold text-ink cursor-default select-none">
+          <div
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-white rounded-full text-sm font-semibold cursor-default select-none"
+            style={{ border: '1px solid #d4e6d5', color: '#1a2e1b' }}
+          >
             Today
-            <svg className="w-3.5 h-3.5 text-muted-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
+            <svg className="w-3.5 h-3.5" style={{ color: '#7a9a7c' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
               <path d="M6 9l6 6 6-6"/>
             </svg>
           </div>
           <a
             href="/admin/messages"
-            className="flex items-center gap-2 px-4 py-2 bg-success text-white rounded-xl text-sm font-semibold shadow-sm shadow-success/20 hover:bg-success-dark transition-colors"
+            className="flex items-center gap-2 px-5 py-2 text-white rounded-full text-sm font-semibold transition-all"
+            style={{ background: '#25D366', boxShadow: '0 4px 16px rgba(37,211,102,0.3)' }}
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -168,9 +175,9 @@ export function AdminDashboard({
           value={totalCount}
         >
           <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
-            <span className="text-[11px] text-muted-brand">✅ {statusCounts.converted} Converted</span>
-            <span className="text-[11px] text-muted-brand">⏳ {statusCounts.pending} Pending</span>
-            <span className="text-[11px] text-muted-brand">✕ {statusCounts.failed} Failed</span>
+            <span className="text-[11px]" style={{ color: '#1B5E20' }}>✅ {statusCounts.converted} Converted</span>
+            <span className="text-[11px]" style={{ color: '#7a9a7c' }}>⏳ {statusCounts.pending} Pending</span>
+            <span className="text-[11px]" style={{ color: '#7a9a7c' }}>✕ {statusCounts.failed} Not interested</span>
           </div>
         </KPICard>
 
@@ -186,14 +193,15 @@ export function AdminDashboard({
                 <div
                   key={a.id}
                   title={a.full_name}
-                  className="w-8 h-8 rounded-full bg-gradient-to-br from-brand to-success border-2 border-white flex items-center justify-center"
+                  className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center"
+                  style={{ background: 'linear-gradient(135deg, #1B5E20, #2E7D32)' }}
                 >
                   <span className="text-[9px] font-bold text-white">{initials(a.full_name)}</span>
                 </div>
               ))}
               {activeAgents.length > 6 && (
-                <div className="w-8 h-8 rounded-full bg-line border-2 border-white flex items-center justify-center">
-                  <span className="text-[9px] text-muted-brand font-bold">+{activeAgents.length - 6}</span>
+                <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center" style={{ background: '#E8F5E9' }}>
+                  <span className="text-[9px] font-bold" style={{ color: '#1B5E20' }}>+{activeAgents.length - 6}</span>
                 </div>
               )}
             </div>
@@ -203,44 +211,64 @@ export function AdminDashboard({
       </div>
 
       {/* ── Leaderboard ────────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-2xl shadow-sm border border-line p-5">
-        <p className="font-bold text-ink mb-4">🏆 Leaderboard — This week</p>
+      <div
+        className="bg-white rounded-2xl p-5"
+        style={{ border: '1px solid rgba(27,94,32,0.08)', boxShadow: '0 2px 8px rgba(27,94,32,0.06)' }}
+      >
+        {/* Section label — matches powerchat.ng section-label style */}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-6 h-0.5" style={{ background: '#F9A825' }} />
+          <p className="text-xs font-bold tracking-widest uppercase" style={{ color: '#1B5E20' }}>
+            Leaderboard — This week
+          </p>
+        </div>
 
         {leaderboard.length === 0 ? (
-          <p className="text-sm text-muted-brand py-4 text-center">No onboardings this week yet</p>
+          <p className="text-sm py-4 text-center" style={{ color: '#7a9a7c' }}>No onboardings this week yet</p>
         ) : (
           <div className="space-y-1">
             {leaderboard.map((entry, i) => (
               <div
                 key={entry.agent_id}
-                className={`flex items-center gap-4 px-4 py-3 rounded-xl ${i === 0 ? 'bg-success-light' : 'hover:bg-cream/50'} transition-colors`}
+                className="flex items-center gap-4 px-4 py-3 rounded-2xl transition-colors"
+                style={i === 0 ? { background: '#E8F5E9' } : {}}
               >
                 {/* Rank */}
-                <span className={`text-sm font-bold w-5 text-center flex-shrink-0 ${i === 0 ? 'text-success' : 'text-muted-brand'}`}>
+                <span
+                  className="text-sm font-bold w-5 text-center flex-shrink-0"
+                  style={{ color: i === 0 ? '#F9A825' : '#7a9a7c' }}
+                >
                   {i + 1}
                 </span>
 
                 {/* Avatar */}
-                <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${i === 0 ? 'border-success bg-success' : 'border-transparent bg-gradient-to-br from-brand to-success'}`}>
+                <div
+                  className="w-9 h-9 rounded-full border-2 border-white flex items-center justify-center flex-shrink-0"
+                  style={{
+                    background: i === 0
+                      ? 'linear-gradient(135deg, #1B5E20, #F9A825)'
+                      : 'linear-gradient(135deg, #1B5E20, #2E7D32)',
+                  }}
+                >
                   <span className="text-xs font-bold text-white">{initials(entry.full_name)}</span>
                 </div>
 
                 {/* Name + zone */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-ink truncate">{entry.full_name}</p>
-                  <p className="text-[11px] text-muted-brand">{entry.zone_name ?? 'No zone'}</p>
+                  <p className="text-sm font-semibold truncate" style={{ color: '#1a2e1b' }}>{entry.full_name}</p>
+                  <p className="text-[11px]" style={{ color: '#7a9a7c' }}>{entry.zone_name ?? 'No zone'}</p>
                 </div>
 
                 {/* Conversions */}
                 <div className="text-right flex-shrink-0">
-                  <p className="text-xs text-muted-brand">Conversions</p>
-                  <p className="text-sm font-bold text-success">{entry.conversions}</p>
+                  <p className="text-xs" style={{ color: '#7a9a7c' }}>Conversions</p>
+                  <p className="text-sm font-bold" style={{ color: '#1B5E20' }}>{entry.conversions}</p>
                 </div>
 
                 {/* Total */}
                 <div className="text-right flex-shrink-0 w-16">
-                  <p className="text-xs text-muted-brand">Onboardings</p>
-                  <p className="text-sm font-bold text-ink">{entry.total}</p>
+                  <p className="text-xs" style={{ color: '#7a9a7c' }}>Onboardings</p>
+                  <p className="text-sm font-bold" style={{ color: '#1a2e1b' }}>{entry.total}</p>
                 </div>
               </div>
             ))}

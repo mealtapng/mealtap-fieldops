@@ -54,7 +54,15 @@
 
   body {
     @apply text-foreground;
-    background-color: #F8F9FA; /* cream */
+    background-color: #fafdfb; /* off-white with green tint — matches powerchat.ng */
+    color: #1a2e1b;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Headings use Bricolage Grotesque — matches powerchat.ng */
+  h1, h2, h3 {
+    font-family: var(--font-bricolage), sans-serif;
+    line-height: 1.2;
   }
 
   .text-balance {

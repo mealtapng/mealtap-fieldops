@@ -50,16 +50,18 @@ export function AdminSidebar({ user }: Props) {
   return (
     <>
       {/* Fixed sidebar */}
-      <aside className="w-[220px] flex-shrink-0 bg-brand flex flex-col h-screen fixed left-0 top-0 z-40">
+      <aside
+        className="w-[220px] flex-shrink-0 flex flex-col h-screen fixed left-0 top-0 z-40"
+        style={{ background: 'linear-gradient(180deg, #0D1B0E 0%, #0a2e0c 100%)' }}
+      >
 
         {/* Logo */}
         <div className="px-5 pt-6 pb-5 border-b border-white/10">
-          <p className="text-lg font-bold leading-none">
+          <p className="text-xl font-display font-extrabold leading-none">
             <span className="text-white">Power</span>
-            <span className="text-success">Chat</span>
+            <span style={{ color: '#25D366' }}>Chat</span>
           </p>
-          <p className="text-white/60 text-xs mt-0.5">Field Ops</p>
-          <p className="text-white/40 text-[10px] tracking-widest uppercase mt-1">Admin Console</p>
+          <p className="text-white/40 text-[10px] tracking-widest uppercase mt-1.5">Admin Console</p>
         </div>
 
         {/* Nav items */}
@@ -74,9 +76,10 @@ export function AdminSidebar({ user }: Props) {
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
                   active
-                    ? 'bg-white/10 text-white font-semibold'
-                    : 'text-white/70 hover:bg-white/5 hover:text-white'
+                    ? 'text-white font-semibold'
+                    : 'text-white/60 hover:bg-white/5 hover:text-white'
                 }`}
+                style={active ? { background: 'rgba(249,168,37,0.15)', color: '#F9A825' } : {}}
               >
                 <span className="text-base leading-none">{item.icon}</span>
                 {item.label}
@@ -108,7 +111,7 @@ export function AdminSidebar({ user }: Props) {
         {user && (
           <div className="border-t border-white/10 p-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-success flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#1B5E20' }}>
                 <span className="text-xs font-bold text-white">{initials(user.full_name)}</span>
               </div>
               <div className="min-w-0 flex-1">

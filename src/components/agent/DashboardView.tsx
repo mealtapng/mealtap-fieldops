@@ -67,7 +67,7 @@ function ProgressRing({ todayCount }: { todayCount: number }) {
         cy={RING_SIZE / 2}
         r={RING_R}
         fill="none"
-        stroke="#34A853"
+        stroke="#25D366"
         strokeWidth={8}
         strokeLinecap="round"
         strokeDasharray={CIRCUMFERENCE}
@@ -109,7 +109,8 @@ function QualityBar({ score }: { score: number }) {
       {Array.from({ length: 5 }, (_, i) => (
         <div
           key={i}
-          className={`h-1.5 flex-1 rounded-full ${i < filled ? 'bg-brand' : 'bg-line'}`}
+          className="h-1.5 flex-1 rounded-full"
+          style={{ background: i < filled ? '#1B5E20' : '#d4e6d5' }}
         />
       ))}
     </div>
@@ -164,7 +165,7 @@ export function DashboardView({ user, stats, recent_onboardings }: DashboardProp
       <div className="max-w-md mx-auto flex flex-col min-h-screen">
 
         {/* ── Hero section ───────────────────────────────────────────────── */}
-        <div className="bg-brand-dark px-6 pt-8 pb-8 relative">
+        <div className="px-6 pt-8 pb-8 relative" style={{ background: 'linear-gradient(160deg, #0D1B0E 0%, #0a2e0c 100%)' }}>
 
           {/* Date + greeting row */}
           <div className="flex items-start justify-between">
@@ -184,7 +185,7 @@ export function DashboardView({ user, stats, recent_onboardings }: DashboardProp
 
             {/* Avatar */}
             <Link href="/profile" className="flex-shrink-0 mt-1">
-              <div className="w-11 h-11 rounded-full bg-success flex items-center justify-center shadow-md">
+              <div className="w-11 h-11 rounded-full flex items-center justify-center shadow-md" style={{ background: '#25D366' }}>
                 <span className="text-sm font-bold text-white">{initials}</span>
               </div>
             </Link>
@@ -212,7 +213,8 @@ export function DashboardView({ user, stats, recent_onboardings }: DashboardProp
           {/* CTA */}
           <Link
             href="/onboard"
-            className="block w-full bg-success hover:bg-success-dark active:bg-success-dark text-white font-bold text-base py-4 rounded-2xl text-center shadow-lg shadow-success/25 transition-colors"
+            className="block w-full text-white font-bold text-base py-4 rounded-full text-center transition-all"
+            style={{ background: '#25D366', boxShadow: '0 4px 20px rgba(37,211,102,0.35)' }}
           >
             + New Onboarding →
           </Link>
@@ -223,7 +225,7 @@ export function DashboardView({ user, stats, recent_onboardings }: DashboardProp
             <StatCard
               label="This week"
               sub={
-                <p className={`text-xs font-semibold ${weekDiff > 0 ? 'text-brand' : 'text-muted-brand'}`}>
+                <p className={`text-xs font-semibold ${weekDiff > 0 ? 'text-success' : 'text-muted-brand'}`}>
                   {weekDiff > 0 ? `↑${weekDiff}` : weekDiff < 0 ? `↓${Math.abs(weekDiff)}` : '—'} vs last week
                 </p>
               }

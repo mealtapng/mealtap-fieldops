@@ -17,7 +17,7 @@ interface Props {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  converted: 'bg-success-light text-success border border-success/30',
+  converted: 'bg-brand-light text-brand border border-brand/20',
   pending:   'bg-amber-50 text-amber-700 border border-amber-200',
   failed:    'bg-line text-muted-brand border border-line',
 }

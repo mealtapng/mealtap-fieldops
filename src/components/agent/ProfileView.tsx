@@ -101,7 +101,7 @@ function CopyButton({ value }: { value: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="text-xs font-semibold text-brand flex-shrink-0"
+      className="text-xs font-semibold flex-shrink-0" style={{ color: '#1B5E20' }}
     >
       {copied ? '✓ Copied' : 'Copy'}
     </button>
@@ -144,7 +144,10 @@ export function ProfileView({
       <div className="max-w-md mx-auto flex flex-col min-h-screen">
 
         {/* ── Hero ──────────────────────────────────────────────────────────── */}
-        <div className="bg-brand-dark rounded-b-[2.5rem] h-44 px-5 pt-12 flex-shrink-0 relative">
+        <div
+          className="rounded-b-[2.5rem] h-44 px-5 pt-12 flex-shrink-0 relative"
+          style={{ background: 'linear-gradient(160deg, #0D1B0E 0%, #0a2e0c 100%)' }}
+        >
           <div className="flex items-center justify-between">
             <Link
               href="/dashboard"
