@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -105,25 +106,33 @@ export default function LoginPage() {
       />
 
       <div className="relative w-full max-w-sm">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-1 mb-3">
-            <span className="text-4xl font-display font-extrabold text-white">Power</span>
-            <span className="text-4xl font-display font-extrabold" style={{ color: '#25D366' }}>Chat</span>
-          </div>
-          <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>
+        {/* Tagline above card */}
+        <div className="text-center mb-6">
+          <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>
             Field Operations Portal
           </p>
         </div>
 
         {/* Card */}
         <div
-          className="rounded-2xl px-8 py-10"
+          className="rounded-2xl px-8 pt-8 pb-10"
           style={{
             background: 'rgba(255,255,255,0.97)',
             boxShadow: '0 16px 48px rgba(27,94,32,0.25)',
           }}
         >
+          {/* Logo inside card */}
+          <div className="flex justify-center mb-6">
+            <Image
+              src="/Logo.PNG"
+              alt="PowerChat"
+              width={180}
+              height={60}
+              priority
+              className="object-contain"
+            />
+          </div>
+
           <h1
             className="text-xl font-display font-bold mb-1"
             style={{ color: '#1B5E20' }}

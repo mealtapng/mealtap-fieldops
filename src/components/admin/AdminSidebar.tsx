@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -56,12 +57,16 @@ export function AdminSidebar({ user }: Props) {
       >
 
         {/* Logo */}
-        <div className="px-5 pt-6 pb-5 border-b border-white/10">
-          <p className="text-xl font-display font-extrabold leading-none">
-            <span className="text-white">Power</span>
-            <span style={{ color: '#25D366' }}>Chat</span>
-          </p>
-          <p className="text-white/40 text-[10px] tracking-widest uppercase mt-1.5">Admin Console</p>
+        <div className="px-4 pt-5 pb-4 border-b border-white/10">
+          <Image
+            src="/Logo.PNG"
+            alt="PowerChat"
+            width={140}
+            height={46}
+            priority
+            className="object-contain rounded-lg"
+          />
+          <p className="text-white/40 text-[10px] tracking-widest uppercase mt-2">Admin Console</p>
         </div>
 
         {/* Nav items */}
