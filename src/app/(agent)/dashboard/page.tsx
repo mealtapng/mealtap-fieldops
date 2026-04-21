@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
 import { redirect } from 'next/navigation'
 import { DashboardView } from '@/components/agent/DashboardView'
 import type { User } from '@/lib/types/database'
@@ -44,11 +45,9 @@ export default async function DashboardPage() {
   const lastWeekISO = lastWeekStart.toISOString()
 
   // ── 1. Profile ────────────────────────────────────────────────────────────
-  const adminDb = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  )
+  const adminDb = createAdminClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
   const { data: profile } = await adminDb
     .from('users')
     .select('full_name, quality_score, assigned_zone_id, referral_code')
