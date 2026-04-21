@@ -1,8 +1,9 @@
 'use client'
 
-import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import logoSrc from '../../../../public/Logo.PNG'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -121,15 +122,15 @@ export default function LoginPage() {
             boxShadow: '0 16px 48px rgba(27,94,32,0.25)',
           }}
         >
-          {/* Logo inside card */}
-          <div className="flex justify-center mb-6">
+          {/* Logo */}
+          <div className="mb-4">
             <Image
-              src="/Logo.PNG"
+              src={logoSrc}
               alt="PowerChat"
-              width={180}
-              height={60}
-              priority
+              width={80}
+              height={80}
               className="object-contain"
+              priority
             />
           </div>
 

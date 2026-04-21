@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import logoSrc from '../../../public/Logo.PNG'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -59,12 +60,12 @@ export function AdminSidebar({ user }: Props) {
         {/* Logo */}
         <div className="px-4 pt-5 pb-4 border-b border-white/10">
           <Image
-            src="/Logo.PNG"
+            src={logoSrc}
             alt="PowerChat"
-            width={140}
-            height={46}
-            priority
+            width={80}
+            height={80}
             className="object-contain rounded-lg"
+            priority
           />
           <p className="text-white/40 text-[10px] tracking-widest uppercase mt-2">Admin Console</p>
         </div>

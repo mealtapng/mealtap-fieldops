@@ -53,7 +53,7 @@ export default function OnboardPage() {
         .from('users')
         .select('referral_code')
         .eq('id', user.id)
-        .single()
+        .single() as { data: { referral_code: string | null } | null; error: unknown }
       if (data?.referral_code) setReferralCode(data.referral_code)
     }
     fetchReferralCode()

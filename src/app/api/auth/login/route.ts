@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
 
   // Sign in using synthetic email + UUID as password.
   // The UUID is deterministic but never exposed to the client.
-  const authEmail = `${digits}@powerchat.internal`
+  const authEmail = `${digits}@mealtap.internal`
 
   const { error: signInError } = await serverClient.auth.signInWithPassword({
     email: authEmail,
