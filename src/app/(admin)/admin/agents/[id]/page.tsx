@@ -32,7 +32,7 @@ export default async function AgentDetailPage({ params }: { params: { id: string
   const [agentResult, onboardingsResult, zonesResult] = await Promise.all([
     (supabase as any)
       .from('users')
-      .select('id, full_name, employee_id, phone, role, assigned_zone_id, quality_score, is_active, created_at, passport_photo_url')
+      .select('id, full_name, employee_id, phone, role, assigned_zone_id, quality_score, is_active, created_at, passport_photo_url, email, date_of_birth, home_address, nin_last_4, next_of_kin_name, next_of_kin_phone, bank_name, bank_account_masked')
       .eq('id', params.id)
       .single(),
     (supabase as any)
@@ -132,6 +132,28 @@ export default async function AgentDetailPage({ params }: { params: { id: string
             <p className="text-xs text-muted-brand mt-1">Earnings</p>
           </div>
         </div>
+      </div>
+
+      {/* Profile details */}
+      <div className="bg-white rounded-2xl shadow-sm border border-line overflow-hidden mb-6">
+        <div className="px-6 py-4 border-b border-line">
+          <p className="font-bold text-ink">Profile details</p>
+        </div>
+        {[
+          { label: 'Email',        value: a.email               ?? '—' },
+          { label: 'Date of birth',value: a.date_of_birth       ? new Date(a.date_of_birth).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '—' },
+          { label: 'Home address', value: a.home_address        ?? '—' },
+          { label: 'NIN (last 4)', value: a.nin_last_4          ? `•••• •••• ${a.nin_last_4}` : '—' },
+          { label: 'Next of kin',  value: a.next_of_kin_name    ?? '—' },
+          { label: 'NoK phone',    value: a.next_of_kin_phone   ?? '—' },
+          { label: 'Bank',         value: a.bank_name           ?? '—' },
+          { label: 'Account',      value: a.bank_account_masked ?? '—' },
+        ].map(({ label, value }) => (
+          <div key={label} className="flex items-center justify-between gap-4 px-6 py-3 border-b border-line last:border-0">
+            <span className="text-xs font-semibold text-muted-brand uppercase tracking-wider w-32 flex-shrink-0">{label}</span>
+            <span className={`text-sm text-right ${value === '—' ? 'text-muted-brand' : 'text-ink'}`}>{value}</span>
+          </div>
+        ))}
       </div>
 
       {/* Recent onboardings */}
