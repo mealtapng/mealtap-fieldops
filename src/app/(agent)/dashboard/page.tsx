@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { DashboardView } from '@/components/agent/DashboardView'
 import type { User } from '@/lib/types/database'
@@ -43,13 +44,16 @@ export default async function DashboardPage() {
   const lastWeekISO = lastWeekStart.toISOString()
 
   // ── 1. Profile ────────────────────────────────────────────────────────────
-  const { data: profile, error: profileError } = await (supabase as any)
+  const adminDb = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+  const { data: profile } = await adminDb
     .from('users')
     .select('full_name, quality_score, assigned_zone_id, referral_code')
     .eq('id', user.id)
-    .single() as { data: ProfileRow | null; error: { message: string } | null }
-
-  if (profileError) console.error('[dashboard] profile fetch failed:', profileError.message, 'uid:', user.id)
+    .single() as { data: ProfileRow | null; error: unknown }
 
   // ── 2. Stats + recent onboardings (parallel) ─────────────────────────────
   const uid = user.id
