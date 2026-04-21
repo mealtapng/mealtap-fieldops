@@ -43,7 +43,7 @@ export default async function DashboardPage() {
   const lastWeekISO = lastWeekStart.toISOString()
 
   // ── 1. Profile ────────────────────────────────────────────────────────────
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile, error: profileError } = await (supabase as any)
     .from('users')
     .select('full_name, quality_score, assigned_zone_id, referral_code')
     .eq('id', user.id)
