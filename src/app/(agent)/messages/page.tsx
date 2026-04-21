@@ -44,7 +44,7 @@ export default async function MessagesPage() {
 
   // ── Wave 2: depends on wave 1 ─────────────────────────────────────────────
 
-  const [reactionsResult, unreadResult, supervisorsResult] = await Promise.all([
+  const [reactionsResult, unreadResult, contactsResult] = await Promise.all([
     postIds.length > 0
       ? (supabase as any).from('board_reactions').select('*').in('post_id', postIds)
       : Promise.resolve({ data: [] }),
@@ -58,19 +58,18 @@ export default async function MessagesPage() {
           .neq('sender_id', uid)
       : Promise.resolve({ data: [] }),
 
-    // Supervisor options for "Message your supervisor" button (agents with no threads)
-    threads.length === 0 && profile.role === 'agent'
-      ? (supabase as any)
-          .from('users')
-          .select('id, full_name, role')
-          .in('role', ['admin', 'field_lead'])
-          .limit(5)
-      : Promise.resolve({ data: [] }),
+    // All active users except self — for the "New Message" picker
+    (supabase as any)
+      .from('users')
+      .select('id, full_name, role')
+      .eq('is_active', true)
+      .neq('id', uid)
+      .order('full_name'),
   ])
 
-  const reactions  = reactionsResult.data  ?? []
-  const unreadRows = unreadResult.data      ?? []
-  const supervisors = supervisorsResult.data ?? []
+  const reactions  = reactionsResult.data ?? []
+  const unreadRows = unreadResult.data     ?? []
+  const contacts   = contactsResult.data   ?? []
 
   // Build unread count per thread
   const unreadCounts: Record<string, number> = {}
@@ -87,7 +86,7 @@ export default async function MessagesPage() {
           reactions={reactions}
           threads={threads}
           unreadCounts={unreadCounts}
-          supervisorOptions={supervisors}
+          contacts={contacts}
         />
         <BottomNav />
       </div>

@@ -6,72 +6,31 @@ import { createClient } from '@/lib/supabase/client'
 import { BoardPostCard } from './BoardPostCard'
 import { DMThreadItem } from './DMThreadItem'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface CurrentUser {
-  id:        string
-  role:      string
-  full_name: string
-}
-
-interface Author {
-  id:        string
-  full_name: string
-  role:      string
-}
-
-interface Post {
-  id:         string
-  body:       string
-  is_pinned:  boolean
-  post_type:  string
-  created_at: string
-  author:     Author | null
-}
-
-interface Reaction {
-  id:         string
-  post_id:    string
-  user_id:    string
-  emoji:      string
-  created_at: string
-}
-
-interface OtherUser {
-  id:        string
-  full_name: string
-  role:      string
-}
-
-interface Thread {
-  id:              string
-  agent_id:        string
-  supervisor_id:   string
-  created_at:      string
-  last_message_at: string | null
-  agent:           OtherUser
-  supervisor:      OtherUser
-}
-
-interface SupervisorOption {
-  id:        string
-  full_name: string
-  role:      string
-}
+interface CurrentUser { id: string; role: string; full_name: string }
+interface Author      { id: string; full_name: string; role: string }
+interface Post        { id: string; body: string; is_pinned: boolean; post_type: string; created_at: string; author: Author | null }
+interface Reaction    { id: string; post_id: string; user_id: string; emoji: string; created_at: string }
+interface OtherUser   { id: string; full_name: string; role: string }
+interface Thread      { id: string; agent_id: string; supervisor_id: string; created_at: string; last_message_at: string | null; agent: OtherUser; supervisor: OtherUser }
+interface Contact     { id: string; full_name: string; role: string }
 
 interface Props {
-  currentUser:      CurrentUser
-  posts:            Post[]
-  reactions:        Reaction[]
-  threads:          Thread[]
-  unreadCounts:     Record<string, number>
-  supervisorOptions: SupervisorOption[]
+  currentUser:  CurrentUser
+  posts:        Post[]
+  reactions:    Reaction[]
+  threads:      Thread[]
+  unreadCounts: Record<string, number>
+  contacts:     Contact[]
 }
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function initials(name: string) {
   return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
+}
+
+function roleLabel(role: string) {
+  if (role === 'admin')      return 'Admin'
+  if (role === 'field_lead') return 'Field Lead'
+  return 'Agent'
 }
 
 function isAdminOrLead(role: string) {
@@ -80,16 +39,14 @@ function isAdminOrLead(role: string) {
 
 // ── New Post Modal ────────────────────────────────────────────────────────────
 
-interface NewPostModalProps {
+function NewPostModal({ currentUserId, onClose, onPosted }: {
   currentUserId: string
-  onClose:       () => void
-  onPosted:      (post: Post) => void
-}
-
-function NewPostModal({ currentUserId, onClose, onPosted }: NewPostModalProps) {
-  const [body,     setBody]     = useState('')
+  onClose:  () => void
+  onPosted: (post: Post) => void
+}) {
+  const [body, setBody]         = useState('')
   const [isPinned, setIsPinned] = useState(false)
-  const [posting,  setPosting]  = useState(false)
+  const [posting, setPosting]   = useState(false)
 
   async function submit() {
     if (!body.trim() || posting) return
@@ -101,54 +58,30 @@ function NewPostModal({ currentUserId, onClose, onPosted }: NewPostModalProps) {
       .select('*, author:users!posted_by(id, full_name, role)')
       .single()
     setPosting(false)
-    if (!error && data) {
-      onPosted(data as Post)
-      onClose()
-    }
+    if (!error && data) { onPosted(data as Post); onClose() }
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50" onClick={onClose}>
-      <div
-        className="w-full max-w-md bg-white rounded-t-3xl p-5 pb-8"
-        onClick={e => e.stopPropagation()}
-      >
+      <div className="w-full max-w-md bg-white rounded-t-3xl p-5 pb-8" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <p className="text-base font-bold text-ink">New post</p>
           <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-full bg-cream text-muted-brand">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
-              <path d="M18 6L6 18M6 6l12 12"/>
-            </svg>
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
         </div>
-
         <textarea
-          autoFocus
-          value={body}
-          onChange={e => setBody(e.target.value)}
-          placeholder="Write your announcement…"
-          rows={4}
+          autoFocus value={body} onChange={e => setBody(e.target.value)}
+          placeholder="Write your announcement…" rows={4}
           className="w-full rounded-xl border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-brand/60 focus:outline-none focus:ring-2 focus:ring-success/30 focus:border-success resize-none"
         />
-
         <label className="flex items-center gap-2.5 mt-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={isPinned}
-            onChange={e => setIsPinned(e.target.checked)}
-            className="w-4 h-4 rounded accent-success"
-          />
+          <input type="checkbox" checked={isPinned} onChange={e => setIsPinned(e.target.checked)} className="w-4 h-4 rounded accent-success" />
           <span className="text-sm text-ink font-medium">📌 Pin this post</span>
         </label>
-
         <button
-          onClick={submit}
-          disabled={!body.trim() || posting}
-          className={`w-full mt-4 py-3.5 rounded-2xl font-bold text-sm transition-all ${
-            body.trim() && !posting
-              ? 'bg-success text-white shadow-lg shadow-success/25 active:bg-success-dark'
-              : 'bg-line text-muted-brand cursor-not-allowed'
-          }`}
+          onClick={submit} disabled={!body.trim() || posting}
+          className={`w-full mt-4 py-3.5 rounded-2xl font-bold text-sm transition-all ${body.trim() && !posting ? 'bg-success text-white shadow-lg shadow-success/25 active:bg-success-dark' : 'bg-line text-muted-brand cursor-not-allowed'}`}
         >
           {posting ? 'Posting…' : 'Post to Team Board'}
         </button>
@@ -157,22 +90,118 @@ function NewPostModal({ currentUserId, onClose, onPosted }: NewPostModalProps) {
   )
 }
 
+// ── New Message Modal ─────────────────────────────────────────────────────────
+
+function NewMessageModal({ contacts, onClose, onSelect, creating }: {
+  contacts: Contact[]
+  onClose:  () => void
+  onSelect: (contactId: string) => void
+  creating: boolean
+}) {
+  const [search, setSearch] = useState('')
+
+  const filtered = contacts.filter(c =>
+    c.full_name.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const adminsLeads = filtered.filter(c => c.role === 'admin' || c.role === 'field_lead')
+  const agents      = filtered.filter(c => c.role === 'agent')
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50" onClick={onClose}>
+      <div className="w-full max-w-md bg-white rounded-t-3xl flex flex-col" style={{ maxHeight: '80vh' }} onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
+          <p className="text-base font-bold text-ink">New message</p>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-full bg-cream text-muted-brand">
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="px-5 pb-3 flex-shrink-0">
+          <input
+            autoFocus type="text" value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Search name…"
+            className="w-full rounded-xl border border-line px-4 py-2.5 text-sm text-ink placeholder:text-muted-brand/60 focus:outline-none focus:ring-2 focus:ring-success/30 focus:border-success"
+          />
+        </div>
+
+        {/* Contact list */}
+        <div className="overflow-y-auto flex-1 pb-8">
+          {adminsLeads.length > 0 && (
+            <>
+              <p className="px-5 py-2 text-[10px] font-bold text-muted-brand uppercase tracking-wider">Supervisors</p>
+              {adminsLeads.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => onSelect(c.id)}
+                  disabled={creating}
+                  className="w-full flex items-center gap-3 px-5 py-3.5 active:bg-cream transition-colors disabled:opacity-60"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-success flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs font-bold text-white">{initials(c.full_name)}</span>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-ink">{c.full_name}</p>
+                    <p className="text-[11px] text-muted-brand">{roleLabel(c.role)}</p>
+                  </div>
+                  {creating ? (
+                    <div className="ml-auto w-4 h-4 border-2 border-success/30 border-t-success rounded-full animate-spin" />
+                  ) : (
+                    <svg className="w-4 h-4 text-muted-brand ml-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  )}
+                </button>
+              ))}
+            </>
+          )}
+
+          {agents.length > 0 && (
+            <>
+              <p className="px-5 py-2 text-[10px] font-bold text-muted-brand uppercase tracking-wider">Agents</p>
+              {agents.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => onSelect(c.id)}
+                  disabled={creating}
+                  className="w-full flex items-center gap-3 px-5 py-3.5 active:bg-cream transition-colors disabled:opacity-60"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-success flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs font-bold text-white">{initials(c.full_name)}</span>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-ink">{c.full_name}</p>
+                    <p className="text-[11px] text-muted-brand">Agent</p>
+                  </div>
+                  {creating ? (
+                    <div className="ml-auto w-4 h-4 border-2 border-success/30 border-t-success rounded-full animate-spin" />
+                  ) : (
+                    <svg className="w-4 h-4 text-muted-brand ml-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  )}
+                </button>
+              ))}
+            </>
+          )}
+
+          {filtered.length === 0 && (
+            <p className="px-5 py-8 text-sm text-muted-brand text-center">No users found.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function MessagesView({
-  currentUser,
-  posts: initialPosts,
-  reactions: initialReactions,
-  threads,
-  unreadCounts,
-  supervisorOptions,
-}: Props) {
+export function MessagesView({ currentUser, posts: initialPosts, reactions: initialReactions, threads, unreadCounts, contacts }: Props) {
   const router = useRouter()
-  const [activeTab,       setActiveTab]       = useState<'board' | 'direct'>('board')
-  const [posts,           setPosts]           = useState<Post[]>(initialPosts)
-  const [reactions,       setReactions]       = useState<Reaction[]>(initialReactions)
+  const [activeTab,        setActiveTab]        = useState<'board' | 'direct'>('board')
+  const [posts,            setPosts]            = useState<Post[]>(initialPosts)
+  const [reactions,        setReactions]        = useState<Reaction[]>(initialReactions)
   const [showNewPostModal, setShowNewPostModal] = useState(false)
-  const [creatingThread,  setCreatingThread]  = useState(false)
+  const [showNewMsgModal,  setShowNewMsgModal]  = useState(false)
+  const [creatingThread,   setCreatingThread]   = useState(false)
 
   const totalUnread = Object.values(unreadCounts).reduce((a, b) => a + b, 0)
 
@@ -181,46 +210,37 @@ export function MessagesView({
     const supabase = createClient()
     const channel = supabase
       .channel('board-posts-realtime')
-      .on(
-        'postgres_changes' as any,
-        { event: 'INSERT', schema: 'public', table: 'board_posts' },
-        async (payload: any) => {
-          // Payload lacks joined author — fetch full post
-          const { data } = await supabase
-            .from('board_posts' as any)
-            .select('*, author:users!posted_by(id, full_name, role)')
-            .eq('id', payload.new.id)
-            .single()
-          if (data) {
-            setPosts(prev => {
-              // Don't duplicate if already present
-              if (prev.find(p => p.id === (data as Post).id)) return prev
-              const newPost = data as Post
-              // Pinned posts go before other pinned posts (or at top if none)
-              if (newPost.is_pinned) return [newPost, ...prev]
-              const firstUnpinned = prev.findIndex(p => !p.is_pinned)
-              if (firstUnpinned === -1) return [...prev, newPost]
-              return [...prev.slice(0, firstUnpinned), newPost, ...prev.slice(firstUnpinned)]
-            })
-          }
+      .on('postgres_changes' as any, { event: 'INSERT', schema: 'public', table: 'board_posts' }, async (payload: any) => {
+        const { data } = await supabase
+          .from('board_posts' as any)
+          .select('*, author:users!posted_by(id, full_name, role)')
+          .eq('id', payload.new.id)
+          .single()
+        if (data) {
+          setPosts(prev => {
+            if (prev.find(p => p.id === (data as Post).id)) return prev
+            const newPost = data as Post
+            if (newPost.is_pinned) return [newPost, ...prev]
+            const firstUnpinned = prev.findIndex(p => !p.is_pinned)
+            if (firstUnpinned === -1) return [...prev, newPost]
+            return [...prev.slice(0, firstUnpinned), newPost, ...prev.slice(firstUnpinned)]
+          })
         }
-      )
+      })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [])
 
-  // ── Reactions change handler ────────────────────────────────────────────────
   function handleReactionsChange(postId: string, updated: Reaction[]) {
     setReactions(prev => [...prev.filter(r => r.post_id !== postId), ...updated])
   }
 
-  // ── Create DM thread ────────────────────────────────────────────────────────
-  async function handleCreateThread(supervisorId: string) {
+  async function handleSelectContact(contactId: string) {
     setCreatingThread(true)
     const res = await fetch('/api/messages/create-thread', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ supervisorId }),
+      body:    JSON.stringify({ supervisorId: contactId }),
     })
     const json = await res.json()
     setCreatingThread(false)
@@ -230,8 +250,19 @@ export function MessagesView({
   return (
     <>
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="px-4 pt-5 pb-2 flex-shrink-0">
+      <div className="px-4 pt-5 pb-2 flex-shrink-0 flex items-center justify-between">
         <h1 className="text-xl font-bold text-ink">Messages</h1>
+        {activeTab === 'direct' && (
+          <button
+            onClick={() => setShowNewMsgModal(true)}
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-success text-white shadow-md shadow-success/25 active:bg-success/90 transition-colors"
+            aria-label="New message"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* ── Tab bar ────────────────────────────────────────────────────────── */}
@@ -284,47 +315,14 @@ export function MessagesView({
         {activeTab === 'direct' && (
           <>
             {threads.length === 0 ? (
-              <div className="py-12 text-center space-y-4">
+              <div className="py-12 text-center space-y-3">
                 <p className="text-3xl">💬</p>
-                <div>
-                  <p className="text-sm font-semibold text-ink">No messages yet</p>
-                  <p className="text-xs text-muted-brand mt-1">
-                    {currentUser.role === 'agent'
-                      ? 'Start a conversation with your supervisor.'
-                      : 'No agent threads yet.'}
-                  </p>
-                </div>
-                {currentUser.role === 'agent' && supervisorOptions.length > 0 && (
-                  <div className="space-y-2 mt-4">
-                    {supervisorOptions.map(sup => (
-                      <button
-                        key={sup.id}
-                        onClick={() => handleCreateThread(sup.id)}
-                        disabled={creatingThread}
-                        className="w-full flex items-center gap-3 bg-white rounded-2xl border border-line px-4 py-3.5 active:bg-cream transition-colors disabled:opacity-60"
-                      >
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-success flex items-center justify-center flex-shrink-0">
-                          <span className="text-xs font-bold text-white">
-                            {initials(sup.full_name)}
-                          </span>
-                        </div>
-                        <div className="text-left">
-                          <p className="text-sm font-bold text-ink">{sup.full_name}</p>
-                          <p className="text-[11px] text-muted-brand">{sup.role === 'admin' ? 'Admin' : 'Field Lead'}</p>
-                        </div>
-                        <svg className="w-4 h-4 text-muted-brand ml-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <p className="text-sm font-semibold text-ink">No messages yet</p>
+                <p className="text-xs text-muted-brand">Tap the chat button above to start a conversation.</p>
               </div>
             ) : (
               threads.map(thread => {
-                const otherUser = thread.agent_id === currentUser.id
-                  ? thread.supervisor
-                  : thread.agent
+                const otherUser = thread.agent_id === currentUser.id ? thread.supervisor : thread.agent
                 return (
                   <DMThreadItem
                     key={thread.id}
@@ -343,7 +341,7 @@ export function MessagesView({
       {isAdminOrLead(currentUser.role) && activeTab === 'board' && (
         <button
           onClick={() => setShowNewPostModal(true)}
-          className="fixed bottom-20 right-4 w-13 h-13 w-14 h-14 bg-success text-white rounded-full shadow-lg shadow-success/30 flex items-center justify-center active:bg-success-dark transition-colors z-30"
+          className="fixed bottom-20 right-4 w-14 h-14 bg-success text-white rounded-full shadow-lg shadow-success/30 flex items-center justify-center active:bg-success-dark transition-colors z-30"
           aria-label="New post"
         >
           <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
@@ -352,22 +350,28 @@ export function MessagesView({
         </button>
       )}
 
-      {/* ── New post modal ──────────────────────────────────────────────────── */}
+      {/* ── Modals ──────────────────────────────────────────────────────────── */}
       {showNewPostModal && (
         <NewPostModal
           currentUserId={currentUser.id}
           onClose={() => setShowNewPostModal(false)}
           onPosted={post => {
-            setPosts(prev =>
-              post.is_pinned
-                ? [post, ...prev]
-                : (() => {
-                    const first = prev.findIndex(p => !p.is_pinned)
-                    if (first === -1) return [...prev, post]
-                    return [...prev.slice(0, first), post, ...prev.slice(first)]
-                  })()
-            )
+            setPosts(prev => {
+              if (post.is_pinned) return [post, ...prev]
+              const first = prev.findIndex(p => !p.is_pinned)
+              if (first === -1) return [...prev, post]
+              return [...prev.slice(0, first), post, ...prev.slice(first)]
+            })
           }}
+        />
+      )}
+
+      {showNewMsgModal && (
+        <NewMessageModal
+          contacts={contacts}
+          onClose={() => setShowNewMsgModal(false)}
+          onSelect={handleSelectContact}
+          creating={creatingThread}
         />
       )}
     </>

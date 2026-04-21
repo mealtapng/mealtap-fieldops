@@ -1,45 +1,38 @@
+import 'server-only'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
 import { NextRequest, NextResponse } from 'next/server'
 
-/**
- * POST /api/messages/create-thread
- * Body: { supervisorId: string }
- * Creates a DM thread between the current user (agent) and the given supervisor.
- * Returns: { threadId: string }
- */
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  let supervisorId: string
-  try {
-    const body = await request.json()
-    supervisorId = typeof body.supervisorId === 'string' ? body.supervisorId.trim() : ''
-  } catch {
+  let body: { supervisorId?: unknown }
+  try { body = await request.json() } catch {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
   }
 
-  if (!supervisorId) {
-    return NextResponse.json({ error: 'supervisorId is required' }, { status: 400 })
-  }
+  const otherId = typeof body.supervisorId === 'string' ? body.supervisorId.trim() : ''
+  if (!otherId) return NextResponse.json({ error: 'supervisorId is required' }, { status: 400 })
 
-  // Check if thread already exists (unique constraint on agent_id + supervisor_id)
-  const { data: existing } = await (supabase as any)
+  const admin = createAdminClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+
+  // Check for existing thread in either direction
+  const { data: existing } = await (admin as any)
     .from('dm_threads')
     .select('id')
-    .eq('agent_id', user.id)
-    .eq('supervisor_id', supervisorId)
+    .or(`and(agent_id.eq.${user.id},supervisor_id.eq.${otherId}),and(agent_id.eq.${otherId},supervisor_id.eq.${user.id})`)
     .maybeSingle()
 
-  if (existing) {
-    return NextResponse.json({ threadId: existing.id })
-  }
+  if (existing) return NextResponse.json({ threadId: existing.id })
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await (admin as any)
     .from('dm_threads')
-    .insert({ agent_id: user.id, supervisor_id: supervisorId })
+    .insert({ agent_id: user.id, supervisor_id: otherId })
     .select('id')
     .single()
 
