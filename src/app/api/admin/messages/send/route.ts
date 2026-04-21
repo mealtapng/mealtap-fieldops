@@ -31,15 +31,17 @@ export async function POST(request: NextRequest) {
 
   const now = new Date().toISOString()
 
+  const insertRow: Record<string, unknown> = {
+    thread_id: threadId,
+    sender_id: user.id,
+    body:      message,
+  }
+  if (attachmentUrl)  insertRow.attachment_url  = attachmentUrl
+  if (attachmentName) insertRow.attachment_name = attachmentName
+
   const { data: inserted, error: msgError } = await (admin as any)
     .from('dm_messages')
-    .insert({
-      thread_id:       threadId,
-      sender_id:       user.id,
-      body:            message,
-      attachment_url:  attachmentUrl  ?? null,
-      attachment_name: attachmentName ?? null,
-    })
+    .insert(insertRow)
     .select('*')
     .single()
 
