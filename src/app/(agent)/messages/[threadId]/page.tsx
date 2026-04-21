@@ -131,6 +131,30 @@ export default function ThreadPage() {
     return () => { supabase.removeChannel(channel) }
   }, [threadId, currentUserId])
 
+  // ── Polling fallback (catches messages when Realtime WebSocket drops) ───────
+  useEffect(() => {
+    if (!currentUserId) return
+    const supabase = supabaseRef.current
+
+    const interval = setInterval(async () => {
+      const { data: msgs } = await supabase
+        .from('dm_messages' as any)
+        .select('*')
+        .eq('thread_id', threadId)
+        .order('sent_at', { ascending: true })
+
+      if (msgs) {
+        setMessages(prev => {
+          const existingIds = new Set(prev.map((m: Message) => m.id))
+          const newMsgs = (msgs as Message[]).filter(m => !existingIds.has(m.id))
+          return newMsgs.length > 0 ? [...prev, ...newMsgs] : prev
+        })
+      }
+    }, 4000)
+
+    return () => clearInterval(interval)
+  }, [threadId, currentUserId])
+
   // ── Auto-scroll to bottom ────────────────────────────────────────────────────
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
