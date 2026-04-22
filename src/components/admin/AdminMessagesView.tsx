@@ -55,13 +55,11 @@ function roleLabel(role: string) {
 // ── New Broadcast Modal ───────────────────────────────────────────────────────
 
 function BroadcastModal({
-  currentUserId,
   onClose,
   onPosted,
 }: {
-  currentUserId: string
-  onClose:       () => void
-  onPosted:      (post: Post) => void
+  onClose:  () => void
+  onPosted: (post: Post) => void
 }) {
   const [body,     setBody]     = useState('')
   const [isPinned, setIsPinned] = useState(false)
@@ -72,15 +70,15 @@ function BroadcastModal({
     if (!body.trim() || posting) return
     setPosting(true)
     setError(null)
-    const supabase = createClient()
-    const { data, error: err } = await (supabase as any)
-      .from('board_posts')
-      .insert({ posted_by: currentUserId, body: body.trim(), is_pinned: isPinned, post_type: 'announcement' })
-      .select('*, author:users!posted_by(id, full_name, role)')
-      .single()
+    const res = await fetch('/api/admin/messages/broadcast', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ body: body.trim(), isPinned }),
+    })
+    const json = await res.json()
     setPosting(false)
-    if (err) { setError('Failed to post. Try again.'); return }
-    onPosted(data as Post)
+    if (!res.ok) { setError(json.error ?? 'Failed to post. Try again.'); return }
+    onPosted(json.post as Post)
     onClose()
   }
 
@@ -114,7 +112,7 @@ function BroadcastModal({
           <span className="text-sm text-ink font-medium">📌 Pin this post</span>
         </label>
 
-        {error && <p className="text-sm text-success mt-3">{error}</p>}
+        {error && <p className="text-sm text-red-500 mt-3">{error}</p>}
 
         <div className="flex gap-3 mt-5">
           <button
@@ -431,7 +429,6 @@ export function AdminMessagesView({
       {/* Modals */}
       {showBroadcast && (
         <BroadcastModal
-          currentUserId={currentUser.id}
           onClose={() => setShowBroadcast(false)}
           onPosted={post => {
             setPosts(prev => post.is_pinned
