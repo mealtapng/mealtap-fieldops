@@ -31,8 +31,9 @@ export default function AdminThreadPage() {
   const { threadId } = useParams<{ threadId: string }>()
   const router       = useRouter()
 
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-  const [otherUser,     setOtherUser]     = useState<OtherUser | null>(null)
+  const [currentUserId,   setCurrentUserId]   = useState<string | null>(null)
+  const [otherUser,       setOtherUser]       = useState<OtherUser | null>(null)
+  const [participantMap,  setParticipantMap]  = useState<Record<string, string>>({}) // sender_id → initials
   const [messages,      setMessages]      = useState<Message[]>([])
   const [input,         setInput]         = useState('')
   const [sending,       setSending]       = useState(false)
@@ -62,6 +63,12 @@ export default function AdminThreadPage() {
 
       const other = thread.supervisor_id === user.id ? thread.agent : thread.supervisor
       setOtherUser(other)
+
+      // Build initials map for both participants (used when admin observes agent-to-agent)
+      const pMap: Record<string, string> = {}
+      if (thread.agent)      pMap[thread.agent_id]      = initials(thread.agent.full_name)
+      if (thread.supervisor) pMap[thread.supervisor_id] = initials(thread.supervisor.full_name)
+      setParticipantMap(pMap)
       setMessages(data.messages ?? [])
       setLoading(false)
 
@@ -211,6 +218,7 @@ export default function AdminThreadPage() {
               sentAt={msg.sent_at}
               isMine={msg.sender_id === currentUserId}
               otherInitials={otherUser ? initials(otherUser.full_name) : '?'}
+              senderInitials={participantMap[msg.sender_id]}
               attachmentUrl={msg.attachment_url}
               attachmentName={msg.attachment_name}
             />

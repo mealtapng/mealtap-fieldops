@@ -3,12 +3,13 @@
 import { timeAgo } from '@/lib/format'
 
 interface Props {
-  body:            string
-  sentAt:          string
-  isMine:          boolean
-  otherInitials:   string
-  attachmentUrl?:  string | null
-  attachmentName?: string | null
+  body:             string
+  sentAt:           string
+  isMine:           boolean
+  otherInitials:    string
+  senderInitials?:  string  // overrides otherInitials when provided (e.g. admin viewing agent-to-agent)
+  attachmentUrl?:   string | null
+  attachmentName?:  string | null
 }
 
 function Initials({ text }: { text: string }) {
@@ -60,7 +61,8 @@ function AttachmentBlock({ url, name, isMine }: { url: string; name: string; isM
   )
 }
 
-export function ChatBubble({ body, sentAt, isMine, otherInitials, attachmentUrl, attachmentName }: Props) {
+export function ChatBubble({ body, sentAt, isMine, otherInitials, senderInitials, attachmentUrl, attachmentName }: Props) {
+  const avatarText = senderInitials ?? otherInitials
   if (isMine) {
     return (
       <div className="flex justify-end mb-2">
@@ -81,7 +83,7 @@ export function ChatBubble({ body, sentAt, isMine, otherInitials, attachmentUrl,
 
   return (
     <div className="flex items-end gap-2 mb-2">
-      <Initials text={otherInitials} />
+      <Initials text={avatarText} />
       <div className="max-w-[80%]">
         <div className="bg-white text-ink px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm leading-relaxed shadow-sm">
           {body}
