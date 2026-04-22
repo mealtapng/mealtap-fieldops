@@ -27,9 +27,12 @@ export async function POST(request: NextRequest) {
     auth: { autoRefreshToken: false, persistSession: false },
   })
 
+  // title is NOT NULL in the original schema — derive it from the first line
+  const title = text.split('\n')[0].slice(0, 120)
+
   const { data: post, error } = await (admin as any)
     .from('board_posts')
-    .insert({ posted_by: user.id, body: text, is_pinned: isPinned, post_type: 'announcement' })
+    .insert({ posted_by: user.id, title, body: text, is_pinned: isPinned, post_type: 'announcement' })
     .select('*, author:users!posted_by(id, full_name, role)')
     .single()
 
