@@ -44,7 +44,7 @@ function AttachmentBlock({ url, name, isMine }: { url: string; name: string; isM
       target="_blank"
       rel="noopener noreferrer"
       className={`mt-1 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-opacity hover:opacity-80 ${
-        isMine ? 'bg-white/15 text-white' : 'bg-cream border border-line text-ink'
+        isMine ? 'bg-white/15 text-white' : 'bg-white/60 border border-green-200 text-ink'
       }`}
     >
       <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -85,7 +85,7 @@ export function ChatBubble({ body, sentAt, isMine, otherInitials, senderInitials
     <div className="flex items-end gap-2 mb-2">
       <Initials text={avatarText} />
       <div className="max-w-[80%]">
-        <div className="bg-white text-ink px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm leading-relaxed shadow-sm">
+        <div className="text-ink px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm leading-relaxed shadow-sm" style={{ background: '#DCFCE7', border: '1px solid #BBF7D0' }}>
           {body}
           {attachmentUrl && attachmentName && (
             <AttachmentBlock url={attachmentUrl} name={attachmentName} isMine={false} />

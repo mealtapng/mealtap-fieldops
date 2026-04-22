@@ -274,6 +274,18 @@ export function AdminMessagesView({
     return () => { supabase.removeChannel(channel) }
   }, [currentUser.id])
 
+  // ── Poll unread counts every 30 s to stay in sync ───────────────────────────
+  useEffect(() => {
+    async function syncCounts() {
+      const res = await fetch('/api/admin/messages/unread-counts')
+      if (!res.ok) return
+      const { counts } = await res.json()
+      setUnreadCounts(counts ?? {})
+    }
+    const id = setInterval(syncCounts, 30_000)
+    return () => clearInterval(id)
+  }, [])
+
   // ── Reactions handler ───────────────────────────────────────────────────────
   function handleReactionsChange(postId: string, updated: Reaction[]) {
     setReactions(prev => [...prev.filter(r => r.post_id !== postId), ...updated])
@@ -423,7 +435,10 @@ export function AdminMessagesView({
               return (
                 <button
                   key={thread.id}
-                  onClick={() => router.push(`/admin/messages/${thread.id}`)}
+                  onClick={() => {
+                    setUnreadCounts(prev => ({ ...prev, [thread.id]: 0 }))
+                    router.push(`/admin/messages/${thread.id}`)
+                  }}
                   className="w-full flex items-center gap-3 bg-white rounded-2xl shadow-sm border border-line px-4 py-3.5 hover:bg-cream/40 transition-colors text-left"
                 >
                   <div className="relative flex-shrink-0">
@@ -474,7 +489,10 @@ export function AdminMessagesView({
               return (
                 <button
                   key={thread.id}
-                  onClick={() => router.push(`/admin/messages/${thread.id}`)}
+                  onClick={() => {
+                    setUnreadCounts(prev => ({ ...prev, [thread.id]: 0 }))
+                    router.push(`/admin/messages/${thread.id}`)
+                  }}
                   className="w-full flex items-center gap-3 bg-white rounded-2xl shadow-sm border border-red-100 px-4 py-3.5 hover:bg-red-50/50 transition-colors text-left"
                 >
                   {/* Double avatar */}

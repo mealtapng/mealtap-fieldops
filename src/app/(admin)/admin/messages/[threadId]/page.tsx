@@ -204,7 +204,7 @@ export default function AdminThreadPage() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 bg-cream/40">
+      <div className="flex-1 overflow-y-auto px-6 py-4" style={{ background: '#E8F5E9' }}>
         <div className="max-w-2xl mx-auto space-y-0.5">
           {messages.length === 0 && (
             <div className="flex items-center justify-center py-20">
