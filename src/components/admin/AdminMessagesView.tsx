@@ -274,7 +274,7 @@ export function AdminMessagesView({
     return () => { supabase.removeChannel(channel) }
   }, [currentUser.id])
 
-  // ── Poll unread counts every 30 s to stay in sync ───────────────────────────
+  // ── Sync unread counts on mount + every 30 s ────────────────────────────────
   useEffect(() => {
     async function syncCounts() {
       const res = await fetch('/api/admin/messages/unread-counts')
@@ -282,6 +282,7 @@ export function AdminMessagesView({
       const { counts } = await res.json()
       setUnreadCounts(counts ?? {})
     }
+    syncCounts() // immediate on every mount (catches stale router-cache data)
     const id = setInterval(syncCounts, 30_000)
     return () => clearInterval(id)
   }, [])
