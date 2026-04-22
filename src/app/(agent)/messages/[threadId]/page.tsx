@@ -167,14 +167,14 @@ export default function ThreadPage() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#E8F5E9' }}>
+      <div className="flex items-center justify-center" style={{ height: '100dvh', background: '#E8F5E9' }}>
         <div className="w-6 h-6 border-2 border-success/30 border-t-success rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ background: '#E8F5E9' }}>
+    <div className="flex flex-col w-full overflow-hidden" style={{ height: '100dvh', background: '#E8F5E9' }}>
 
       {/* ── Header ───────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 px-4 pt-12 pb-3 bg-white border-b border-line flex-shrink-0">
@@ -203,7 +203,7 @@ export default function ThreadPage() {
       </div>
 
       {/* ── Message list ─────────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-3">
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full py-20">
             <p className="text-sm text-muted-brand text-center">No messages yet. Say hello!</p>
@@ -224,7 +224,7 @@ export default function ThreadPage() {
       </div>
 
       {/* ── Input bar ────────────────────────────────────────────────────── */}
-      <div className="flex-shrink-0 border-t border-line bg-white px-3 py-3 flex items-end gap-2 pb-safe">
+      <div className="flex-shrink-0 border-t border-line bg-white px-4 py-3 flex items-end gap-2">
 
         <input
           ref={fileRef}

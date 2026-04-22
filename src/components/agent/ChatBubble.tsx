@@ -65,8 +65,8 @@ export function ChatBubble({ body, sentAt, isMine, otherInitials, senderInitials
   const avatarText = senderInitials ?? otherInitials
   if (isMine) {
     return (
-      <div className="flex justify-end mb-2 pl-10">
-        <div className="max-w-[75%] min-w-0">
+      <div className="flex justify-end mb-2">
+        <div className="max-w-[78%] min-w-0">
           <div className="text-white px-4 py-2.5 rounded-2xl rounded-tr-sm text-sm leading-relaxed break-words" style={{ background: '#1B5E20' }}>
             {body}
             {attachmentUrl && attachmentName && (
@@ -82,9 +82,9 @@ export function ChatBubble({ body, sentAt, isMine, otherInitials, senderInitials
   }
 
   return (
-    <div className="flex items-end gap-2 mb-2 pr-10">
+    <div className="flex items-end gap-2 mb-2">
       <Initials text={avatarText} />
-      <div className="max-w-[75%] min-w-0">
+      <div className="max-w-[78%] min-w-0">
         <div className="text-ink px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm leading-relaxed shadow-sm break-words" style={{ background: '#DCFCE7', border: '1px solid #BBF7D0' }}>
           {body}
           {attachmentUrl && attachmentName && (
