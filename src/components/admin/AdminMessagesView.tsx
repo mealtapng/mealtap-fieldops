@@ -209,7 +209,7 @@ export function AdminMessagesView({
 }: Props) {
   const router = useRouter()
 
-  const [activeTab,         setActiveTab]         = useState<'board' | 'direct'>('board')
+  const [activeTab,         setActiveTab]         = useState<'board' | 'direct' | 'agent-chats'>('board')
   const [posts,             setPosts]             = useState<Post[]>(initialPosts)
   const [reactions,         setReactions]         = useState<Reaction[]>(initialReactions)
   const [threads]                                  = useState<Thread[]>(initialThreads)
@@ -219,7 +219,16 @@ export function AdminMessagesView({
   const [startingThread,    setStartingThread]    = useState(false)
   const [deletingPostId,    setDeletingPostId]    = useState<string | null>(null)
 
-  const totalUnread = Object.values(unreadCounts).reduce((a, b) => a + b, 0)
+  // Split threads: agent-to-agent vs admin/lead↔agent
+  const agentToAgentThreads = threads.filter(t =>
+    t.agent.role === 'agent' && t.supervisor.role === 'agent'
+  )
+  const directThreads = threads.filter(t =>
+    t.agent.role !== 'agent' || t.supervisor.role !== 'agent'
+  )
+
+  const directUnread     = directThreads.reduce((s, t) => s + (unreadCounts[t.id] ?? 0), 0)
+  const agentChatsUnread = agentToAgentThreads.reduce((s, t) => s + (unreadCounts[t.id] ?? 0), 0)
 
   // ── Board Realtime ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -320,28 +329,49 @@ export function AdminMessagesView({
             </button>
           )}
         </div>
+
       </div>
 
       {/* Tab bar */}
       <div className="flex gap-1 px-6 pt-4 flex-shrink-0">
-        {(['board', 'direct'] as const).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5 ${
-              activeTab === tab
-                ? 'bg-white shadow-sm border border-line text-ink'
-                : 'text-muted-brand hover:text-ink'
-            }`}
-          >
-            {tab === 'board' ? '📢 Team Board' : '💬 Direct'}
-            {tab === 'direct' && totalUnread > 0 && (
-              <span className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
-                {totalUnread > 9 ? '9+' : totalUnread}
-              </span>
-            )}
-          </button>
-        ))}
+        <button
+          onClick={() => setActiveTab('board')}
+          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+            activeTab === 'board' ? 'bg-white shadow-sm border border-line text-ink' : 'text-muted-brand hover:text-ink'
+          }`}
+        >
+          📢 Team Board
+        </button>
+        <button
+          onClick={() => setActiveTab('direct')}
+          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+            activeTab === 'direct' ? 'bg-white shadow-sm border border-line text-ink' : 'text-muted-brand hover:text-ink'
+          }`}
+        >
+          💬 Direct
+          {directUnread > 0 && (
+            <span className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+              {directUnread > 9 ? '9+' : directUnread}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab('agent-chats')}
+          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+            activeTab === 'agent-chats'
+              ? 'bg-red-500 text-white shadow-sm'
+              : 'bg-red-50 text-red-500 hover:bg-red-100'
+          }`}
+        >
+          🔴 Agent Chats
+          {agentChatsUnread > 0 && (
+            <span className={`w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center ${
+              activeTab === 'agent-chats' ? 'bg-white text-red-500' : 'bg-red-500 text-white'
+            }`}>
+              {agentChatsUnread > 9 ? '9+' : agentChatsUnread}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Content */}
@@ -380,17 +410,16 @@ export function AdminMessagesView({
         {/* ── Direct ────────────────────────────────────────────────────────── */}
         {activeTab === 'direct' && (
           <div className="max-w-xl space-y-2">
-            {threads.length === 0 ? (
+            {directThreads.length === 0 ? (
               <div className="bg-white rounded-2xl border border-line p-12 text-center">
                 <p className="text-3xl mb-3">💬</p>
                 <p className="text-sm font-semibold text-ink">No threads yet</p>
                 <p className="text-xs text-muted-brand mt-1">Click &quot;+ New Message&quot; to start a conversation.</p>
               </div>
-            ) : threads.map(thread => {
+            ) : directThreads.map(thread => {
               const otherUser = thread.supervisor_id === currentUser.id ? thread.agent : thread.supervisor
               const unread    = unreadCounts[thread.id] ?? 0
               const timestamp = thread.last_message_at ?? thread.created_at
-
               return (
                 <button
                   key={thread.id}
@@ -405,13 +434,67 @@ export function AdminMessagesView({
                       <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white" />
                     )}
                   </div>
-
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-bold text-ink truncate">{otherUser.full_name}</p>
                       <p className="text-[11px] text-muted-brand flex-shrink-0">{timeAgo(timestamp)}</p>
                     </div>
                     <p className="text-[11px] text-muted-brand">{roleLabel(otherUser.role)}</p>
+                  </div>
+                  {unread > 0 && (
+                    <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                      <span className="text-[9px] font-bold text-white">{unread > 9 ? '9+' : unread}</span>
+                    </div>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {/* ── Agent Chats ───────────────────────────────────────────────────── */}
+        {activeTab === 'agent-chats' && (
+          <div className="max-w-xl space-y-2">
+            <div className="flex items-center gap-2 mb-4 p-3 bg-red-50 rounded-xl border border-red-100">
+              <span className="text-red-500 text-lg">🔴</span>
+              <p className="text-xs text-red-600 font-medium">
+                Private conversations between agents — visible only to admins.
+              </p>
+            </div>
+
+            {agentToAgentThreads.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-line p-12 text-center">
+                <p className="text-3xl mb-3">🔴</p>
+                <p className="text-sm font-semibold text-ink">No agent-to-agent chats yet</p>
+                <p className="text-xs text-muted-brand mt-1">When agents message each other, threads appear here.</p>
+              </div>
+            ) : agentToAgentThreads.map(thread => {
+              const unread    = unreadCounts[thread.id] ?? 0
+              const timestamp = thread.last_message_at ?? thread.created_at
+              return (
+                <button
+                  key={thread.id}
+                  onClick={() => router.push(`/admin/messages/${thread.id}`)}
+                  className="w-full flex items-center gap-3 bg-white rounded-2xl shadow-sm border border-red-100 px-4 py-3.5 hover:bg-red-50/50 transition-colors text-left"
+                >
+                  {/* Double avatar */}
+                  <div className="relative flex-shrink-0 w-11 h-11">
+                    <div className="absolute top-0 left-0 w-8 h-8 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center border-2 border-white z-10">
+                      <span className="text-[10px] font-bold text-white">{initials(thread.agent.full_name)}</span>
+                    </div>
+                    <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center border-2 border-white">
+                      <span className="text-[10px] font-bold text-white">{initials(thread.supervisor.full_name)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-bold text-ink truncate">
+                        {thread.agent.full_name} ↔ {thread.supervisor.full_name}
+                      </p>
+                      <p className="text-[11px] text-muted-brand flex-shrink-0">{timeAgo(timestamp)}</p>
+                    </div>
+                    <p className="text-[11px] text-red-400 font-medium">Private messages between agents</p>
                   </div>
 
                   {unread > 0 && (
