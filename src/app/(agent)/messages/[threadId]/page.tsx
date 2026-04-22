@@ -167,127 +167,124 @@ export default function ThreadPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
+      <div className="fixed inset-0 flex items-center justify-center" style={{ background: '#E8F5E9' }}>
         <div className="w-6 h-6 border-2 border-success/30 border-t-success rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#E8F5E9' }}>
-      <div className="max-w-md mx-auto w-full flex flex-col min-h-screen">
+    <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ background: '#E8F5E9' }}>
 
-        {/* ── Header ─────────────────────────────────────────────────────── */}
-        <div className="flex items-center gap-3 px-4 pt-12 pb-3 bg-white border-b border-line flex-shrink-0">
-          <Link
-            href="/messages"
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-line text-muted-brand active:bg-cream"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 5l-7 7 7 7"/>
-            </svg>
-          </Link>
+      {/* ── Header ───────────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-3 px-4 pt-12 pb-3 bg-white border-b border-line flex-shrink-0">
+        <Link
+          href="/messages"
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-line text-muted-brand active:bg-cream flex-shrink-0"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+        </Link>
 
-          {otherUser && (
-            <>
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand to-success flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-bold text-white">{initials(otherUser.full_name)}</span>
-              </div>
-              <div>
-                <p className="text-sm font-bold text-ink leading-tight">{otherUser.full_name}</p>
-                <p className="text-[11px] text-muted-brand">
-                  {otherUser.role === 'admin' ? 'Admin' : otherUser.role === 'field_lead' ? 'Field Lead' : 'Agent'}
-                </p>
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* ── Message list ────────────────────────────────────────────────── */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-0.5" style={{ background: '#E8F5E9' }}>
-          {messages.length === 0 && (
-            <div className="flex items-center justify-center h-full py-20">
-              <p className="text-sm text-muted-brand text-center">
-                No messages yet. Say hello!
+        {otherUser && (
+          <>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand to-success flex items-center justify-center flex-shrink-0">
+              <span className="text-xs font-bold text-white">{initials(otherUser.full_name)}</span>
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-ink leading-tight truncate">{otherUser.full_name}</p>
+              <p className="text-[11px] text-muted-brand">
+                {otherUser.role === 'admin' ? 'Admin' : otherUser.role === 'field_lead' ? 'Field Lead' : 'Agent'}
               </p>
             </div>
-          )}
-          {messages.map(msg => (
-            <ChatBubble
-              key={msg.id}
-              body={msg.body}
-              sentAt={msg.sent_at}
-              isMine={msg.sender_id === currentUserId}
-              otherInitials={otherUser ? initials(otherUser.full_name) : '?'}
-              attachmentUrl={msg.attachment_url}
-              attachmentName={msg.attachment_name}
-            />
-          ))}
-          <div ref={bottomRef} />
-        </div>
-
-        {/* ── Input bar ───────────────────────────────────────────────────── */}
-        <div className="flex-shrink-0 border-t border-line bg-white px-4 py-3 flex items-end gap-2">
-
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*,.pdf"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-
-          <button
-            onClick={() => fileRef.current?.click()}
-            disabled={sending || uploadingFile}
-            title="Attach image or PDF"
-            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-muted-brand hover:text-ink hover:bg-white active:bg-cream transition-colors disabled:opacity-40"
-          >
-            {uploadingFile ? (
-              <div className="w-4 h-4 border-2 border-success/30 border-t-success rounded-full animate-spin" />
-            ) : (
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-              </svg>
-            )}
-          </button>
-
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value.slice(0, 1000))}
-            onKeyDown={handleKeyDown}
-            placeholder="Type a message…"
-            rows={1}
-            style={{ resize: 'none' }}
-            className="flex-1 rounded-2xl border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-brand/60 focus:outline-none focus:ring-2 focus:ring-success/30 focus:border-success bg-white overflow-hidden"
-            onInput={e => {
-              const el = e.currentTarget
-              el.style.height = 'auto'
-              el.style.height = Math.min(el.scrollHeight, 120) + 'px'
-            }}
-          />
-          <button
-            onClick={() => send()}
-            disabled={!input.trim() || sending}
-            className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
-              input.trim() && !sending
-                ? 'bg-success text-white shadow-md shadow-success/25 active:bg-success-dark'
-                : 'bg-line text-muted-brand'
-            }`}
-          >
-            {sending ? (
-              <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-            ) : (
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"/>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-              </svg>
-            )}
-          </button>
-        </div>
-
+          </>
+        )}
       </div>
+
+      {/* ── Message list ─────────────────────────────────────────────────── */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4">
+        {messages.length === 0 && (
+          <div className="flex items-center justify-center h-full py-20">
+            <p className="text-sm text-muted-brand text-center">No messages yet. Say hello!</p>
+          </div>
+        )}
+        {messages.map(msg => (
+          <ChatBubble
+            key={msg.id}
+            body={msg.body}
+            sentAt={msg.sent_at}
+            isMine={msg.sender_id === currentUserId}
+            otherInitials={otherUser ? initials(otherUser.full_name) : '?'}
+            attachmentUrl={msg.attachment_url}
+            attachmentName={msg.attachment_name}
+          />
+        ))}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* ── Input bar ────────────────────────────────────────────────────── */}
+      <div className="flex-shrink-0 border-t border-line bg-white px-3 py-3 flex items-end gap-2 pb-safe">
+
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*,.pdf"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+
+        <button
+          onClick={() => fileRef.current?.click()}
+          disabled={sending || uploadingFile}
+          title="Attach image or PDF"
+          className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-muted-brand active:bg-cream transition-colors disabled:opacity-40"
+        >
+          {uploadingFile ? (
+            <div className="w-4 h-4 border-2 border-success/30 border-t-success rounded-full animate-spin" />
+          ) : (
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+            </svg>
+          )}
+        </button>
+
+        <textarea
+          ref={inputRef}
+          value={input}
+          onChange={e => setInput(e.target.value.slice(0, 1000))}
+          onKeyDown={handleKeyDown}
+          placeholder="Type a message…"
+          rows={1}
+          style={{ resize: 'none' }}
+          className="flex-1 min-w-0 rounded-2xl border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-brand/60 focus:outline-none focus:ring-2 focus:ring-success/30 focus:border-success bg-white overflow-hidden"
+          onInput={e => {
+            const el = e.currentTarget
+            el.style.height = 'auto'
+            el.style.height = Math.min(el.scrollHeight, 120) + 'px'
+          }}
+        />
+
+        <button
+          onClick={() => send()}
+          disabled={!input.trim() || sending}
+          className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
+            input.trim() && !sending
+              ? 'bg-success text-white shadow-md shadow-success/25 active:opacity-80'
+              : 'bg-line text-muted-brand'
+          }`}
+        >
+          {sending ? (
+            <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+          ) : (
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          )}
+        </button>
+      </div>
+
     </div>
   )
 }
