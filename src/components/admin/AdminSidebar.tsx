@@ -22,6 +22,7 @@ const NAV_ITEMS = [
   { href: '/admin/onboardings',  label: 'Onboardings', icon: '⚡', exact: false },
   { href: '/admin/agents',       label: 'Agents',      icon: '👥', exact: false },
   { href: '/admin/messages',     label: 'Messages',    icon: '💬', exact: false },
+  { href: '/content-hub',        label: 'Content Hub', icon: '🖼️', exact: false },
   { href: '/admin/payouts',      label: 'Payouts',     icon: '💰', exact: false },
   { href: '/admin/settings',     label: 'Settings',    icon: '⚙️', exact: false },
 ]

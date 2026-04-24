@@ -66,7 +66,7 @@ const zoneName = getArg('zone')
 
 // ── Validate role ─────────────────────────────────────────────────────────────
 
-const VALID_ROLES = ['agent', 'field_lead', 'admin'] as const
+const VALID_ROLES = ['agent', 'field_lead', 'admin', 'content_manager'] as const
 type Role = (typeof VALID_ROLES)[number]
 
 if (!(VALID_ROLES as readonly string[]).includes(rawRole)) {
@@ -149,9 +149,10 @@ async function main() {
   // ── Auto-generate employee ID ────────────────────────────────────────────────
 
   const PREFIX_MAP: Record<Role, string> = {
-    agent:      'MT-FA',
-    field_lead: 'MT-FL',
-    admin:      'MT-AD',
+    agent:           'MT-FA',
+    field_lead:      'MT-FL',
+    admin:           'MT-AD',
+    content_manager: 'PC-CM',
   }
   const prefix = PREFIX_MAP[role]
 
@@ -244,6 +245,7 @@ async function main() {
   // ── Success ──────────────────────────────────────────────────────────────────
 
   const line = '─'.repeat(42)
+  const defaultUrl = role === 'content_manager' ? 'field.powerchat.ng/content-hub' : 'field.powerchat.ng/dashboard'
   console.log(`
 ✓ User created successfully
 ${line}
@@ -252,8 +254,9 @@ ${line}
   Role:         ${role}
   Employee ID:  ${employeeId}
   Zone:         ${resolvedZoneName ?? '—'}
+  Login URL:    ${defaultUrl}
 ${line}
-  PIN: ${pin}  ← send to agent via WhatsApp
+  PIN: ${pin}  ← send to user via WhatsApp
 ${line}
 `)
 }
