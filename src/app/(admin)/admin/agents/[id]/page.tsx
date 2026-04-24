@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { DeactivateButton } from '@/components/admin/DeactivateButton'
 import { ReactivateButton } from '@/components/admin/ReactivateButton'
+import { ContentHubAccessButton } from '@/components/admin/ContentHubAccessButton'
 
 const ROLE_LABELS: Record<string, string> = {
   agent:      'Agent',
@@ -186,6 +187,16 @@ export default async function AgentDetailPage({ params }: { params: { id: string
           </div>
         </div>
       )}
+
+      {/* Content Hub access */}
+      <div className="bg-white rounded-2xl shadow-sm border border-line p-6 mb-6">
+        <h2 className="text-sm font-bold text-ink mb-1">Content Hub</h2>
+        <ContentHubAccessButton
+          agentId={a.id}
+          agentName={a.full_name}
+          currentRole={a.role}
+        />
+      </div>
 
       {/* Danger / recovery zone */}
       {a.is_active ? (
