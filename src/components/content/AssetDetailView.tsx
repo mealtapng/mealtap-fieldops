@@ -39,7 +39,7 @@ const PLATFORMS = [
   { key: 'caption_linkedin',  label: '💼 LinkedIn',  max: 3000,  color: '#0A66C2' },
 ] as const
 
-function CopyButton({ text, label }: { text: string; label: string }) {
+function CopyButton({ text }: { text: string; label: string }) {
   const [copied, setCopied] = useState(false)
   async function copy() {
     try {
@@ -70,12 +70,10 @@ function CopyButton({ text, label }: { text: string; label: string }) {
   )
 }
 
-export function AssetDetailView({ asset: initialAsset, currentUserId, isAdmin }: Props) {
+export function AssetDetailView({ asset: initialAsset, isAdmin }: Props) {
   const [asset,    setAsset]    = useState<Asset>(initialAsset)
   const [updating, setUpdating] = useState(false)
   const [statusErr,setStatusErr]= useState<string | null>(null)
-
-  const canEdit = isAdmin || true // content_manager can update status
 
   async function updateStatus(status: string) {
     setUpdating(true); setStatusErr(null)
