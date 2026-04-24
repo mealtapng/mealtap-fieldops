@@ -37,7 +37,7 @@ export function ContentHubView({
 }: Props) {
   const [tab,         setTab]         = useState<Tab>(initialTab)
   const [weeks,       setWeeks]       = useState<Week[]>(initialWeeks)
-  const [activeWeek,  setActiveWeek]  = useState<Week | null>(initialActiveWeek)
+  const [activeWeek] = useState<Week | null>(initialActiveWeek)
   const [assets,      setAssets]      = useState<Asset[]>(initialAssets)
 
   const isAdmin    = currentUser.role === 'admin'

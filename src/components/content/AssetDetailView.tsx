@@ -70,7 +70,7 @@ function CopyButton({ text }: { text: string; label: string }) {
   )
 }
 
-export function AssetDetailView({ asset: initialAsset, isAdmin }: Props) {
+export function AssetDetailView({ asset: initialAsset }: Props) {
   const [asset,    setAsset]    = useState<Asset>(initialAsset)
   const [updating, setUpdating] = useState(false)
   const [statusErr,setStatusErr]= useState<string | null>(null)
