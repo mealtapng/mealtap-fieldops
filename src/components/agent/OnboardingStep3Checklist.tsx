@@ -21,7 +21,7 @@ const CHECKLIST_ITEMS: {
   {
     key:         'checklistSavedNumber',
     label:       'Saved the PowerChat number',
-    description: 'Customer saved 0818-111-2220 in their contacts',
+    description: 'Customer saved 09111122229 in their contacts',
     icon:        '📱',
   },
   {
@@ -94,7 +94,7 @@ export function OnboardingStep3Checklist({ initialData: initial, onContinue }: P
             PowerChat WhatsApp Number
           </p>
           <p className="text-2xl font-bold text-success tracking-wide">
-            0818-111-2220
+            09111122229
           </p>
           <p className="text-[11px] text-success/70 mt-1">
             Show this to the customer

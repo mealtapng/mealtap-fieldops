@@ -31,7 +31,7 @@ export default async function ContentGuidePage() {
           </p>
           <div className="mt-3 p-3 bg-green-50 rounded-xl">
             <p className="text-xs font-bold text-green-800">📱 WhatsApp number to include in ≥3 posts/week</p>
-            <p className="text-lg font-bold text-green-700 mt-0.5">0818-111-2220</p>
+            <p className="text-lg font-bold text-green-700 mt-0.5">09111122229</p>
           </div>
         </div>
 
@@ -167,7 +167,7 @@ export default async function ContentGuidePage() {
               'Always include a clear CTA: save the number, start a chat, or share with a friend.',
               'Memes and relatable content build reach. Demos and tutorials build trust. CTAs build users.',
               'Track performance weekly. Double down on what works. Cut what does not.',
-              'The WhatsApp number (0818-111-2220) must appear in at least 3 posts per week.',
+              'The WhatsApp number (09111122229) must appear in at least 3 posts per week.',
             ].map(p => (
               <li key={p} className="flex items-start gap-2.5 text-sm text-gray-700">
                 <svg className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><polyline points="20 6 9 17 4 12"/></svg>

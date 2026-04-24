@@ -81,6 +81,18 @@ export function ContentSidebar({ user }: Props) {
               </Link>
             )
           })}
+
+          <div className="pt-2 mt-2 border-t border-white/10">
+            <Link
+              href={user?.role === 'admin' ? '/admin' : '/dashboard'}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/40 hover:bg-white/5 hover:text-white/70 transition-colors"
+            >
+              <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 5l-7 7 7 7"/>
+              </svg>
+              Field Ops
+            </Link>
+          </div>
         </nav>
 
         {user && (
