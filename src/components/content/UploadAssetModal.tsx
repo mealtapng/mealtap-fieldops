@@ -239,7 +239,7 @@ export function UploadAssetModal({ weekId, onClose, onUploaded }: Props) {
               <input
                 value={hashtags}
                 onChange={e => setHashtags(e.target.value)}
-                placeholder="#PowerChat #electricity #Nigeria"
+                placeholder="#Mealtap #restaurants #Nigeria"
                 className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400"
               />
             </div>

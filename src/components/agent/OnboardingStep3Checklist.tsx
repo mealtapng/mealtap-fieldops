@@ -89,14 +89,14 @@ export function OnboardingStep3Checklist({ initialData: initial, onContinue }: P
       <div className="flex-1 overflow-y-auto px-4 pt-3 space-y-3 pb-4">
 
         {/* WhatsApp number prominent display */}
-        <div className="bg-success/10 rounded-2xl px-4 py-4 text-center">
+        <div className="bg-terra/10 rounded-2xl px-4 py-4 text-center">
           <p className="text-[10px] font-bold tracking-widest text-success uppercase mb-1">
             PowerChat WhatsApp Number
           </p>
           <p className="text-2xl font-bold text-success tracking-wide">
             09111122229
           </p>
-          <p className="text-[11px] text-success/70 mt-1">
+          <p className="text-[11px] text-terra/70 mt-1">
             Show this to the customer
           </p>
         </div>
@@ -112,14 +112,14 @@ export function OnboardingStep3Checklist({ initialData: initial, onContinue }: P
                 onClick={() => setters[item.key](!checked)}
                 className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl border-2 text-left transition-all active:scale-[0.99] ${
                   checked
-                    ? 'bg-success/10 border-success shadow-sm'
+                    ? 'bg-terra/10 border-terra shadow-sm'
                     : 'bg-white border-line'
                 }`}
               >
                 {/* Checkbox */}
                 <div className={`w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
                   checked
-                    ? 'bg-success border-success'
+                    ? 'bg-success border-terra'
                     : 'border-line bg-white'
                 }`}>
                   {checked && (
@@ -137,7 +137,7 @@ export function OnboardingStep3Checklist({ initialData: initial, onContinue }: P
                       {item.label}
                     </p>
                   </div>
-                  <p className="text-[11px] text-muted-brand mt-0.5 leading-snug">
+                  <p className="text-[11px] text-muted mt-0.5 leading-snug">
                     {item.description}
                   </p>
                 </div>
@@ -149,11 +149,11 @@ export function OnboardingStep3Checklist({ initialData: initial, onContinue }: P
         {/* Token amount input — only shown when all 4 checked */}
         {allChecked && (
           <div className="bg-white rounded-2xl shadow-sm px-4 py-4">
-            <p className="text-[10px] font-bold tracking-widest text-muted-brand uppercase mb-2">
+            <p className="text-[10px] font-bold tracking-widest text-muted uppercase mb-2">
               Token amount purchased
             </p>
-            <div className="flex items-center gap-2 rounded-xl border border-brand overflow-hidden focus-within:ring-2 focus-within:ring-brand/30">
-              <span className="px-3 py-2.5 text-sm font-bold text-brand bg-brand/10 border-r border-brand/30 flex-shrink-0">₦</span>
+            <div className="flex items-center gap-2 rounded-xl border border-forest overflow-hidden focus-within:ring-2 focus-within:ring-forest/30">
+              <span className="px-3 py-2.5 text-sm font-bold text-brand bg-forest/10 border-r border-forest/30 flex-shrink-0">₦</span>
               <input
                 type="number"
                 inputMode="numeric"
@@ -161,16 +161,16 @@ export function OnboardingStep3Checklist({ initialData: initial, onContinue }: P
                 onChange={e => setTokenAmount(e.target.value.replace(/\D/g, ''))}
                 placeholder="1000"
                 min={1000}
-                className="flex-1 px-3 py-2.5 text-sm text-ink placeholder:text-muted-brand/60 focus:outline-none bg-white"
+                className="flex-1 px-3 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:outline-none bg-white"
               />
             </div>
-            <p className="text-[11px] text-muted-brand mt-1">Minimum ₦1,000 — enter the exact amount</p>
+            <p className="text-[11px] text-muted mt-1">Minimum ₦1,000 — enter the exact amount</p>
           </div>
         )}
 
         {/* Progress summary */}
         <div className="bg-cream rounded-xl px-4 py-3 flex items-center justify-between">
-          <span className="text-xs text-muted-brand font-medium">Steps completed</span>
+          <span className="text-xs text-muted font-medium">Steps completed</span>
           <span className={`text-sm font-bold ${allChecked ? 'text-success' : 'text-ink'}`}>
             {checkedCount} / 4 {allChecked ? '✓' : ''}
           </span>
@@ -184,8 +184,8 @@ export function OnboardingStep3Checklist({ initialData: initial, onContinue }: P
           onClick={handleContinue}
           className={`w-full py-4 rounded-2xl font-bold text-base transition-all ${
             allChecked
-              ? 'bg-success text-white shadow-lg shadow-success/25 active:bg-success-dark'
-              : 'bg-brand text-white shadow-lg shadow-brand/25 active:bg-brand-dark'
+              ? 'bg-terra text-white shadow-lg shadow-terra/25 active:bg-terra-dark'
+              : 'bg-brand text-white shadow-lg shadow-forest/25 active:bg-forest-dark'
           }`}
         >
           {allChecked ? '✓ Converted — continue →' : `Continue with ${checkedCount}/4 checked →`}

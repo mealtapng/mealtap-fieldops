@@ -8,9 +8,9 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  converted: 'bg-success-light text-success border border-success/30',
+  converted: 'bg-terra-light text-success border border-terra/30',
   pending:   'bg-amber-50 text-amber-700 border border-amber-200',
-  failed:    'bg-line text-muted-brand border border-line',
+  failed:    'bg-line text-muted border border-line',
 }
 
 const CHECKLIST_ITEMS = [
@@ -57,7 +57,7 @@ export default async function OnboardingDetailPage({ params }: { params: { id: s
   return (
     <div className="p-6 max-w-2xl">
       {/* Back */}
-      <a href="/admin/onboardings" className="inline-flex items-center gap-1 text-sm text-muted-brand hover:text-brand transition-colors mb-6">
+      <a href="/admin/onboardings" className="inline-flex items-center gap-1 text-sm text-muted hover:text-forest transition-colors mb-6">
         ← All Onboardings
       </a>
 
@@ -69,45 +69,45 @@ export default async function OnboardingDetailPage({ params }: { params: { id: s
               <span className="text-2xl">⚡</span>
               <h1 className="text-xl font-bold text-ink">{r.user_name}</h1>
             </div>
-            <p className="text-sm text-muted-brand">{createdDate}</p>
+            <p className="text-sm text-muted">{createdDate}</p>
           </div>
-          <span className={`inline-flex px-3 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 ${STATUS_STYLES[status] ?? 'bg-line text-muted-brand'}`}>
+          <span className={`inline-flex px-3 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 ${STATUS_STYLES[status] ?? 'bg-line text-muted'}`}>
             {STATUS_LABELS[status] ?? status}
           </span>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mt-6 pt-5 border-t border-line">
           <div>
-            <p className="text-xs font-bold text-muted-brand uppercase tracking-wider mb-1">Phone</p>
+            <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1">Phone</p>
             <p className="text-sm text-ink">{r.user_phone ?? '—'}</p>
           </div>
           <div>
-            <p className="text-xs font-bold text-muted-brand uppercase tracking-wider mb-1">Meter Number</p>
+            <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1">Meter Number</p>
             <p className="text-sm text-ink font-mono">{r.meter_number ?? '—'}</p>
           </div>
           <div>
-            <p className="text-xs font-bold text-muted-brand uppercase tracking-wider mb-1">DISCO</p>
+            <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1">DISCO</p>
             <p className="text-sm text-ink">{r.disco_area ?? '—'}</p>
           </div>
           <div>
-            <p className="text-xs font-bold text-muted-brand uppercase tracking-wider mb-1">Zone</p>
+            <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1">Zone</p>
             <p className="text-sm text-ink">{zoneName ?? '—'}</p>
           </div>
           {r.address && (
             <div className="col-span-2">
-              <p className="text-xs font-bold text-muted-brand uppercase tracking-wider mb-1">Address</p>
+              <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1">Address</p>
               <p className="text-sm text-ink">{r.address}</p>
             </div>
           )}
           {r.referral_code && (
             <div>
-              <p className="text-xs font-bold text-muted-brand uppercase tracking-wider mb-1">Referral Code</p>
+              <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1">Referral Code</p>
               <p className="text-sm text-ink font-mono">{r.referral_code}</p>
             </div>
           )}
           {r.token_amount_purchased != null && (
             <div>
-              <p className="text-xs font-bold text-muted-brand uppercase tracking-wider mb-1">Token Amount</p>
+              <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1">Token Amount</p>
               <p className="text-sm font-bold text-success">₦{r.token_amount_purchased.toLocaleString()}</p>
             </div>
           )}
@@ -121,7 +121,7 @@ export default async function OnboardingDetailPage({ params }: { params: { id: s
           {CHECKLIST_ITEMS.map(item => {
             const checked = !!r[item.key]
             return (
-              <div key={item.key} className={`flex items-center gap-3 p-3 rounded-xl ${checked ? 'bg-success-light' : 'bg-cream/50'}`}>
+              <div key={item.key} className={`flex items-center gap-3 p-3 rounded-xl ${checked ? 'bg-terra-light' : 'bg-cream/50'}`}>
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${checked ? 'bg-success' : 'bg-line'}`}>
                   {checked && (
                     <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
@@ -129,7 +129,7 @@ export default async function OnboardingDetailPage({ params }: { params: { id: s
                     </svg>
                   )}
                 </div>
-                <p className={`text-sm ${checked ? 'text-success font-semibold' : 'text-muted-brand'}`}>{item.label}</p>
+                <p className={`text-sm ${checked ? 'text-success font-semibold' : 'text-muted'}`}>{item.label}</p>
               </div>
             )
           })}
@@ -148,11 +148,11 @@ export default async function OnboardingDetailPage({ params }: { params: { id: s
             </div>
             <div>
               <p className="text-sm font-semibold text-ink">{agent.full_name}</p>
-              <p className="text-xs text-muted-brand">{agent.phone ?? '—'} · {agent.referral_code ?? '—'}</p>
+              <p className="text-xs text-muted">{agent.phone ?? '—'} · {agent.referral_code ?? '—'}</p>
             </div>
             <a
               href={`/admin/agents/${r.agent_id}`}
-              className="ml-auto text-sm font-semibold text-brand hover:text-brand-dark transition-colors"
+              className="ml-auto text-sm font-semibold text-brand hover:text-forest-dark transition-colors"
             >
               View profile →
             </a>
@@ -164,7 +164,7 @@ export default async function OnboardingDetailPage({ params }: { params: { id: s
       {r.notes && (
         <div className="bg-white rounded-2xl shadow-sm border border-line p-6">
           <p className="font-bold text-ink mb-2">Notes</p>
-          <p className="text-sm text-muted-brand leading-relaxed">{r.notes}</p>
+          <p className="text-sm text-muted leading-relaxed">{r.notes}</p>
         </div>
       )}
     </div>

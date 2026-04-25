@@ -170,7 +170,7 @@ export default function AdminThreadPage() {
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-success/30 border-t-success rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-terra/30 border-t-success rounded-full animate-spin" />
       </div>
     )
   }
@@ -181,7 +181,7 @@ export default function AdminThreadPage() {
       <div className="flex items-center gap-3 px-6 py-4 bg-white border-b border-line flex-shrink-0">
         <Link
           href="/admin/messages"
-          className="w-8 h-8 flex items-center justify-center rounded-full border border-line text-muted-brand hover:text-ink hover:border-ink/20 transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-full border border-line text-muted hover:text-ink hover:border-ink/20 transition-colors"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 5l-7 7 7 7"/>
@@ -195,7 +195,7 @@ export default function AdminThreadPage() {
             </div>
             <div>
               <p className="text-sm font-bold text-ink leading-tight">{otherUser.full_name}</p>
-              <p className="text-xs text-muted-brand">
+              <p className="text-xs text-muted">
                 {otherUser.role === 'admin' ? 'Admin' : otherUser.role === 'field_lead' ? 'Field Lead' : 'Agent'}
               </p>
             </div>
@@ -208,7 +208,7 @@ export default function AdminThreadPage() {
         <div className="max-w-2xl mx-auto space-y-0.5">
           {messages.length === 0 && (
             <div className="flex items-center justify-center py-20">
-              <p className="text-sm text-muted-brand">No messages yet. Say hello!</p>
+              <p className="text-sm text-muted">No messages yet. Say hello!</p>
             </div>
           )}
           {messages.map(msg => (
@@ -243,10 +243,10 @@ export default function AdminThreadPage() {
             onClick={() => fileRef.current?.click()}
             disabled={sending || uploadingFile}
             title="Attach image or PDF"
-            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-muted-brand hover:text-ink hover:bg-cream transition-colors disabled:opacity-40"
+            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-muted hover:text-ink hover:bg-cream transition-colors disabled:opacity-40"
           >
             {uploadingFile ? (
-              <div className="w-4 h-4 border-2 border-success/30 border-t-success rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-terra/30 border-t-success rounded-full animate-spin" />
             ) : (
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
@@ -262,7 +262,7 @@ export default function AdminThreadPage() {
             placeholder="Type a message…"
             rows={1}
             style={{ resize: 'none' }}
-            className="flex-1 rounded-2xl border border-line px-4 py-2.5 text-sm text-ink placeholder:text-muted-brand/60 focus:outline-none focus:ring-2 focus:ring-success/30 focus:border-success bg-cream/40 overflow-hidden"
+            className="flex-1 rounded-2xl border border-line px-4 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-terra/30 focus:border-terra bg-cream/40 overflow-hidden"
             onInput={e => {
               const el = e.currentTarget
               el.style.height = 'auto'
@@ -274,8 +274,8 @@ export default function AdminThreadPage() {
             disabled={!input.trim() || sending}
             className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
               input.trim() && !sending
-                ? 'bg-success text-white shadow-md shadow-success/25 hover:bg-success/90'
-                : 'bg-line text-muted-brand'
+                ? 'bg-terra text-white shadow-md shadow-terra/25 hover:bg-terra/90'
+                : 'bg-line text-muted'
             }`}
           >
             {sending ? (

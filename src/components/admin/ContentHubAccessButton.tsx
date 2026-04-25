@@ -50,7 +50,7 @@ export function ContentHubAccessButton({ agentId, agentName, currentRole }: Prop
           <p className="text-sm font-semibold text-ink">
             {hasAccess ? '✅ Content Hub access enabled' : 'No Content Hub access'}
           </p>
-          <p className="text-xs text-muted-brand mt-0.5">
+          <p className="text-xs text-muted mt-0.5">
             {hasAccess
               ? 'This user can manage content weeks, upload assets, and use the message board.'
               : 'Grant access to let this person manage content for PowerChat social channels.'}

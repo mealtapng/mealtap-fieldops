@@ -73,7 +73,7 @@ export function ReactionBar({ postId, reactions, currentUserId, onReactionsChang
       <div className="flex items-center gap-1 pt-2 border-t border-line mt-2">
         <button
           onClick={() => setShowPicker(true)}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-dashed border-line text-xs text-muted-brand hover:border-success hover:text-success transition-colors"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-dashed border-line text-xs text-muted hover:border-terra hover:text-terra transition-colors"
         >
           <span>+</span>
           <span>React</span>
@@ -95,8 +95,8 @@ export function ReactionBar({ postId, reactions, currentUserId, onReactionsChang
             disabled={loading === emoji}
             className={`flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-semibold transition-colors
               ${isMine
-                ? 'bg-brand-light border-brand text-brand'
-                : 'bg-cream border-line text-muted-brand hover:border-success'
+                ? 'bg-forest-light border-forest text-brand'
+                : 'bg-cream border-line text-muted hover:border-terra'
               }`}
           >
             <span>{emoji}</span>
@@ -107,7 +107,7 @@ export function ReactionBar({ postId, reactions, currentUserId, onReactionsChang
       {!showPicker && canAddMore && (
         <button
           onClick={() => setShowPicker(true)}
-          className="px-2 py-1 rounded-full border border-dashed border-line text-xs text-muted-brand hover:border-success hover:text-success transition-colors"
+          className="px-2 py-1 rounded-full border border-dashed border-line text-xs text-muted hover:border-terra hover:text-terra transition-colors"
         >
           +
         </button>
@@ -115,7 +115,7 @@ export function ReactionBar({ postId, reactions, currentUserId, onReactionsChang
       {showPicker && (
         <button
           onClick={() => setShowPicker(false)}
-          className="px-2 py-1 rounded-full border border-line text-xs text-muted-brand"
+          className="px-2 py-1 rounded-full border border-line text-xs text-muted"
         >
           ✕
         </button>

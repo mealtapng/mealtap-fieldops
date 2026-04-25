@@ -26,10 +26,10 @@ export interface ProfileProps {
   passportPhotoUrl: string | null
   qualityScore: number | null
   zoneName: string | null
-  referralCode: string | null
-  totalOnboardings: number
-  conversions: number
+  totalCaptures: number
+  hotLeads: number
   daysActive: number
+  hotLeadBonus: number
 }
 
 interface DraftState {
@@ -56,7 +56,7 @@ function InfoRow({
 }) {
   return (
     <div className="px-5 py-3.5 flex items-center justify-between gap-4">
-      <span className="text-xs font-semibold text-muted-brand flex-shrink-0">{label}</span>
+      <span className="text-xs font-semibold text-muted flex-shrink-0">{label}</span>
       <span className={`text-sm font-medium text-right ${valueClassName ?? 'text-ink'}`}>
         {value}
       </span>
@@ -90,8 +90,8 @@ function EditableRow({
   if (!editing) {
     return (
       <div className="px-5 py-3.5 flex items-center justify-between gap-4">
-        <span className="text-xs font-semibold text-muted-brand flex-shrink-0">{label}</span>
-        <span className={`text-sm font-medium text-right ${value ? 'text-ink' : 'text-muted-brand'}`}>
+        <span className="text-xs font-semibold text-muted flex-shrink-0">{label}</span>
+        <span className={`text-sm font-medium text-right ${value ? 'text-ink' : 'text-muted'}`}>
           {displayValue}
         </span>
       </div>
@@ -99,7 +99,7 @@ function EditableRow({
   }
   return (
     <div className="px-5 py-2.5 flex items-center justify-between gap-3">
-      <span className="text-xs font-semibold text-muted-brand flex-shrink-0 w-28">{label}</span>
+      <span className="text-xs font-semibold text-muted flex-shrink-0 w-28">{label}</span>
       <input
         type={type}
         inputMode={inputMode}
@@ -107,8 +107,7 @@ function EditableRow({
         placeholder={placeholder}
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="flex-1 text-sm text-right bg-cream border border-line rounded-xl px-3 py-2 outline-none focus:border-brand transition-colors min-w-0"
-        style={{ color: '#1a2e1b' }}
+        className="flex-1 text-sm text-right bg-cream border border-line rounded-xl px-3 py-2 outline-none focus:border-forest transition-colors min-w-0 text-ink"
       />
     </div>
   )
@@ -119,7 +118,7 @@ function EditableRow({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[10px] font-semibold tracking-widest text-muted-brand uppercase mb-2 px-1">
+      <p className="text-[10px] font-semibold tracking-widest text-muted uppercase mb-2 px-1">
         {title}
       </p>
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-line">
@@ -135,27 +134,10 @@ function StatCol({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="flex-1 flex flex-col items-center py-4 gap-0.5">
       <span className="text-xl font-bold text-ink">{value}</span>
-      <span className="text-[10px] font-semibold tracking-wider text-muted-brand uppercase">
+      <span className="text-[10px] font-semibold tracking-wider text-muted uppercase">
         {label}
       </span>
     </div>
-  )
-}
-
-// ── CopyButton ────────────────────────────────────────────────────────────────
-
-function CopyButton({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false)
-  function handleCopy() {
-    navigator.clipboard.writeText(value).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
-  }
-  return (
-    <button type="button" onClick={handleCopy} className="text-xs font-semibold flex-shrink-0" style={{ color: '#1B5E20' }}>
-      {copied ? '✓ Copied' : 'Copy'}
-    </button>
   )
 }
 
@@ -165,15 +147,15 @@ export function ProfileView({
   userId, fullName, employeeId, role, phone,
   email, dateOfBirth, homeAddress, ninLast4,
   nextOfKinName, nextOfKinPhone, bankName, bankAccountMasked,
-  passportPhotoUrl, qualityScore, zoneName, referralCode,
-  totalOnboardings, conversions, daysActive,
+  passportPhotoUrl, qualityScore, zoneName,
+  totalCaptures, hotLeads, daysActive, hotLeadBonus,
 }: ProfileProps) {
   const roleLabel =
     role === 'field_lead' ? 'Field Lead' :
     role === 'admin'      ? 'Admin' :
                             'Field Agent'
 
-  const lifetimeEarnings = conversions * 100
+  const lifetimeBonus = hotLeads * hotLeadBonus
 
   // ── Edit state ──────────────────────────────────────────────────────────────
 
@@ -274,7 +256,7 @@ export function ProfileView({
         {/* ── Hero ──────────────────────────────────────────────────────────── */}
         <div
           className="rounded-b-[2.5rem] h-44 px-5 pt-12 flex-shrink-0 relative"
-          style={{ background: 'linear-gradient(160deg, #0D1B0E 0%, #0a2e0c 100%)' }}
+          style={{ background: 'linear-gradient(160deg, #1F3F1B 0%, #2D5A27 100%)' }}
         >
           <div className="flex items-center justify-between">
             {editing ? (
@@ -302,7 +284,7 @@ export function ProfileView({
                 onClick={saveEdit}
                 disabled={saving}
                 className="text-sm font-bold transition-colors disabled:opacity-50"
-                style={{ color: '#25D366' }}
+                style={{ color: '#C8622A' }}
               >
                 {saving ? 'Saving…' : 'Save'}
               </button>
@@ -327,10 +309,10 @@ export function ProfileView({
               <PhotoUpload userId={userId} initialPath={passportPhotoUrl} fullName={fullName} />
             </div>
             <h1 className="text-xl font-bold text-ink mt-3 text-center leading-tight">{fullName}</h1>
-            <p className="text-xs text-muted-brand text-center mt-0.5">{roleLabel} · {employeeId}</p>
+            <p className="text-xs text-muted text-center mt-0.5">{roleLabel} · {employeeId}</p>
             <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
               {zoneName && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-brand/10 text-brand text-xs font-semibold">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-forest-light text-forest text-xs font-semibold">
                   <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                     <circle cx="12" cy="9" r="2.5" />
@@ -339,27 +321,18 @@ export function ProfileView({
                 </span>
               )}
               {(qualityScore ?? 0) >= 90 && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full bg-success-light text-success text-xs font-semibold">
+                <span className="inline-flex items-center px-3 py-1 rounded-full bg-terra-light text-terra text-xs font-semibold">
                   ⭐ Top performer
                 </span>
               )}
             </div>
-            {referralCode && (
-              <div className="mt-4 bg-brand/10 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-bold tracking-widest text-brand uppercase">Your referral code</p>
-                  <p className="text-lg font-bold text-brand tracking-wider mt-0.5">{referralCode}</p>
-                </div>
-                <CopyButton value={referralCode} />
-              </div>
-            )}
           </div>
 
           {/* ── Lifetime stats bar ────────────────────────────────────────── */}
           <div className="bg-white rounded-2xl shadow-sm mx-4 mt-3 flex divide-x divide-line">
-            <StatCol label="Onboardings" value={totalOnboardings} />
-            <StatCol label="Conversions"  value={conversions} />
-            <StatCol label="Days active"  value={daysActive} />
+            <StatCol label="Captures"   value={totalCaptures} />
+            <StatCol label="Hot leads"  value={hotLeads} />
+            <StatCol label="Days active" value={daysActive} />
           </div>
 
           {/* ── Save error ───────────────────────────────────────────────── */}
@@ -375,7 +348,7 @@ export function ProfileView({
               <EditableRow
                 label="Email"
                 value={draft.email}
-                displayValue={saved.email ?? <span className="text-muted-brand">Not set</span>}
+                displayValue={saved.email ?? <span className="text-muted">Not set</span>}
                 editing={editing}
                 type="email"
                 placeholder="your@email.com"
@@ -384,7 +357,7 @@ export function ProfileView({
               <EditableRow
                 label="Date of birth"
                 value={draft.dateOfBirth}
-                displayValue={saved.dateOfBirth ? formatDate(saved.dateOfBirth) : <span className="text-muted-brand">Not set</span>}
+                displayValue={saved.dateOfBirth ? formatDate(saved.dateOfBirth) : <span className="text-muted">Not set</span>}
                 editing={editing}
                 type="date"
                 onChange={set('dateOfBirth')}
@@ -392,7 +365,7 @@ export function ProfileView({
               <EditableRow
                 label="Home address"
                 value={draft.homeAddress}
-                displayValue={saved.homeAddress ?? <span className="text-muted-brand">Not set</span>}
+                displayValue={saved.homeAddress ?? <span className="text-muted">Not set</span>}
                 editing={editing}
                 placeholder="123 Main St, Abuja"
                 onChange={set('homeAddress')}
@@ -406,7 +379,7 @@ export function ProfileView({
                 displayValue={
                   saved.ninLast4
                     ? <span>•••• •••• {saved.ninLast4} <span className="text-success">✓</span></span>
-                    : <span className="text-muted-brand">Not set</span>
+                    : <span className="text-muted">Not set</span>
                 }
                 editing={editing}
                 inputMode="numeric"
@@ -417,7 +390,7 @@ export function ProfileView({
               <EditableRow
                 label="Next of kin"
                 value={draft.nextOfKinName}
-                displayValue={saved.nextOfKinName ?? <span className="text-muted-brand">Not set</span>}
+                displayValue={saved.nextOfKinName ?? <span className="text-muted">Not set</span>}
                 editing={editing}
                 placeholder="Full name"
                 onChange={set('nextOfKinName')}
@@ -425,7 +398,7 @@ export function ProfileView({
               <EditableRow
                 label="NoK phone"
                 value={draft.nextOfKinPhone}
-                displayValue={saved.nextOfKinPhone ? formatPhone(saved.nextOfKinPhone) : <span className="text-muted-brand">Not set</span>}
+                displayValue={saved.nextOfKinPhone ? formatPhone(saved.nextOfKinPhone) : <span className="text-muted">Not set</span>}
                 editing={editing}
                 inputMode="tel"
                 placeholder="08012345678"
@@ -437,7 +410,7 @@ export function ProfileView({
               <EditableRow
                 label="Bank"
                 value={draft.bankName}
-                displayValue={saved.bankName ?? <span className="text-muted-brand">Not set</span>}
+                displayValue={saved.bankName ?? <span className="text-muted">Not set</span>}
                 editing={editing}
                 placeholder="e.g. Access Bank"
                 onChange={set('bankName')}
@@ -445,18 +418,19 @@ export function ProfileView({
               <EditableRow
                 label="Account"
                 value={draft.bankAccountMasked}
-                displayValue={saved.bankAccountMasked ?? <span className="text-muted-brand">Not set</span>}
+                displayValue={saved.bankAccountMasked ?? <span className="text-muted">Not set</span>}
                 editing={editing}
                 inputMode="numeric"
                 placeholder="0123456789"
                 onChange={set('bankAccountMasked')}
               />
               <InfoRow
-                label="Lifetime earnings"
-                value={formatNaira(lifetimeEarnings)}
-                valueClassName="text-brand font-bold"
+                label="Hot lead bonus"
+                value={formatNaira(lifetimeBonus)}
+                valueClassName="text-terra font-bold"
               />
-              <InfoRow label="Rate" value="₦100 per conversion" valueClassName="text-muted-brand" />
+              <InfoRow label="Weekly salary" value="₦40,000 (paid separately)" valueClassName="text-muted" />
+              <InfoRow label="Rate" value={`₦${hotLeadBonus.toLocaleString()} per hot lead`} valueClassName="text-muted" />
             </Section>
 
             <div className="mt-6 mb-4 text-center">

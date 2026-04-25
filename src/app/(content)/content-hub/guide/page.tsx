@@ -16,7 +16,7 @@ export default async function ContentGuidePage() {
         <Link href="/content-hub" className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:border-gray-300 transition-colors">
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
         </Link>
-        <h1 className="text-lg font-bold" style={{ color: '#1B5E20' }}>Content Strategy Guide</h1>
+        <h1 className="text-lg font-bold" style={{ color: '#2D5A27' }}>Content Strategy Guide</h1>
       </div>
 
       <div className="px-6 py-6 max-w-3xl space-y-8">
@@ -24,10 +24,10 @@ export default async function ContentGuidePage() {
         {/* Mission */}
         <div className="bg-white rounded-2xl border border-green-100 px-6 py-5">
           <h2 className="text-base font-bold text-gray-900 mb-2">Monthly Theme</h2>
-          <p className="text-xl font-bold text-green-700 italic">&ldquo;Buy Electricity in Seconds, Just Chat&rdquo;</p>
+          <p className="text-xl font-bold text-green-700 italic">&ldquo;Nigeria&apos;s Restaurants, One Tap Away&rdquo;</p>
           <p className="text-sm text-gray-600 mt-2 leading-relaxed">
-            Every piece of content ties back to this single idea: PowerChat makes buying electricity as easy as sending a text.
-            Always include a clear CTA — save the number, start a chat, or share with a friend.
+            Every piece of content ties back to this single idea: Mealtap connects Nigeria&apos;s best local restaurants to customers in seconds.
+            Always include a clear CTA — follow us, visit your nearest restaurant, or share with a friend.
           </p>
           <div className="mt-3 p-3 bg-green-50 rounded-xl">
             <p className="text-xs font-bold text-green-800">📱 WhatsApp number to include in ≥3 posts/week</p>
@@ -41,10 +41,10 @@ export default async function ContentGuidePage() {
           <div className="space-y-3">
             {[
               { pct: '25%', label: 'The Problem',   color: '#EF4444', desc: 'Electricity purchase pain points — NEPA struggles, queue stress, billing issues' },
-              { pct: '25%', label: 'The Solution',  color: '#1B5E20', desc: 'How PowerChat solves it via WhatsApp — fast, simple, no-app needed' },
+              { pct: '25%', label: 'The Solution',  color: '#1B5E20', desc: 'How Mealtap solves it via WhatsApp — fast, simple, no-app needed' },
               { pct: '20%', label: 'Social Proof',  color: '#2563EB', desc: 'User testimonials, agent stories, UGC — real people, real results' },
               { pct: '15%', label: 'Education',     color: '#7C3AED', desc: 'How-to guides, DISCO explainers, tips for staying powered up' },
-              { pct: '15%', label: 'Brand & Culture', color: '#D97706', desc: 'Team behind PowerChat, Nigerian identity, language (Pidgin/Yoruba)' },
+              { pct: '15%', label: 'Brand & Culture', color: '#D97706', desc: 'Team behind Mealtap, Nigerian identity, language (Pidgin/Yoruba)' },
             ].map(p => (
               <div key={p.label} className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-white font-bold text-sm" style={{ background: p.color }}>
@@ -162,7 +162,7 @@ export default async function ContentGuidePage() {
           <h2 className="text-base font-bold text-gray-900 mb-4">Key Principles</h2>
           <ul className="space-y-2.5">
             {[
-              'Every post should answer: "Why should I use PowerChat?"',
+              'Every post should answer: "Why should I use Mealtap?"',
               'Content tone is simple, warm, and Nigerian. Avoid corporate language.',
               'Always include a clear CTA: save the number, start a chat, or share with a friend.',
               'Memes and relatable content build reach. Demos and tutorials build trust. CTAs build users.',

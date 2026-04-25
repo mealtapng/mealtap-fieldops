@@ -6,15 +6,15 @@ import mapboxgl from 'mapbox-gl'
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 
-type Onboarding = {
-  id:                string
-  user_name:         string
-  address:           string | null
-  lat:               number | null
-  lng:               number | null
-  conversion_status: string | null
-  agent_name:        string
-  created_at:        string
+type Restaurant = {
+  id:         string
+  name:       string
+  address:    string | null
+  lat:        number | null
+  lng:        number | null
+  tag:        string | null
+  agent_name: string
+  created_at: string
 }
 
 type Zone = {
@@ -25,22 +25,25 @@ type Zone = {
   radius_km:  number
 }
 
-type StatusCounts = {
-  converted: number
-  pending:   number
-  failed:    number
+type TagCounts = {
+  hot:       number
+  warm:      number
+  cold:      number
+  not_a_fit: number
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  converted: '#34A853',
-  pending:   '#F59E0B',
-  failed:    '#9CA3AF',
+const TAG_COLORS: Record<string, string> = {
+  hot:       '#C8622A',
+  warm:      '#2D5A27',
+  cold:      '#9CA3AF',
+  not_a_fit: '#EF4444',
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  converted: 'Converted',
-  pending:   'Pending',
-  failed:    'Not interested',
+const TAG_LABELS: Record<string, string> = {
+  hot:       '🔥 Hot',
+  warm:      '🌿 Warm',
+  cold:      '❄️ Cold',
+  not_a_fit: '✕ Not a fit',
 }
 
 // Generates a circle polygon as [lng, lat] coordinate pairs
@@ -73,14 +76,14 @@ function addZoneOverlays(map: mapboxgl.Map, zones: Zone[]) {
       id: `zone-fill-${zone.id}`,
       type: 'fill',
       source: `zone-fill-${zone.id}`,
-      paint: { 'fill-color': '#1A73E8', 'fill-opacity': 0.06 },
+      paint: { 'fill-color': '#2D5A27', 'fill-opacity': 0.06 },
     })
     map.addLayer({
       id: `zone-line-${zone.id}`,
       type: 'line',
       source: `zone-fill-${zone.id}`,
       paint: {
-        'line-color': '#1A73E8',
+        'line-color': '#2D5A27',
         'line-opacity': 0.3,
         'line-width': 1.5,
         'line-dasharray': [3, 3],
@@ -106,7 +109,7 @@ function addZoneOverlays(map: mapboxgl.Map, zones: Zone[]) {
         'text-allow-overlap': false,
       },
       paint: {
-        'text-color': '#1A73E8',
+        'text-color': '#2D5A27',
         'text-opacity': 0.7,
         'text-halo-color': '#ffffff',
         'text-halo-width': 1.5,
@@ -115,12 +118,12 @@ function addZoneOverlays(map: mapboxgl.Map, zones: Zone[]) {
   }
 }
 
-function addOnboardingMarkers(map: mapboxgl.Map, onboardings: Onboarding[]) {
-  for (const r of onboardings) {
+function addRestaurantMarkers(map: mapboxgl.Map, restaurants: Restaurant[]) {
+  for (const r of restaurants) {
     if (r.lat == null || r.lng == null) continue
 
-    const color = STATUS_COLORS[r.conversion_status ?? ''] ?? '#9CA3AF'
-    const label = STATUS_LABELS[r.conversion_status ?? ''] ?? r.conversion_status ?? '—'
+    const color = TAG_COLORS[r.tag ?? ''] ?? '#9CA3AF'
+    const label = TAG_LABELS[r.tag ?? ''] ?? r.tag ?? '—'
     const date  = r.created_at
       ? new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
       : '—'
@@ -140,8 +143,8 @@ function addOnboardingMarkers(map: mapboxgl.Map, onboardings: Onboarding[]) {
     const popup = new mapboxgl.Popup({ offset: 10, closeButton: false, maxWidth: '220px' })
       .setHTML(`
         <div style="font-family: Poppins, sans-serif; padding: 2px 0;">
-          <p style="font-weight: 700; font-size: 14px; margin: 0 0 4px; color: #202124; line-height: 1.3;">${r.user_name}</p>
-          <p style="font-size: 11px; color: #6B7280; margin: 0 0 8px; line-height: 1.4;">${r.address ?? ''}</p>
+          <p style="font-weight: 700; font-size: 14px; margin: 0 0 4px; color: #1A1A1A; line-height: 1.3;">${r.name}</p>
+          <p style="font-size: 11px; color: #6B6B6B; margin: 0 0 8px; line-height: 1.4;">${r.address ?? ''}</p>
           <span style="
             display: inline-block;
             font-size: 10px;
@@ -167,13 +170,13 @@ function addOnboardingMarkers(map: mapboxgl.Map, onboardings: Onboarding[]) {
 }
 
 export default function AdminMap({
-  onboardings,
+  restaurants,
   zones,
-  statusCounts,
+  tagCounts,
 }: {
-  onboardings:  Onboarding[]
-  zones:        Zone[]
-  statusCounts: StatusCounts
+  restaurants: Restaurant[]
+  zones:       Zone[]
+  tagCounts:   TagCounts
 }) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
@@ -199,7 +202,7 @@ export default function AdminMap({
       const onLoad = () => {
         map.resize()
         addZoneOverlays(map, zones)
-        addOnboardingMarkers(map, onboardings)
+        addRestaurantMarkers(map, restaurants)
       }
       if (map.isStyleLoaded()) {
         onLoad()
@@ -223,9 +226,10 @@ export default function AdminMap({
   }, [])
 
   const legendItems = [
-    { status: 'converted', label: 'Converted',      count: statusCounts.converted },
-    { status: 'pending',   label: 'Pending',         count: statusCounts.pending   },
-    { status: 'failed',    label: 'Not interested',  count: statusCounts.failed    },
+    { tag: 'hot',       label: '🔥 Hot',       count: tagCounts.hot       },
+    { tag: 'warm',      label: '🌿 Warm',      count: tagCounts.warm      },
+    { tag: 'cold',      label: '❄️ Cold',      count: tagCounts.cold      },
+    { tag: 'not_a_fit', label: '✕ Not a fit', count: tagCounts.not_a_fit },
   ]
 
   return (
@@ -237,15 +241,15 @@ export default function AdminMap({
 
       {/* Legend overlay */}
       <div className="absolute top-4 right-4 z-10 bg-white rounded-xl shadow-sm border border-line p-3 min-w-[150px]">
-        <p className="text-[10px] font-bold tracking-widest text-muted-brand uppercase mb-2">Legend</p>
+        <p className="text-[10px] font-bold tracking-widest text-muted uppercase mb-2">Legend</p>
         <div className="space-y-1.5">
-          {legendItems.map(({ status, label, count }) => (
-            <div key={status} className="flex items-center gap-2">
+          {legendItems.map(({ tag, label, count }) => (
+            <div key={tag} className="flex items-center gap-2">
               <div
                 className="w-3 h-3 rounded-full border-2 border-white shadow-sm flex-shrink-0"
-                style={{ background: STATUS_COLORS[status] }}
+                style={{ background: TAG_COLORS[tag] }}
               />
-              <span className="text-xs text-muted-brand">{label}</span>
+              <span className="text-xs text-muted">{label}</span>
               <span className="ml-auto text-xs font-semibold text-ink">{count}</span>
             </div>
           ))}

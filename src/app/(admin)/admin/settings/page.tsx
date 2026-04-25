@@ -14,7 +14,7 @@ export default async function SettingsPage() {
   })
 
   const [settingsResult, zonesResult] = await Promise.all([
-    (admin as any).from('settings').select('key, value'),
+    (admin as any).from('app_settings').select('key, value'),
     (admin as any).from('zones').select('id, name, center_lat, center_lng').order('name'),
   ])
 
@@ -24,9 +24,9 @@ export default async function SettingsPage() {
   return (
     <SettingsView
       settings={{
-        commission_per_conversion: settingsMap['commission_per_conversion'] ?? '100',
-        payout_cycle:              settingsMap['payout_cycle']              ?? 'weekly',
-        target_weekly_onboardings: settingsMap['target_weekly_onboardings'] ?? '10',
+        daily_target:   settingsMap['daily_target']   ?? '20',
+        weekly_salary:  settingsMap['weekly_salary']  ?? '40000',
+        hot_lead_bonus: settingsMap['hot_lead_bonus'] ?? '500',
       }}
       zones={zonesResult.data ?? []}
     />

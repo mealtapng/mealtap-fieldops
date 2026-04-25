@@ -95,14 +95,14 @@ export default function LoginPage() {
     <main
       className="min-h-screen flex items-center justify-center px-4"
       style={{
-        background: 'linear-gradient(160deg, #0D1B0E 0%, #0a2e0c 45%, #0d1f10 100%)',
+        background: 'linear-gradient(160deg, #1F3F1B 0%, #2D5A27 45%, #1F3F1B 100%)',
       }}
     >
       {/* Subtle radial glow */}
       <div
         className="pointer-events-none fixed inset-0"
         style={{
-          background: 'radial-gradient(ellipse at 60% 20%, rgba(249,168,37,0.06) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(27,94,32,0.15) 0%, transparent 60%)',
+          background: 'radial-gradient(ellipse at 60% 20%, rgba(200,98,42,0.08) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(45,90,39,0.15) 0%, transparent 60%)',
         }}
       />
 
@@ -119,14 +119,14 @@ export default function LoginPage() {
           className="rounded-2xl px-8 pt-8 pb-10"
           style={{
             background: 'rgba(255,255,255,0.97)',
-            boxShadow: '0 16px 48px rgba(27,94,32,0.25)',
+            boxShadow: '0 16px 48px rgba(45,90,39,0.25)',
           }}
         >
           {/* Logo */}
           <div className="mb-4">
             <Image
               src={logoSrc}
-              alt="PowerChat"
+              alt="Mealtap"
               width={80}
               height={80}
               className="object-contain"
@@ -135,27 +135,27 @@ export default function LoginPage() {
           </div>
 
           <h1
-            className="text-xl font-display font-bold mb-1"
-            style={{ color: '#1B5E20' }}
+            className="text-xl font-bold mb-1"
+            style={{ color: '#2D5A27' }}
           >
             Welcome back
           </h1>
-          <p className="text-sm mb-8" style={{ color: '#4a6b4c' }}>
+          <p className="text-sm mb-8" style={{ color: '#6B6B6B' }}>
             Sign in to start your shift
           </p>
 
           {/* Phone field */}
           <div className="mb-6">
-            <label className="block text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#4a6b4c' }}>
+            <label className="block text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#6B6B6B' }}>
               Phone Number
             </label>
             <div
               className="flex items-center rounded-2xl overflow-hidden border"
-              style={{ borderColor: '#d4e6d5', background: '#fafdfb' }}
+              style={{ borderColor: '#E5E5E0', background: '#F5F5F0' }}
             >
               <span
                 className="flex items-center gap-1.5 px-3 py-3.5 text-sm font-semibold border-r whitespace-nowrap select-none"
-                style={{ color: '#1B5E20', borderColor: '#d4e6d5' }}
+                style={{ color: '#2D5A27', borderColor: '#E5E5E0' }}
               >
                 🇳🇬 +234
               </span>
@@ -166,7 +166,7 @@ export default function LoginPage() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                 className="flex-1 px-3 py-3.5 text-sm outline-none min-w-0 bg-transparent"
-                style={{ color: '#1a2e1b' }}
+                style={{ color: '#1A1A1A' }}
               />
             </div>
           </div>
@@ -194,11 +194,11 @@ export default function LoginPage() {
                   onBlur={() => setFocusedPin(-1)}
                   className="w-14 h-14 text-center text-2xl font-bold rounded-2xl outline-none transition-all"
                   style={{
-                    background: '#fafdfb',
-                    color: '#1B5E20',
+                    background: '#F5F5F0',
+                    color: '#2D5A27',
                     border: focusedPin === i
-                      ? '2px solid #1B5E20'
-                      : '1px solid #d4e6d5',
+                      ? '2px solid #2D5A27'
+                      : '1px solid #E5E5E0',
                   }}
                 />
               ))}
@@ -211,8 +211,8 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full font-bold py-4 rounded-full text-white transition-all disabled:opacity-60"
             style={{
-              background: '#25D366',
-              boxShadow: '0 4px 20px rgba(37,211,102,0.35)',
+              background: '#C8622A',
+              boxShadow: '0 4px 20px rgba(200,98,42,0.35)',
               fontSize: '15px',
             }}
           >
@@ -225,7 +225,7 @@ export default function LoginPage() {
             </p>
           )}
 
-          <p className="text-center text-xs mt-4" style={{ color: '#7a9a7c' }}>
+          <p className="text-center text-xs mt-4" style={{ color: '#6B6B6B' }}>
             Forgot PIN? Message your field lead.
           </p>
         </div>

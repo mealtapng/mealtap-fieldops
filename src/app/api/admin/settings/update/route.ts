@@ -21,17 +21,17 @@ export async function POST(request: NextRequest) {
     auth: { autoRefreshToken: false, persistSession: false },
   })
 
-  const allowed = ['commission_per_conversion', 'payout_cycle', 'target_weekly_onboardings']
+  const allowed = ['daily_target', 'weekly_salary', 'hot_lead_bonus']
   const updates = allowed
     .filter(k => k in body && body[k] !== undefined && body[k] !== null)
-    .map(k => ({ key: k, value: String(body[k]) }))
+    .map(k => ({ key: k, value: String(body[k]), updated_by: user.id, updated_at: new Date().toISOString() }))
 
   if (updates.length === 0) return err('No valid settings provided', 400)
 
-  for (const { key, value } of updates) {
+  for (const row of updates) {
     const { error } = await (admin as any)
-      .from('settings')
-      .upsert({ key, value }, { onConflict: 'key' })
+      .from('app_settings')
+      .upsert(row, { onConflict: 'key' })
 
     if (error) {
       console.error('[settings/update]', error.message)

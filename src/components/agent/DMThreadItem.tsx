@@ -53,9 +53,9 @@ export function DMThreadItem({ thread, otherUser, unreadCount }: Props) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm font-bold text-ink truncate">{otherUser.full_name}</p>
-          <p className="text-[11px] text-muted-brand flex-shrink-0">{timeAgo(timestamp)}</p>
+          <p className="text-[11px] text-muted flex-shrink-0">{timeAgo(timestamp)}</p>
         </div>
-        <p className="text-[11px] text-muted-brand mt-0.5">{roleLabel(otherUser.role)}</p>
+        <p className="text-[11px] text-muted mt-0.5">{roleLabel(otherUser.role)}</p>
       </div>
 
       {/* Unread badge */}

@@ -41,35 +41,28 @@ const config: Config = {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
-        // ── PowerChat brand — matches powerchat.ng ────────────────────────────
-        brand: {
-          DEFAULT: "#1B5E20",   // green-deep
-          dark:    "#0D1B0E",   // near-black green (footer / hero dark)
-          light:   "#E8F5E9",   // green-pale
+        // ── Mealtap brand palette ─────────────────────────────────────────────
+        forest: {
+          DEFAULT: "#2D5A27",
+          dark:    "#1F3F1B",
+          light:   "#E8F3EC",
         },
-        success: {
-          DEFAULT: "#25D366",   // WhatsApp green (primary CTA)
-          dark:    "#128C7E",   // WhatsApp dark
-          light:   "#DCF8C6",   // bubble green / success bg
+        terra: {
+          DEFAULT: "#C8622A",
+          dark:    "#A14F1F",
+          light:   "#FBEFE6",
         },
-        gold: {
-          DEFAULT: "#F9A825",   // gold accent
-          dark:    "#F57F17",
-          light:   "#FFF8E1",
-        },
-        cream:      "#fafdfb",  // off-white with green tint (body bg)
-        ink:        "#1a2e1b",  // primary text (dark green-black)
-        "muted-brand": "#4a6b4c", // secondary text
-        line:       "#d4e6d5",  // borders / dividers (green-tinted)
+        cream:  "#F5F5F0",
+        ink:    "#1A1A1A",
         muted: {
-          DEFAULT:    "hsl(var(--muted))",
+          DEFAULT:    "#6B6B6B",
           foreground: "hsl(var(--muted-foreground))",
-          brand:      "#4a6b4c",
         },
+        line:   "#E5E5E0",
       },
       fontFamily: {
-        sans:    ["var(--font-jakarta)", ...fontFamily.sans],
-        display: ["var(--font-bricolage)", ...fontFamily.sans],
+        sans:    ["var(--font-poppins)", ...fontFamily.sans],
+        display: ["var(--font-poppins)", ...fontFamily.sans],
       },
       borderRadius: {
         lg: "var(--radius)",

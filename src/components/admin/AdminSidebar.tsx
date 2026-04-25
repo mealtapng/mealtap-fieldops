@@ -17,14 +17,14 @@ interface Props {
 }
 
 const NAV_ITEMS = [
-  { href: '/admin',              label: 'Dashboard',   icon: '📊', exact: true  },
-  { href: '/admin/map',          label: 'Live Map',    icon: '🗺️', exact: false },
-  { href: '/admin/onboardings',  label: 'Onboardings', icon: '⚡', exact: false },
-  { href: '/admin/agents',       label: 'Agents',      icon: '👥', exact: false },
-  { href: '/admin/messages',     label: 'Messages',    icon: '💬', exact: false },
-  { href: '/content-hub',        label: 'Content Hub', icon: '🖼️', exact: false },
-  { href: '/admin/payouts',      label: 'Payouts',     icon: '💰', exact: false },
-  { href: '/admin/settings',     label: 'Settings',    icon: '⚙️', exact: false },
+  { href: '/admin',               label: 'Dashboard',   icon: '📊', exact: true  },
+  { href: '/admin/map',           label: 'Live Map',    icon: '🗺️', exact: false },
+  { href: '/admin/restaurants',   label: 'Restaurants', icon: '🍽️', exact: false },
+  { href: '/admin/agents',        label: 'Agents',      icon: '👥', exact: false },
+  { href: '/admin/messages',      label: 'Messages',    icon: '💬', exact: false },
+  { href: '/content-hub',         label: 'Content Hub', icon: '🖼️', exact: false },
+  { href: '/admin/payouts',       label: 'Payouts',     icon: '💰', exact: false },
+  { href: '/admin/settings',      label: 'Settings',    icon: '⚙️', exact: false },
 ]
 
 
@@ -53,14 +53,14 @@ export function AdminSidebar({ user }: Props) {
       {/* Fixed sidebar */}
       <aside
         className="w-[220px] flex-shrink-0 flex flex-col h-screen fixed left-0 top-0 z-40"
-        style={{ background: 'linear-gradient(180deg, #0D1B0E 0%, #0a2e0c 100%)' }}
+        style={{ background: 'linear-gradient(180deg, #1F3F1B 0%, #2D5A27 100%)' }}
       >
 
         {/* Logo */}
         <div className="px-4 pt-5 pb-4 border-b border-white/10">
           <Image
             src={logoSrc}
-            alt="PowerChat"
+            alt="Mealtap"
             width={80}
             height={80}
             className="object-contain rounded-lg"
@@ -84,7 +84,7 @@ export function AdminSidebar({ user }: Props) {
                     ? 'text-white font-semibold'
                     : 'text-white/60 hover:bg-white/5 hover:text-white'
                 }`}
-                style={active ? { background: 'rgba(249,168,37,0.15)', color: '#F9A825' } : {}}
+                style={active ? { background: 'rgba(200,98,42,0.18)', color: '#FBAB76' } : {}}
               >
                 <span className="text-base leading-none">{item.icon}</span>
                 {item.label}
@@ -98,7 +98,7 @@ export function AdminSidebar({ user }: Props) {
         {user && (
           <div className="border-t border-white/10 p-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#1B5E20' }}>
+              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#2D5A27' }}>
                 <span className="text-xs font-bold text-white">{initials(user.full_name)}</span>
               </div>
               <div className="min-w-0 flex-1">

@@ -18,9 +18,9 @@ interface Props {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  converted: 'bg-success-light text-success',
+  converted: 'bg-terra-light text-success',
   pending:   'bg-amber-50 text-amber-700',
-  failed:    'bg-line text-muted-brand',
+  failed:    'bg-line text-muted',
 }
 const STATUS_LABELS: Record<string, string> = {
   converted: 'Converted',
@@ -46,14 +46,14 @@ export function ZoneView({ zone, stats, onboardings }: Props) {
         <div className="px-4 pt-12 pb-4 flex items-center gap-3">
           <Link
             href="/dashboard"
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-line text-muted-brand active:bg-cream"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-line text-muted active:bg-cream"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 12H5M12 5l-7 7 7 7"/>
             </svg>
           </Link>
           <div>
-            <p className="text-[10px] font-semibold tracking-widest text-muted-brand uppercase">Today&apos;s zone</p>
+            <p className="text-[10px] font-semibold tracking-widest text-muted uppercase">Today&apos;s zone</p>
             <h1 className="text-xl font-bold text-ink leading-tight">{zone.name}</h1>
           </div>
         </div>
@@ -64,9 +64,9 @@ export function ZoneView({ zone, stats, onboardings }: Props) {
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-white rounded-2xl p-4 text-center shadow-sm">
               <p className="text-2xl font-bold text-ink">{stats.total}</p>
-              <p className="text-[10px] text-muted-brand font-semibold uppercase tracking-wide mt-0.5">Total</p>
+              <p className="text-[10px] text-muted font-semibold uppercase tracking-wide mt-0.5">Total</p>
             </div>
-            <div className="bg-success-light rounded-2xl p-4 text-center">
+            <div className="bg-terra-light rounded-2xl p-4 text-center">
               <p className="text-2xl font-bold text-success">{stats.converted}</p>
               <p className="text-[10px] text-success/80 font-semibold uppercase tracking-wide mt-0.5">Converted</p>
             </div>
@@ -90,7 +90,7 @@ export function ZoneView({ zone, stats, onboardings }: Props) {
 
           {/* Onboardings list */}
           <div>
-            <p className="text-[10px] font-semibold tracking-widest text-muted-brand uppercase mb-2">
+            <p className="text-[10px] font-semibold tracking-widest text-muted uppercase mb-2">
               Your onboardings here
             </p>
 
@@ -98,7 +98,7 @@ export function ZoneView({ zone, stats, onboardings }: Props) {
               <div className="bg-white rounded-2xl p-8 text-center shadow-sm">
                 <p className="text-3xl mb-2">📍</p>
                 <p className="text-sm font-semibold text-ink">No onboardings in this zone yet</p>
-                <p className="text-xs text-muted-brand mt-1">Start your first one with the button above.</p>
+                <p className="text-xs text-muted mt-1">Start your first one with the button above.</p>
               </div>
             ) : (
               <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y divide-line">
@@ -109,10 +109,10 @@ export function ZoneView({ zone, stats, onboardings }: Props) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-ink truncate">{o.user_name}</p>
-                      <p className="text-xs text-muted-brand">{o.disco_area ?? 'Unknown DISCO'} · {timeAgo(o.created_at)}</p>
+                      <p className="text-xs text-muted">{o.disco_area ?? 'Unknown DISCO'} · {timeAgo(o.created_at)}</p>
                     </div>
                     {o.conversion_status && (
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${STATUS_STYLES[o.conversion_status] ?? 'bg-line text-muted-brand'}`}>
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${STATUS_STYLES[o.conversion_status] ?? 'bg-line text-muted'}`}>
                         {STATUS_LABELS[o.conversion_status] ?? o.conversion_status}
                       </span>
                     )}

@@ -73,7 +73,7 @@ export function ChatBubble({ body, sentAt, isMine, otherInitials, senderInitials
               <AttachmentBlock url={attachmentUrl} name={attachmentName} isMine />
             )}
           </div>
-          <p className="text-[10px] text-muted-brand mt-0.5 text-right pr-1">
+          <p className="text-[10px] text-muted mt-0.5 text-right pr-1">
             {timeAgo(sentAt)}
           </p>
         </div>
@@ -91,7 +91,7 @@ export function ChatBubble({ body, sentAt, isMine, otherInitials, senderInitials
             <AttachmentBlock url={attachmentUrl} name={attachmentName} isMine={false} />
           )}
         </div>
-        <p className="text-[10px] text-muted-brand mt-0.5 pl-1">
+        <p className="text-[10px] text-muted mt-0.5 pl-1">
           {timeAgo(sentAt)}
         </p>
       </div>

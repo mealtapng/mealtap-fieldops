@@ -6,7 +6,7 @@
  * down as props. No React context needed for a linear wizard.
  */
 
-import type { ConversionStatus } from './types/database'
+type ConversionStatus = 'converted' | 'pending' | 'failed'
 
 // ── Step 1: GPS location lock ─────────────────────────────────────────────────
 

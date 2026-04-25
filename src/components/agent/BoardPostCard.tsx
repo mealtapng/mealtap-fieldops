@@ -66,7 +66,7 @@ export function BoardPostCard({ post, reactions, currentUserId, onReactionsChang
             <p className="text-sm font-bold text-ink leading-tight truncate">
               {post.author?.full_name ?? 'Unknown'}
             </p>
-            <p className="text-[11px] text-muted-brand">
+            <p className="text-[11px] text-muted">
               {roleLabel(post.author?.role ?? '')} · {timeAgo(post.created_at)}
             </p>
           </div>

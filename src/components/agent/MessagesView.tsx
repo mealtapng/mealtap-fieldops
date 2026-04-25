@@ -66,14 +66,14 @@ function NewPostModal({ currentUserId, onClose, onPosted }: {
       <div className="w-full max-w-md bg-white rounded-t-3xl p-5 pb-8" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <p className="text-base font-bold text-ink">New post</p>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-full bg-cream text-muted-brand">
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-full bg-cream text-muted">
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
         </div>
         <textarea
           autoFocus value={body} onChange={e => setBody(e.target.value)}
           placeholder="Write your announcement…" rows={4}
-          className="w-full rounded-xl border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-brand/60 focus:outline-none focus:ring-2 focus:ring-success/30 focus:border-success resize-none"
+          className="w-full rounded-xl border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-terra/30 focus:border-terra resize-none"
         />
         <label className="flex items-center gap-2.5 mt-3 cursor-pointer">
           <input type="checkbox" checked={isPinned} onChange={e => setIsPinned(e.target.checked)} className="w-4 h-4 rounded accent-success" />
@@ -81,7 +81,7 @@ function NewPostModal({ currentUserId, onClose, onPosted }: {
         </label>
         <button
           onClick={submit} disabled={!body.trim() || posting}
-          className={`w-full mt-4 py-3.5 rounded-2xl font-bold text-sm transition-all ${body.trim() && !posting ? 'bg-success text-white shadow-lg shadow-success/25 active:bg-success-dark' : 'bg-line text-muted-brand cursor-not-allowed'}`}
+          className={`w-full mt-4 py-3.5 rounded-2xl font-bold text-sm transition-all ${body.trim() && !posting ? 'bg-terra text-white shadow-lg shadow-terra/25 active:bg-terra-dark' : 'bg-line text-muted cursor-not-allowed'}`}
         >
           {posting ? 'Posting…' : 'Post to Team Board'}
         </button>
@@ -113,7 +113,7 @@ function NewMessageModal({ contacts, onClose, onSelect, creating }: {
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
           <p className="text-base font-bold text-ink">New message</p>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-full bg-cream text-muted-brand">
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-full bg-cream text-muted">
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
         </div>
@@ -123,7 +123,7 @@ function NewMessageModal({ contacts, onClose, onSelect, creating }: {
           <input
             autoFocus type="text" value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search name…"
-            className="w-full rounded-xl border border-line px-4 py-2.5 text-sm text-ink placeholder:text-muted-brand/60 focus:outline-none focus:ring-2 focus:ring-success/30 focus:border-success"
+            className="w-full rounded-xl border border-line px-4 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-terra/30 focus:border-terra"
           />
         </div>
 
@@ -131,7 +131,7 @@ function NewMessageModal({ contacts, onClose, onSelect, creating }: {
         <div className="overflow-y-auto flex-1 pb-8">
           {adminsLeads.length > 0 && (
             <>
-              <p className="px-5 py-2 text-[10px] font-bold text-muted-brand uppercase tracking-wider">Supervisors</p>
+              <p className="px-5 py-2 text-[10px] font-bold text-muted uppercase tracking-wider">Supervisors</p>
               {adminsLeads.map(c => (
                 <button
                   key={c.id}
@@ -144,12 +144,12 @@ function NewMessageModal({ contacts, onClose, onSelect, creating }: {
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-semibold text-ink">{c.full_name}</p>
-                    <p className="text-[11px] text-muted-brand">{roleLabel(c.role)}</p>
+                    <p className="text-[11px] text-muted">{roleLabel(c.role)}</p>
                   </div>
                   {creating ? (
-                    <div className="ml-auto w-4 h-4 border-2 border-success/30 border-t-success rounded-full animate-spin" />
+                    <div className="ml-auto w-4 h-4 border-2 border-terra/30 border-t-success rounded-full animate-spin" />
                   ) : (
-                    <svg className="w-4 h-4 text-muted-brand ml-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    <svg className="w-4 h-4 text-muted ml-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                   )}
                 </button>
               ))}
@@ -158,7 +158,7 @@ function NewMessageModal({ contacts, onClose, onSelect, creating }: {
 
           {agents.length > 0 && (
             <>
-              <p className="px-5 py-2 text-[10px] font-bold text-muted-brand uppercase tracking-wider">Agents</p>
+              <p className="px-5 py-2 text-[10px] font-bold text-muted uppercase tracking-wider">Agents</p>
               {agents.map(c => (
                 <button
                   key={c.id}
@@ -171,12 +171,12 @@ function NewMessageModal({ contacts, onClose, onSelect, creating }: {
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-semibold text-ink">{c.full_name}</p>
-                    <p className="text-[11px] text-muted-brand">Agent</p>
+                    <p className="text-[11px] text-muted">Agent</p>
                   </div>
                   {creating ? (
-                    <div className="ml-auto w-4 h-4 border-2 border-success/30 border-t-success rounded-full animate-spin" />
+                    <div className="ml-auto w-4 h-4 border-2 border-terra/30 border-t-success rounded-full animate-spin" />
                   ) : (
-                    <svg className="w-4 h-4 text-muted-brand ml-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    <svg className="w-4 h-4 text-muted ml-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                   )}
                 </button>
               ))}
@@ -184,7 +184,7 @@ function NewMessageModal({ contacts, onClose, onSelect, creating }: {
           )}
 
           {filtered.length === 0 && (
-            <p className="px-5 py-8 text-sm text-muted-brand text-center">No users found.</p>
+            <p className="px-5 py-8 text-sm text-muted text-center">No users found.</p>
           )}
         </div>
       </div>
@@ -255,7 +255,7 @@ export function MessagesView({ currentUser, posts: initialPosts, reactions: init
         {activeTab === 'direct' && (
           <button
             onClick={() => setShowNewMsgModal(true)}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-success text-white shadow-md shadow-success/25 active:bg-success/90 transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-terra text-white shadow-md shadow-terra/25 active:bg-terra/90 transition-colors"
             aria-label="New message"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
@@ -272,7 +272,7 @@ export function MessagesView({ currentUser, posts: initialPosts, reactions: init
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-bold transition-all ${
-              activeTab === tab ? 'bg-white shadow text-ink' : 'text-muted-brand'
+              activeTab === tab ? 'bg-white shadow text-ink' : 'text-muted'
             }`}
           >
             {tab === 'board' ? '📢 Team Board' : '💬 Direct'}
@@ -294,7 +294,7 @@ export function MessagesView({ currentUser, posts: initialPosts, reactions: init
                 <div>
                   <p className="text-3xl mb-2">📢</p>
                   <p className="text-sm font-semibold text-ink">No posts yet</p>
-                  <p className="text-xs text-muted-brand mt-1">Announcements from your field lead will appear here.</p>
+                  <p className="text-xs text-muted mt-1">Announcements from your field lead will appear here.</p>
                 </div>
               </div>
             ) : (
@@ -318,7 +318,7 @@ export function MessagesView({ currentUser, posts: initialPosts, reactions: init
               <div className="py-12 text-center space-y-3">
                 <p className="text-3xl">💬</p>
                 <p className="text-sm font-semibold text-ink">No messages yet</p>
-                <p className="text-xs text-muted-brand">Tap the chat button above to start a conversation.</p>
+                <p className="text-xs text-muted">Tap the chat button above to start a conversation.</p>
               </div>
             ) : (
               threads.map(thread => {
@@ -341,7 +341,7 @@ export function MessagesView({ currentUser, posts: initialPosts, reactions: init
       {isAdminOrLead(currentUser.role) && activeTab === 'board' && (
         <button
           onClick={() => setShowNewPostModal(true)}
-          className="fixed bottom-20 right-4 w-14 h-14 bg-success text-white rounded-full shadow-lg shadow-success/30 flex items-center justify-center active:bg-success-dark transition-colors z-30"
+          className="fixed bottom-20 right-4 w-14 h-14 bg-terra text-white rounded-full shadow-lg shadow-terra/30 flex items-center justify-center active:bg-terra-dark transition-colors z-30"
           aria-label="New post"
         >
           <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">

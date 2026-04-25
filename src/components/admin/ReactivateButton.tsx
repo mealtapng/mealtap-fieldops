@@ -31,7 +31,7 @@ export function ReactivateButton({ agentId, agentName }: { agentId: string; agen
     <button
       onClick={handleReactivate}
       disabled={loading}
-      className="px-4 py-2.5 rounded-xl border border-brand/30 text-sm font-semibold text-brand hover:bg-brand/5 disabled:opacity-60 transition-colors"
+      className="px-4 py-2.5 rounded-xl border border-forest/30 text-sm font-semibold text-brand hover:bg-forest/5 disabled:opacity-60 transition-colors"
     >
       {loading ? 'Reactivating…' : 'Reactivate Agent'}
     </button>

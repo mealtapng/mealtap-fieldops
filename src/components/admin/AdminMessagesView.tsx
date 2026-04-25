@@ -90,7 +90,7 @@ function BroadcastModal({
       <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-xl">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-bold text-ink">New Broadcast</h2>
-          <button onClick={onClose} className="text-muted-brand hover:text-ink text-xl leading-none">×</button>
+          <button onClick={onClose} className="text-muted hover:text-ink text-xl leading-none">×</button>
         </div>
 
         <textarea
@@ -99,7 +99,7 @@ function BroadcastModal({
           onChange={e => setBody(e.target.value)}
           placeholder="Write your announcement to all agents…"
           rows={5}
-          className="w-full rounded-xl border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand resize-none"
+          className="w-full rounded-xl border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest resize-none"
         />
 
         <label className="flex items-center gap-2.5 mt-3 cursor-pointer">
@@ -117,14 +117,14 @@ function BroadcastModal({
         <div className="flex gap-3 mt-5">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-line text-sm font-semibold text-muted-brand hover:text-ink hover:border-ink/20 transition-colors"
+            className="flex-1 px-4 py-2.5 rounded-xl border border-line text-sm font-semibold text-muted hover:text-ink hover:border-ink/20 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={submit}
             disabled={!body.trim() || posting}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-success text-white text-sm font-semibold hover:bg-success/90 disabled:opacity-60 transition-colors"
+            className="flex-1 px-4 py-2.5 rounded-xl bg-terra text-white text-sm font-semibold hover:bg-terra/90 disabled:opacity-60 transition-colors"
           >
             {posting ? 'Posting…' : 'Post to Team Board'}
           </button>
@@ -160,7 +160,7 @@ function NewMessageModal({
       <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-ink">New Message</h2>
-          <button onClick={onClose} className="text-muted-brand hover:text-ink text-xl leading-none">×</button>
+          <button onClick={onClose} className="text-muted hover:text-ink text-xl leading-none">×</button>
         </div>
 
         <input
@@ -169,12 +169,12 @@ function NewMessageModal({
           onChange={e => setSearch(e.target.value)}
           placeholder="Search agents…"
           autoFocus
-          className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand mb-3"
+          className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest mb-3"
         />
 
         <div className="space-y-2 max-h-72 overflow-y-auto">
           {filtered.length === 0 ? (
-            <p className="text-sm text-muted-brand text-center py-6">No agents found</p>
+            <p className="text-sm text-muted text-center py-6">No agents found</p>
           ) : filtered.map(agent => (
             <button
               key={agent.id}
@@ -187,7 +187,7 @@ function NewMessageModal({
               </div>
               <div>
                 <p className="text-sm font-semibold text-ink">{agent.full_name}</p>
-                <p className="text-xs text-muted-brand">{agent.employee_id} · {roleLabel(agent.role)}</p>
+                <p className="text-xs text-muted">{agent.employee_id} · {roleLabel(agent.role)}</p>
               </div>
             </button>
           ))}
@@ -328,7 +328,7 @@ export function AdminMessagesView({
           {activeTab === 'board' && (
             <button
               onClick={() => setShowBroadcast(true)}
-              className="px-4 py-2.5 bg-success text-white rounded-xl font-semibold text-sm hover:bg-success/90 transition-colors"
+              className="px-4 py-2.5 bg-terra text-white rounded-xl font-semibold text-sm hover:bg-terra/90 transition-colors"
             >
               + New Broadcast
             </button>
@@ -350,7 +350,7 @@ export function AdminMessagesView({
         <button
           onClick={() => setActiveTab('board')}
           className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5 ${
-            activeTab === 'board' ? 'bg-white shadow-sm border border-line text-ink' : 'text-muted-brand hover:text-ink'
+            activeTab === 'board' ? 'bg-white shadow-sm border border-line text-ink' : 'text-muted hover:text-ink'
           }`}
         >
           📢 Team Board
@@ -358,7 +358,7 @@ export function AdminMessagesView({
         <button
           onClick={() => setActiveTab('direct')}
           className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-1.5 ${
-            activeTab === 'direct' ? 'bg-white shadow-sm border border-line text-ink' : 'text-muted-brand hover:text-ink'
+            activeTab === 'direct' ? 'bg-white shadow-sm border border-line text-ink' : 'text-muted hover:text-ink'
           }`}
         >
           💬 Direct
@@ -397,7 +397,7 @@ export function AdminMessagesView({
               <div className="bg-white rounded-2xl border border-line p-12 text-center">
                 <p className="text-3xl mb-3">📢</p>
                 <p className="text-sm font-semibold text-ink">No posts yet</p>
-                <p className="text-xs text-muted-brand mt-1">Click &quot;+ New Broadcast&quot; to post to all agents.</p>
+                <p className="text-xs text-muted mt-1">Click &quot;+ New Broadcast&quot; to post to all agents.</p>
               </div>
             ) : posts.map(post => (
               <div key={post.id} className="relative group">
@@ -427,7 +427,7 @@ export function AdminMessagesView({
               <div className="bg-white rounded-2xl border border-line p-12 text-center">
                 <p className="text-3xl mb-3">💬</p>
                 <p className="text-sm font-semibold text-ink">No threads yet</p>
-                <p className="text-xs text-muted-brand mt-1">Click &quot;+ New Message&quot; to start a conversation.</p>
+                <p className="text-xs text-muted mt-1">Click &quot;+ New Message&quot; to start a conversation.</p>
               </div>
             ) : directThreads.map(thread => {
               const otherUser = thread.supervisor_id === currentUser.id ? thread.agent : thread.supervisor
@@ -453,9 +453,9 @@ export function AdminMessagesView({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-bold text-ink truncate">{otherUser.full_name}</p>
-                      <p className="text-[11px] text-muted-brand flex-shrink-0">{timeAgo(timestamp)}</p>
+                      <p className="text-[11px] text-muted flex-shrink-0">{timeAgo(timestamp)}</p>
                     </div>
-                    <p className="text-[11px] text-muted-brand">{roleLabel(otherUser.role)}</p>
+                    <p className="text-[11px] text-muted">{roleLabel(otherUser.role)}</p>
                   </div>
                   {unread > 0 && (
                     <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
@@ -482,7 +482,7 @@ export function AdminMessagesView({
               <div className="bg-white rounded-2xl border border-line p-12 text-center">
                 <p className="text-3xl mb-3">🔴</p>
                 <p className="text-sm font-semibold text-ink">No agent-to-agent chats yet</p>
-                <p className="text-xs text-muted-brand mt-1">When agents message each other, threads appear here.</p>
+                <p className="text-xs text-muted mt-1">When agents message each other, threads appear here.</p>
               </div>
             ) : agentToAgentThreads.map(thread => {
               const unread    = unreadCounts[thread.id] ?? 0
@@ -511,7 +511,7 @@ export function AdminMessagesView({
                       <p className="text-sm font-bold text-ink truncate">
                         {thread.agent.full_name} ↔ {thread.supervisor.full_name}
                       </p>
-                      <p className="text-[11px] text-muted-brand flex-shrink-0">{timeAgo(timestamp)}</p>
+                      <p className="text-[11px] text-muted flex-shrink-0">{timeAgo(timestamp)}</p>
                     </div>
                     <p className="text-[11px] text-red-400 font-medium">Private messages between agents</p>
                   </div>

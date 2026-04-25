@@ -22,9 +22,9 @@ interface Props {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  converted: 'bg-brand-light text-brand border border-brand/20',
+  converted: 'bg-forest-light text-brand border border-forest/20',
   pending:   'bg-amber-50 text-amber-700 border border-amber-200',
-  failed:    'bg-line text-muted-brand border border-line',
+  failed:    'bg-line text-muted border border-line',
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -64,11 +64,11 @@ export function OnboardingsTable({ onboardings, total }: Props) {
         <div className="flex items-center justify-between px-6 py-5 border-b border-line">
           <div>
             <h1 className="text-2xl font-bold text-brand">Onboardings ⚡</h1>
-            <p className="text-sm text-muted-brand">{total} total onboarding{total !== 1 ? 's' : ''}</p>
+            <p className="text-sm text-muted">{total} total onboarding{total !== 1 ? 's' : ''}</p>
           </div>
           <a
             href="/api/admin/export-onboardings"
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-line text-sm font-semibold text-muted-brand hover:border-brand hover:text-brand transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-line text-sm font-semibold text-muted hover:border-forest hover:text-forest transition-colors"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
@@ -83,7 +83,7 @@ export function OnboardingsTable({ onboardings, total }: Props) {
         <div className="flex items-center gap-3 px-6 py-3 border-b border-line bg-cream/30">
           {/* Search */}
           <div className="relative flex-1 max-w-xs">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input
@@ -91,7 +91,7 @@ export function OnboardingsTable({ onboardings, total }: Props) {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by name, phone, agent…"
-              className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-line text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+              className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-line text-sm text-ink placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
             />
           </div>
 
@@ -104,7 +104,7 @@ export function OnboardingsTable({ onboardings, total }: Props) {
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors ${
                   filter === s
                     ? 'bg-brand text-white'
-                    : 'text-muted-brand hover:text-ink hover:bg-line/50'
+                    : 'text-muted hover:text-ink hover:bg-line/50'
                 }`}
               >
                 {s === 'failed' ? 'Not interested' : s}
@@ -119,7 +119,7 @@ export function OnboardingsTable({ onboardings, total }: Props) {
             <thead>
               <tr className="border-b border-line bg-cream/50">
                 {['Customer', 'Phone', 'DISCO', 'Agent', 'Zone', 'Status', 'Token Amt', 'Time'].map(col => (
-                  <th key={col} className="text-left px-5 py-3 text-[10px] font-bold tracking-widest text-muted-brand uppercase">
+                  <th key={col} className="text-left px-5 py-3 text-[10px] font-bold tracking-widest text-muted uppercase">
                     {col}
                   </th>
                 ))}
@@ -128,7 +128,7 @@ export function OnboardingsTable({ onboardings, total }: Props) {
             <tbody className="divide-y divide-line">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-sm text-muted-brand">
+                  <td colSpan={8} className="px-6 py-12 text-center text-sm text-muted">
                     No onboardings match your filters
                   </td>
                 </tr>
@@ -138,14 +138,14 @@ export function OnboardingsTable({ onboardings, total }: Props) {
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2">
                       <span className="text-base">⚡</span>
-                      <Link href={`/admin/onboardings/${row.id}`} className="text-sm font-semibold text-ink hover:text-brand transition-colors">
+                      <Link href={`/admin/onboardings/${row.id}`} className="text-sm font-semibold text-ink hover:text-forest transition-colors">
                         {row.user_name}
                       </Link>
                     </div>
                   </td>
 
                   {/* Phone */}
-                  <td className="px-5 py-3.5 text-sm text-muted-brand">{row.user_phone ?? '—'}</td>
+                  <td className="px-5 py-3.5 text-sm text-muted">{row.user_phone ?? '—'}</td>
 
                   {/* DISCO */}
                   <td className="px-5 py-3.5 text-sm text-ink">{row.disco_area ?? '—'}</td>
@@ -161,16 +161,16 @@ export function OnboardingsTable({ onboardings, total }: Props) {
                   </td>
 
                   {/* Zone */}
-                  <td className="px-5 py-3.5 text-sm text-muted-brand">{row.zone_name ?? '—'}</td>
+                  <td className="px-5 py-3.5 text-sm text-muted">{row.zone_name ?? '—'}</td>
 
                   {/* Status */}
                   <td className="px-5 py-3.5">
                     {row.conversion_status ? (
-                      <span className={`inline-flex px-2.5 py-1 rounded-full text-[11px] font-semibold ${STATUS_STYLES[row.conversion_status] ?? 'bg-line text-muted-brand'}`}>
+                      <span className={`inline-flex px-2.5 py-1 rounded-full text-[11px] font-semibold ${STATUS_STYLES[row.conversion_status] ?? 'bg-line text-muted'}`}>
                         {STATUS_LABELS[row.conversion_status] ?? row.conversion_status}
                       </span>
                     ) : (
-                      <span className="text-sm text-muted-brand">—</span>
+                      <span className="text-sm text-muted">—</span>
                     )}
                   </td>
 
@@ -180,7 +180,7 @@ export function OnboardingsTable({ onboardings, total }: Props) {
                   </td>
 
                   {/* Time */}
-                  <td className="px-5 py-3.5 text-sm text-muted-brand whitespace-nowrap">
+                  <td className="px-5 py-3.5 text-sm text-muted whitespace-nowrap">
                     {timeAgo(row.created_at)}
                   </td>
                 </tr>

@@ -16,7 +16,7 @@ interface Props {
 
 function SectionHeader({ title }: { title: string }) {
   return (
-    <p className="text-[10px] font-bold tracking-widest text-muted-brand uppercase mb-2 px-1">
+    <p className="text-[10px] font-bold tracking-widest text-muted uppercase mb-2 px-1">
       {title}
     </p>
   )
@@ -49,7 +49,7 @@ function TextInput({
   const invalid = required && touched && value.trim().length === 0
   return (
     <div className="px-4 py-3.5">
-      <label className="block text-[10px] font-bold tracking-widest text-muted-brand uppercase mb-1.5">
+      <label className="block text-[10px] font-bold tracking-widest text-muted uppercase mb-1.5">
         {label}{required && <span className="text-brand ml-0.5">*</span>}
       </label>
       <input
@@ -59,14 +59,14 @@ function TextInput({
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={`w-full rounded-xl border px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-brand/60
-          focus:outline-none focus:ring-2 focus:border-brand transition-colors
+        className={`w-full rounded-xl border px-3.5 py-2.5 text-sm text-ink placeholder:text-muted/60
+          focus:outline-none focus:ring-2 focus:border-forest transition-colors
           ${invalid
             ? 'border-red-400 focus:ring-red-200'
-            : 'border-line focus:ring-brand/30'
+            : 'border-line focus:ring-forest/30'
           }`}
       />
-      {hint && <p className="text-[11px] text-muted-brand mt-1">{hint}</p>}
+      {hint && <p className="text-[11px] text-muted mt-1">{hint}</p>}
       {invalid && <p className="text-[11px] text-red-500 mt-1">This field is required</p>}
     </div>
   )
@@ -112,7 +112,7 @@ export function OnboardingStep2Details({ initialData: initial, referralCode, onC
       <div className="flex-1 overflow-y-auto px-4 pt-3 space-y-4 pb-4">
 
         {/* Referral code display */}
-        <div className="bg-brand/10 rounded-2xl px-4 py-3.5 flex items-center gap-3">
+        <div className="bg-forest/10 rounded-2xl px-4 py-3.5 flex items-center gap-3">
           <span className="text-xl flex-shrink-0">⚡</span>
           <div>
             <p className="text-[10px] font-bold tracking-widest text-brand uppercase">
@@ -133,11 +133,11 @@ export function OnboardingStep2Details({ initialData: initial, referralCode, onC
           <FormCard>
             {/* Phone */}
             <div className="px-4 py-3.5">
-              <label className="block text-[10px] font-bold tracking-widest text-muted-brand uppercase mb-1.5">
+              <label className="block text-[10px] font-bold tracking-widest text-muted uppercase mb-1.5">
                 Phone number<span className="text-brand ml-0.5">*</span>
               </label>
               <div className="flex items-center gap-0 rounded-xl border overflow-hidden
-                focus-within:ring-2 focus-within:ring-brand/30 focus-within:border-brand transition-colors
+                focus-within:ring-2 focus-within:ring-forest/30 focus-within:border-forest transition-colors
                 border-line">
                 <span className="px-3 py-2.5 text-sm font-semibold text-ink bg-cream border-r border-line flex-shrink-0">
                   🇳🇬 +234
@@ -149,7 +149,7 @@ export function OnboardingStep2Details({ initialData: initial, referralCode, onC
                   onChange={e => { setUserPhone(e.target.value); setPhoneTouched(true) }}
                   placeholder="08XX XXX XXXX"
                   maxLength={15}
-                  className="flex-1 px-3 py-2.5 text-sm text-ink placeholder:text-muted-brand/60 focus:outline-none bg-white"
+                  className="flex-1 px-3 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:outline-none bg-white"
                 />
               </div>
               {phoneInvalid && (
@@ -174,17 +174,17 @@ export function OnboardingStep2Details({ initialData: initial, referralCode, onC
           <FormCard>
             {/* DISCO dropdown */}
             <div className="px-4 py-3.5">
-              <label className="block text-[10px] font-bold tracking-widest text-muted-brand uppercase mb-1.5">
+              <label className="block text-[10px] font-bold tracking-widest text-muted uppercase mb-1.5">
                 DISCO area<span className="text-brand ml-0.5">*</span>
               </label>
               <select
                 value={discoArea}
                 onChange={e => { setDiscoArea(e.target.value); setDiscoTouched(true) }}
                 className={`w-full rounded-xl border px-3.5 py-2.5 text-sm text-ink bg-white
-                  focus:outline-none focus:ring-2 focus:border-brand transition-colors appearance-none
+                  focus:outline-none focus:ring-2 focus:border-forest transition-colors appearance-none
                   ${discoInvalid
                     ? 'border-red-400 focus:ring-red-200'
-                    : 'border-line focus:ring-brand/30'
+                    : 'border-line focus:ring-forest/30'
                   }`}
               >
                 <option value="">Select electricity provider…</option>
@@ -217,8 +217,8 @@ export function OnboardingStep2Details({ initialData: initial, referralCode, onC
           onClick={handleContinue}
           className={`w-full py-4 rounded-2xl font-bold text-base transition-all ${
             canContinue
-              ? 'bg-brand text-white shadow-lg shadow-brand/25 active:bg-brand-dark'
-              : 'bg-line text-muted-brand cursor-not-allowed'
+              ? 'bg-brand text-white shadow-lg shadow-forest/25 active:bg-forest-dark'
+              : 'bg-line text-muted cursor-not-allowed'
           }`}
         >
           Continue to checklist →

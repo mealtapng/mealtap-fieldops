@@ -163,7 +163,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
   if (noGeo) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-4">
-        <div className="w-14 h-14 rounded-full bg-brand/10 flex items-center justify-center">
+        <div className="w-14 h-14 rounded-full bg-forest/10 flex items-center justify-center">
           <span className="text-2xl">📍</span>
         </div>
         <p className="text-sm text-ink font-semibold">
@@ -182,7 +182,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
     const msg = msgs[geoError.code] ?? 'Unable to get your location.'
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-4">
-        <div className="w-14 h-14 rounded-full bg-brand/10 flex items-center justify-center">
+        <div className="w-14 h-14 rounded-full bg-forest/10 flex items-center justify-center">
           <span className="text-2xl">📍</span>
         </div>
         <p className="text-sm text-ink font-semibold leading-relaxed">{msg}</p>
@@ -195,7 +195,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
           </button>
         )}
         {geoError.code === 1 && (
-          <p className="text-xs text-muted-brand">
+          <p className="text-xs text-muted">
             Tap the lock icon in your browser&apos;s address bar to allow location.
           </p>
         )}
@@ -216,7 +216,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
       <div className="flex-1 overflow-y-auto">
 
         {/* ── Map ──────────────────────────────────────────────────────── */}
-        <div className="relative bg-brand-light" style={{ height: 280 }}>
+        <div className="relative bg-forest-light" style={{ height: 280 }}>
           {/* Mapbox container */}
           <div ref={mapContainerRef} className="absolute inset-0" />
 
@@ -284,7 +284,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
           <div className="bg-white rounded-2xl shadow-sm px-5 py-4">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-[10px] font-bold tracking-widest text-muted-brand uppercase">
+              <span className="text-[10px] font-bold tracking-widest text-muted uppercase">
                 Live GPS Reading
               </span>
             </div>
@@ -313,7 +313,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
                       value={address}
                       onChange={e => setAddress(e.target.value)}
                       onBlur={() => setEditingAddr(false)}
-                      className="w-full text-sm text-ink font-medium border-b border-brand outline-none pb-0.5 bg-transparent"
+                      className="w-full text-sm text-ink font-medium border-b border-forest outline-none pb-0.5 bg-transparent"
                       placeholder="Enter address…"
                     />
                   ) : isGeocoding ? (
@@ -340,7 +340,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
           </div>
 
           {/* Tip card */}
-          <div className="bg-brand/10 rounded-2xl px-4 py-3.5 flex items-start gap-3">
+          <div className="bg-forest/10 rounded-2xl px-4 py-3.5 flex items-start gap-3">
             <span className="text-lg flex-shrink-0">💡</span>
             <p className="text-xs text-brand font-medium leading-relaxed">
               Tip: If the pin is off, walk closer to the customer&apos;s meter and tap Re-pin.
@@ -351,7 +351,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
           {/* Re-pin button */}
           <button
             onClick={repin}
-            className="w-full py-3.5 rounded-2xl border-2 border-brand text-brand font-semibold text-sm bg-white flex items-center justify-center gap-2 active:bg-brand/10 transition-colors"
+            className="w-full py-3.5 rounded-2xl border-2 border-forest text-brand font-semibold text-sm bg-white flex items-center justify-center gap-2 active:bg-forest/10 transition-colors"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3" />
@@ -370,14 +370,14 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
           onClick={handleContinue}
           className={`w-full py-4 rounded-2xl font-bold text-base transition-all ${
             canContinue
-              ? 'bg-brand text-white shadow-lg shadow-brand/25 active:bg-brand-dark'
-              : 'bg-line text-muted-brand cursor-not-allowed'
+              ? 'bg-brand text-white shadow-lg shadow-forest/25 active:bg-forest-dark'
+              : 'bg-line text-muted cursor-not-allowed'
           }`}
         >
           📍 Lock location &amp; continue →
         </button>
         {acc != null && acc > 10 && (
-          <p className="text-[11px] text-center text-muted-brand mt-1.5">
+          <p className="text-[11px] text-center text-muted mt-1.5">
             GPS accuracy must be ±10m or better to continue (currently ±{acc}m)
           </p>
         )}
@@ -391,7 +391,7 @@ export function CaptureStep1GPS({ initialData, onContinue }: Props) {
 function GPSRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-xs text-muted-brand font-medium">{label}</span>
+      <span className="text-xs text-muted font-medium">{label}</span>
       <span className="text-xs font-mono font-semibold text-ink">{value}</span>
     </div>
   )

@@ -168,7 +168,7 @@ export default function ThreadPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center" style={{ height: '100dvh', background: '#E8F5E9' }}>
-        <div className="w-6 h-6 border-2 border-success/30 border-t-success rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-terra/30 border-t-success rounded-full animate-spin" />
       </div>
     )
   }
@@ -180,7 +180,7 @@ export default function ThreadPage() {
       <div className="flex items-center gap-3 px-4 pt-12 pb-3 bg-white border-b border-line flex-shrink-0">
         <Link
           href="/messages"
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-line text-muted-brand active:bg-cream flex-shrink-0"
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-line text-muted active:bg-cream flex-shrink-0"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 5l-7 7 7 7"/>
@@ -194,7 +194,7 @@ export default function ThreadPage() {
             </div>
             <div className="min-w-0">
               <p className="text-sm font-bold text-ink leading-tight truncate">{otherUser.full_name}</p>
-              <p className="text-[11px] text-muted-brand">
+              <p className="text-[11px] text-muted">
                 {otherUser.role === 'admin' ? 'Admin' : otherUser.role === 'field_lead' ? 'Field Lead' : 'Agent'}
               </p>
             </div>
@@ -206,7 +206,7 @@ export default function ThreadPage() {
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-3">
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full py-20">
-            <p className="text-sm text-muted-brand text-center">No messages yet. Say hello!</p>
+            <p className="text-sm text-muted text-center">No messages yet. Say hello!</p>
           </div>
         )}
         {messages.map(msg => (
@@ -238,10 +238,10 @@ export default function ThreadPage() {
           onClick={() => fileRef.current?.click()}
           disabled={sending || uploadingFile}
           title="Attach image or PDF"
-          className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-muted-brand active:bg-cream transition-colors disabled:opacity-40"
+          className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-muted active:bg-cream transition-colors disabled:opacity-40"
         >
           {uploadingFile ? (
-            <div className="w-4 h-4 border-2 border-success/30 border-t-success rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-terra/30 border-t-success rounded-full animate-spin" />
           ) : (
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
@@ -257,7 +257,7 @@ export default function ThreadPage() {
           placeholder="Type a message…"
           rows={1}
           style={{ resize: 'none' }}
-          className="flex-1 min-w-0 rounded-2xl border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-brand/60 focus:outline-none focus:ring-2 focus:ring-success/30 focus:border-success bg-white overflow-hidden"
+          className="flex-1 min-w-0 rounded-2xl border border-line px-3.5 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-terra/30 focus:border-terra bg-white overflow-hidden"
           onInput={e => {
             const el = e.currentTarget
             el.style.height = 'auto'
@@ -270,8 +270,8 @@ export default function ThreadPage() {
           disabled={!input.trim() || sending}
           className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
             input.trim() && !sending
-              ? 'bg-success text-white shadow-md shadow-success/25 active:opacity-80'
-              : 'bg-line text-muted-brand'
+              ? 'bg-terra text-white shadow-md shadow-terra/25 active:opacity-80'
+              : 'bg-line text-muted'
           }`}
         >
           {sending ? (

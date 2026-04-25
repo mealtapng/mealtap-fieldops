@@ -13,81 +13,87 @@ export default async function PayoutsPage() {
     auth: { autoRefreshToken: false, persistSession: false },
   })
 
-  const [agentsResult, conversionsResult, payoutsResult, settingsResult, zonesResult] = await Promise.all([
-    (admin as any)
-      .from('users')
-      .select('id, full_name, employee_id, assigned_zone_id, is_active, bank_name, bank_account_masked')
-      .in('role', ['agent', 'field_lead'])
-      .order('full_name'),
+  const now = new Date()
+  const dow = now.getUTCDay()
+  const weekStart = new Date(now)
+  weekStart.setUTCDate(now.getUTCDate() - (dow === 0 ? 6 : dow - 1))
+  weekStart.setUTCHours(0, 0, 0, 0)
+  const weekISO = weekStart.toISOString()
 
-    (admin as any)
-      .from('onboardings')
-      .select('agent_id')
-      .eq('conversion_status', 'converted'),
-
-    (admin as any)
-      .from('payouts')
-      .select('agent_id, amount, created_at, note'),
-
-    (admin as any)
-      .from('settings')
-      .select('key, value'),
-
-    (admin as any)
-      .from('zones')
-      .select('id, name'),
+  const [agentsResult, capturesResult, payoutsResult, settingsResult, zonesResult] = await Promise.all([
+    (admin as any).from('users').select('id, full_name, employee_id, assigned_zone_id, is_active, bank_name, bank_account_masked').in('role', ['agent', 'field_lead']).order('full_name'),
+    (admin as any).from('restaurants').select('captured_by, tag').gte('created_at', weekISO),
+    (admin as any).from('payouts').select('agent_id, net_amount, status, paid_at').order('created_at', { ascending: false }),
+    (admin as any).from('app_settings').select('key, value').in('key', ['weekly_salary', 'hot_lead_bonus']),
+    (admin as any).from('zones').select('id, name'),
   ])
 
-  const commission = Number(
-    ((settingsResult.data ?? []) as Array<{ key: string; value: string }>)
-      .find(s => s.key === 'commission_per_conversion')?.value ?? '100'
-  )
+  const settings = Object.fromEntries(((settingsResult.data ?? []) as { key: string; value: string }[]).map(s => [s.key, s.value]))
+  const weeklySalary  = parseInt(settings.weekly_salary  ?? '40000', 10)
+  const hotLeadBonus  = parseInt(settings.hot_lead_bonus ?? '500',   10)
 
   const zoneMap: Record<string, string> = {}
   for (const z of (zonesResult.data ?? [])) zoneMap[z.id] = z.name
 
-  // Count conversions per agent
-  const convMap: Record<string, number> = {}
-  for (const r of (conversionsResult.data ?? [])) {
-    convMap[r.agent_id] = (convMap[r.agent_id] ?? 0) + 1
+  // Per-agent captures this week
+  const captureMap: Record<string, { total: number; hot: number }> = {}
+  for (const r of (capturesResult.data ?? [])) {
+    if (!captureMap[r.captured_by]) captureMap[r.captured_by] = { total: 0, hot: 0 }
+    captureMap[r.captured_by].total++
+    if (r.tag === 'hot') captureMap[r.captured_by].hot++
   }
 
-  // Sum payouts per agent
-  const paidMap: Record<string, number> = {}
+  // Latest payout per agent
+  const payoutMap: Record<string, { amount: number; status: string; paid_at: string | null }> = {}
   for (const p of (payoutsResult.data ?? [])) {
-    paidMap[p.agent_id] = (paidMap[p.agent_id] ?? 0) + Number(p.amount)
+    if (!payoutMap[p.agent_id]) {
+      payoutMap[p.agent_id] = { amount: p.net_amount, status: p.status, paid_at: p.paid_at }
+    }
+  }
+  // Total paid (all time) per agent for summary
+  const totalPaidMap: Record<string, number> = {}
+  for (const p of (payoutsResult.data ?? [])) {
+    if (p.status === 'paid') totalPaidMap[p.agent_id] = (totalPaidMap[p.agent_id] ?? 0) + Number(p.net_amount)
   }
 
   const agents = ((agentsResult.data ?? []) as any[]).map(a => {
-    const conversions = convMap[a.id] ?? 0
-    const earned      = conversions * commission
-    const paid        = paidMap[a.id] ?? 0
+    const caps       = captureMap[a.id] ?? { total: 0, hot: 0 }
+    const bonusTotal = caps.hot * hotLeadBonus
+    const netOwed    = weeklySalary + bonusTotal
+    const lastPayout = payoutMap[a.id]
+    const isPaid     = lastPayout?.status === 'paid'
+
     return {
       id:                  a.id,
       full_name:           a.full_name,
-      employee_id:         a.employee_id,
+      employee_id:         a.employee_id ?? null,
       zone_name:           a.assigned_zone_id ? (zoneMap[a.assigned_zone_id] ?? null) : null,
       is_active:           a.is_active,
       bank_name:           a.bank_name ?? null,
       bank_account_masked: a.bank_account_masked ?? null,
-      conversions,
-      earned,
-      paid,
-      outstanding:         Math.max(0, earned - paid),
+      total_captures:      caps.total,
+      hot_leads:           caps.hot,
+      salary_owed:         weeklySalary,
+      hot_lead_bonus:      bonusTotal,
+      deductions:          0,
+      net_owed:            isPaid ? 0 : netOwed,
+      last_paid_at:        lastPayout?.paid_at ?? null,
+      status:              (isPaid ? 'paid' : lastPayout?.status ?? 'unpaid') as 'unpaid' | 'processing' | 'paid',
     }
   })
 
-  const totalOutstanding = agents.reduce((s, a) => s + a.outstanding, 0)
-  const totalPaid        = agents.reduce((s, a) => s + a.paid, 0)
-  const totalEarned      = agents.reduce((s, a) => s + a.earned, 0)
+  const totalOwed  = agents.reduce((s, a) => s + a.net_owed, 0)
+  const totalPaid  = Object.values(totalPaidMap).reduce((s, v) => s + v, 0)
+  const pendingCount = agents.filter(a => a.net_owed > 0).length
 
   return (
     <PayoutsView
       agents={agents}
-      commission={commission}
-      totalOutstanding={totalOutstanding}
+      weeklyMarshal={weeklySalary}
+      hotLeadBonus={hotLeadBonus}
+      totalOwed={totalOwed}
       totalPaid={totalPaid}
-      totalEarned={totalEarned}
+      pendingCount={pendingCount}
     />
   )
 }

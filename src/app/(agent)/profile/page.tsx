@@ -3,14 +3,10 @@ import { redirect } from 'next/navigation'
 import { ProfileView } from '@/components/agent/ProfileView'
 import type { User } from '@/lib/types/database'
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 async function awaitCount(query: any): Promise<number> {
   const { count } = await query
   return count ?? 0
 }
-
-// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function ProfilePage() {
   const supabase = await createClient()
@@ -18,65 +14,34 @@ export default async function ProfilePage() {
   const { data: { user: authUser } } = await supabase.auth.getUser()
   if (!authUser) redirect('/login')
 
-  // ── Parallel data fetches ──────────────────────────────────────────────────
-
   const [
     profileResult,
-    totalOnboardings,
-    conversions,
-    onboardingRows,
+    totalCaptures,
+    hotLeads,
+    captureRows,
+    settingsResult,
   ] = await Promise.all([
-    // Full user profile
-    supabase
-      .from('users')
-      .select('*')
-      .eq('id', authUser.id)
-      .single() as unknown as Promise<{ data: User | null; error: Error | null }>,
-
-    // Total onboardings count
-    awaitCount(
-      supabase
-        .from('onboardings')
-        .select('*', { count: 'exact', head: true })
-        .eq('agent_id', authUser.id)
-    ),
-
-    // Conversions count
-    awaitCount(
-      supabase
-        .from('onboardings')
-        .select('*', { count: 'exact', head: true })
-        .eq('agent_id', authUser.id)
-        .eq('conversion_status', 'converted')
-    ),
-
-    // All onboarding timestamps (for distinct-day count)
-    supabase
-      .from('onboardings')
-      .select('created_at')
-      .eq('agent_id', authUser.id),
+    supabase.from('users').select('*').eq('id', authUser.id).single() as unknown as Promise<{ data: User | null; error: Error | null }>,
+    awaitCount(supabase.from('restaurants').select('*', { count: 'exact', head: true }).eq('captured_by', authUser.id)),
+    awaitCount(supabase.from('restaurants').select('*', { count: 'exact', head: true }).eq('captured_by', authUser.id).eq('tag', 'hot')),
+    supabase.from('restaurants').select('created_at').eq('captured_by', authUser.id),
+    supabase.from('app_settings').select('key, value').eq('key', 'hot_lead_bonus') as unknown as Promise<{ data: { key: string; value: string }[] | null }>,
   ])
 
   const profile = profileResult.data
   if (!profile) redirect('/login')
 
-  // Days active: count distinct calendar dates
   const daysActive = new Set(
-    (onboardingRows.data ?? []).map((r: { created_at: string }) => r.created_at.slice(0, 10))
+    (captureRows.data ?? []).map((r: { created_at: string }) => r.created_at.slice(0, 10))
   ).size
 
-  // ── Zone name lookup ───────────────────────────────────────────────────────
+  const hotLeadBonus = parseInt(settingsResult.data?.[0]?.value ?? '500', 10)
 
   let zoneName: string | null = null
   if (profile.assigned_zone_id) {
-    const { data: zones } = await supabase
-      .from('zones')
-      .select('id, name')
-      .in('id', [profile.assigned_zone_id]) as unknown as { data: { id: string; name: string }[] | null }
+    const { data: zones } = await supabase.from('zones').select('id, name').in('id', [profile.assigned_zone_id]) as unknown as { data: { id: string; name: string }[] | null }
     zoneName = zones?.[0]?.name ?? null
   }
-
-  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <ProfileView
@@ -96,10 +61,10 @@ export default async function ProfilePage() {
       passportPhotoUrl={profile.passport_photo_url}
       qualityScore={profile.quality_score}
       zoneName={zoneName}
-      referralCode={profile.referral_code}
-      totalOnboardings={totalOnboardings}
-      conversions={conversions}
+      totalCaptures={totalCaptures}
+      hotLeads={hotLeads}
       daysActive={daysActive}
+      hotLeadBonus={hotLeadBonus}
     />
   )
 }

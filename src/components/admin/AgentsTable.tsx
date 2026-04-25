@@ -13,8 +13,8 @@ interface Agent {
   quality_score:      number | null
   is_active:          boolean
   passport_photo_url: string | null
-  total_onboardings:  number
-  conversions:        number
+  total_captures:     number
+  hot_leads:          number
 }
 
 interface Zone {
@@ -32,8 +32,8 @@ function initials(name: string) {
 }
 
 function qualityColor(score: number | null) {
-  if (score == null) return 'text-muted-brand'
-  if (score >= 90) return 'text-brand font-semibold'
+  if (score == null) return 'text-muted'
+  if (score >= 90) return 'text-forest font-semibold'
   if (score >= 70) return 'text-amber-600 font-semibold'
   return 'text-red-500 font-semibold'
 }
@@ -106,12 +106,12 @@ export function AgentsTable({ agents, zones }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-line">
           <div>
-            <h1 className="text-2xl font-bold text-brand">Agents</h1>
-            <p className="text-sm text-muted-brand">{agents.length} field agent{agents.length !== 1 ? 's' : ''}</p>
+            <h1 className="text-2xl font-bold text-forest">Agents</h1>
+            <p className="text-sm text-muted">{agents.length} field agent{agents.length !== 1 ? 's' : ''}</p>
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="px-4 py-2.5 bg-success text-white rounded-xl font-semibold text-sm hover:bg-success-dark transition-colors"
+            className="px-4 py-2.5 bg-terra text-white rounded-xl font-semibold text-sm hover:bg-terra-dark transition-colors"
           >
             + New Agent
           </button>
@@ -122,20 +122,20 @@ export function AgentsTable({ agents, zones }: Props) {
           <table className="w-full">
             <thead>
               <tr className="border-b border-line bg-cream/50">
-                <th className="text-left px-6 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Agent</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Phone</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Zone</th>
-                <th className="text-center px-4 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Onboardings</th>
-                <th className="text-center px-4 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Conversions</th>
-                <th className="text-center px-4 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Quality</th>
-                <th className="text-center px-4 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Status</th>
-                <th className="text-right px-6 py-3 text-xs font-bold text-muted-brand uppercase tracking-wider">Actions</th>
+                <th className="text-left px-6 py-3 text-xs font-bold text-muted uppercase tracking-wider">Agent</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-muted uppercase tracking-wider">Phone</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-muted uppercase tracking-wider">Zone</th>
+                <th className="text-center px-4 py-3 text-xs font-bold text-muted uppercase tracking-wider">Captures</th>
+                <th className="text-center px-4 py-3 text-xs font-bold text-muted uppercase tracking-wider">Hot Leads</th>
+                <th className="text-center px-4 py-3 text-xs font-bold text-muted uppercase tracking-wider">Quality</th>
+                <th className="text-center px-4 py-3 text-xs font-bold text-muted uppercase tracking-wider">Status</th>
+                <th className="text-right px-6 py-3 text-xs font-bold text-muted uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {agents.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-sm text-muted-brand">
+                  <td colSpan={8} className="px-6 py-12 text-center text-sm text-muted">
                     No agents yet. Click &quot;+ New Agent&quot; to add one.
                   </td>
                 </tr>
@@ -151,13 +151,13 @@ export function AgentsTable({ agents, zones }: Props) {
                           className="w-9 h-9 rounded-full object-cover flex-shrink-0"
                         />
                       ) : (
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand to-success flex items-center justify-center flex-shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-forest to-forest-dark flex items-center justify-center flex-shrink-0">
                           <span className="text-white text-xs font-bold">{initials(agent.full_name)}</span>
                         </div>
                       )}
                       <div>
                         <p className="font-semibold text-ink text-sm">{agent.full_name}</p>
-                        <p className="text-xs text-muted-brand">
+                        <p className="text-xs text-muted">
                           {agent.employee_id ?? '—'} · {ROLE_LABELS[agent.role] ?? agent.role}
                         </p>
                       </div>
@@ -168,16 +168,16 @@ export function AgentsTable({ agents, zones }: Props) {
                   <td className="px-4 py-4 text-sm text-ink">{agent.phone ?? '—'}</td>
 
                   {/* Zone */}
-                  <td className="px-4 py-4 text-sm text-ink">{agent.zone_name ?? <span className="text-muted-brand">—</span>}</td>
+                  <td className="px-4 py-4 text-sm text-ink">{agent.zone_name ?? <span className="text-muted">—</span>}</td>
 
-                  {/* Onboardings */}
+                  {/* Captures */}
                   <td className="px-4 py-4 text-center">
-                    <span className="text-sm font-semibold text-ink">{agent.total_onboardings}</span>
+                    <span className="text-sm font-semibold text-ink">{agent.total_captures}</span>
                   </td>
 
-                  {/* Conversions */}
+                  {/* Hot Leads */}
                   <td className="px-4 py-4 text-center">
-                    <span className="text-sm font-semibold text-success">{agent.conversions}</span>
+                    <span className="text-sm font-semibold text-terra">{agent.hot_leads}</span>
                   </td>
 
                   {/* Quality */}
@@ -191,7 +191,7 @@ export function AgentsTable({ agents, zones }: Props) {
                   <td className="px-4 py-4 text-center">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                       agent.is_active
-                        ? 'bg-brand/10 text-brand'
+                        ? 'bg-forest/10 text-forest'
                         : 'bg-red-50 text-red-500'
                     }`}>
                       {agent.is_active ? 'Active' : 'Inactive'}
@@ -202,7 +202,7 @@ export function AgentsTable({ agents, zones }: Props) {
                   <td className="px-6 py-4 text-right">
                     <Link
                       href={`/admin/agents/${agent.id}`}
-                      className="text-sm font-semibold text-brand hover:text-brand-dark transition-colors"
+                      className="text-sm font-semibold text-forest hover:text-forest-dark transition-colors"
                     >
                       View →
                     </Link>
@@ -225,7 +225,7 @@ export function AgentsTable({ agents, zones }: Props) {
               <h2 className="text-lg font-bold text-ink">New Agent</h2>
               <button
                 onClick={() => { setShowModal(false); resetForm() }}
-                className="text-muted-brand hover:text-ink transition-colors text-xl leading-none"
+                className="text-muted hover:text-ink transition-colors text-xl leading-none"
               >
                 ×
               </button>
@@ -234,7 +234,7 @@ export function AgentsTable({ agents, zones }: Props) {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Full name */}
               <div>
-                <label className="block text-xs font-semibold text-muted-brand uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
                   Full name
                 </label>
                 <input
@@ -243,17 +243,17 @@ export function AgentsTable({ agents, zones }: Props) {
                   onChange={e => setFullName(e.target.value)}
                   required
                   placeholder="e.g. Amaka Obi"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
                 />
               </div>
 
               {/* Phone */}
               <div>
-                <label className="block text-xs font-semibold text-muted-brand uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
                   Phone number
                 </label>
                 <div className="flex">
-                  <span className="flex items-center px-3.5 bg-cream border border-r-0 border-line rounded-l-xl text-sm text-muted-brand">
+                  <span className="flex items-center px-3.5 bg-cream border border-r-0 border-line rounded-l-xl text-sm text-muted">
                     +234
                   </span>
                   <input
@@ -262,20 +262,20 @@ export function AgentsTable({ agents, zones }: Props) {
                     onChange={e => setPhone(e.target.value)}
                     required
                     placeholder="08012345678"
-                    className="flex-1 px-3.5 py-2.5 rounded-r-xl border border-line text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+                    className="flex-1 px-3.5 py-2.5 rounded-r-xl border border-line text-sm text-ink placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
                   />
                 </div>
               </div>
 
               {/* Role */}
               <div>
-                <label className="block text-xs font-semibold text-muted-brand uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
                   Role
                 </label>
                 <select
                   value={role}
                   onChange={e => setRole(e.target.value as 'agent' | 'field_lead')}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink bg-white focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
                 >
                   <option value="agent">Agent</option>
                   <option value="field_lead">Field Lead</option>
@@ -284,13 +284,13 @@ export function AgentsTable({ agents, zones }: Props) {
 
               {/* Zone */}
               <div>
-                <label className="block text-xs font-semibold text-muted-brand uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
                   Assigned zone <span className="normal-case font-normal">(optional)</span>
                 </label>
                 <select
                   value={zoneId}
                   onChange={e => setZoneId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink bg-white focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
                 >
                   <option value="">— No zone —</option>
                   {zones.map(z => (
@@ -301,7 +301,7 @@ export function AgentsTable({ agents, zones }: Props) {
 
               {/* PIN */}
               <div>
-                <label className="block text-xs font-semibold text-muted-brand uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
                   PIN <span className="normal-case font-normal">(optional — auto-generated if blank)</span>
                 </label>
                 <input
@@ -311,7 +311,7 @@ export function AgentsTable({ agents, zones }: Props) {
                   pattern="\d{4}"
                   maxLength={4}
                   placeholder="4 digits"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink placeholder:text-muted-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-line text-sm text-ink placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-forest/30 focus:border-forest"
                 />
               </div>
 
@@ -323,14 +323,14 @@ export function AgentsTable({ agents, zones }: Props) {
                 <button
                   type="button"
                   onClick={() => { setShowModal(false); resetForm() }}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-line text-sm font-semibold text-muted-brand hover:text-ink hover:border-ink/20 transition-colors"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-line text-sm font-semibold text-muted hover:text-ink hover:border-ink/20 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-success text-white text-sm font-semibold hover:bg-success-dark disabled:opacity-60 transition-colors"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-terra text-white text-sm font-semibold hover:bg-terra-dark disabled:opacity-60 transition-colors"
                 >
                   {loading ? 'Creating…' : 'Create Agent'}
                 </button>
@@ -346,25 +346,25 @@ export function AgentsTable({ agents, zones }: Props) {
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl text-center">
             <p className="text-3xl mb-3">🎉</p>
             <h2 className="text-lg font-bold text-ink mb-1">Agent created!</h2>
-            <p className="text-sm text-muted-brand mb-5">Send this PIN to the agent via WhatsApp:</p>
+            <p className="text-sm text-muted mb-5">Send this PIN to the agent via WhatsApp:</p>
 
             <div className="bg-cream rounded-xl px-6 py-4 mb-2 flex items-center justify-center gap-4">
               <span className="text-3xl font-mono font-bold text-ink tracking-[0.3em]">{createdPin}</span>
               <button
                 onClick={handleCopy}
-                className="px-3 py-1.5 rounded-lg border border-line text-xs font-semibold text-muted-brand hover:text-ink hover:border-ink/20 transition-colors"
+                className="px-3 py-1.5 rounded-lg border border-line text-xs font-semibold text-muted hover:text-ink hover:border-ink/20 transition-colors"
               >
                 {copied ? 'Copied!' : 'Copy'}
               </button>
             </div>
 
-            <p className="text-xs text-muted-brand mb-5">
+            <p className="text-xs text-muted mb-5">
               This PIN will <strong>never</strong> be shown again.
             </p>
 
             <button
               onClick={() => { setShowSuccess(false); setCopied(false); window.location.reload() }}
-              className="w-full px-4 py-2.5 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand-dark transition-colors"
+              className="w-full px-4 py-2.5 rounded-xl bg-forest text-white text-sm font-semibold hover:bg-forest-dark transition-colors"
             >
               Done
             </button>

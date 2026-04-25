@@ -60,7 +60,7 @@ export function ContentSidebar({ user }: Props) {
         style={{ background: 'linear-gradient(180deg, #0D1B0E 0%, #0a2e0c 100%)' }}
       >
         <div className="px-4 pt-5 pb-4 border-b border-white/10">
-          <Image src={logoSrc} alt="PowerChat" width={80} height={80} className="object-contain rounded-lg" priority />
+          <Image src={logoSrc} alt="Mealtap" width={80} height={80} className="object-contain rounded-lg" priority />
           <p className="text-white/40 text-[10px] tracking-widest uppercase mt-2">Content Hub</p>
         </div>
 
@@ -124,7 +124,7 @@ export function ContentSidebar({ user }: Props) {
         className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center gap-3 px-4 py-3 border-b border-white/10"
         style={{ background: '#0D1B0E' }}
       >
-        <Image src={logoSrc} alt="PowerChat" width={32} height={32} className="object-contain rounded" />
+        <Image src={logoSrc} alt="Mealtap" width={32} height={32} className="object-contain rounded" />
         <p className="text-white font-bold text-sm flex-1">Content Hub</p>
         {user && (
           <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#1B5E20' }}>
