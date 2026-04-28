@@ -7,13 +7,25 @@ export default async function AdminProfilePage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await (supabase as any)
-    .from('users')
-    .select('id, full_name, employee_id, role, phone, email, date_of_birth, home_address, next_of_kin_name, next_of_kin_phone, passport_photo_url')
-    .eq('id', user.id)
-    .single()
+  const [profileResult, captureResult] = await Promise.all([
+    (supabase as any)
+      .from('users')
+      .select('id, full_name, employee_id, role, phone, email, date_of_birth, home_address, next_of_kin_name, next_of_kin_phone, passport_photo_url')
+      .eq('id', user.id)
+      .single(),
+    (supabase as any)
+      .from('restaurants')
+      .select('created_at, tag')
+      .eq('captured_by', user.id),
+  ])
 
-  if (!profile) redirect('/login')
+  if (!profileResult.data) redirect('/login')
+
+  const profile = profileResult.data
+  const captures = captureResult.data ?? []
+  const totalCaptures = captures.length
+  const hotLeads = captures.filter((r: any) => r.tag === 'hot').length
+  const daysActive = new Set(captures.map((r: any) => r.created_at.slice(0, 10))).size
 
   return (
     <AdminProfileView
@@ -28,6 +40,9 @@ export default async function AdminProfilePage() {
       nextOfKinName={profile.next_of_kin_name}
       nextOfKinPhone={profile.next_of_kin_phone}
       passportPhotoUrl={profile.passport_photo_url}
+      totalCaptures={totalCaptures}
+      hotLeads={hotLeads}
+      daysActive={daysActive}
     />
   )
 }
