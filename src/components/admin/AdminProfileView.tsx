@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { formatPhone, formatDate } from '@/lib/format'
+import { PhotoUpload } from '@/components/agent/PhotoUpload'
 
 interface Props {
+  userId: string
   fullName: string
   employeeId: string
   role: string
@@ -13,6 +15,7 @@ interface Props {
   homeAddress: string | null
   nextOfKinName: string | null
   nextOfKinPhone: string | null
+  passportPhotoUrl: string | null
 }
 
 interface Draft {
@@ -26,10 +29,6 @@ interface Draft {
 const ROLE_LABELS: Record<string, string> = {
   admin:      'Admin',
   field_lead: 'Field Lead',
-}
-
-function initials(name: string) {
-  return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
 }
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -99,8 +98,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export function AdminProfileView({
-  fullName, employeeId, role, phone,
+  userId, fullName, employeeId, role, phone,
   email, dateOfBirth, homeAddress, nextOfKinName, nextOfKinPhone,
+  passportPhotoUrl,
 }: Props) {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving]   = useState(false)
@@ -214,12 +214,7 @@ export function AdminProfileView({
 
         {/* Identity card */}
         <div className="bg-white rounded-2xl border border-line p-6 flex items-center gap-5">
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 text-xl font-bold text-white"
-            style={{ background: 'linear-gradient(135deg, #2D5A27, #1F3F1B)' }}
-          >
-            {initials(fullName)}
-          </div>
+          <PhotoUpload userId={userId} initialPath={passportPhotoUrl} fullName={fullName} />
           <div>
             <p className="text-xl font-bold text-ink">{fullName}</p>
             <p className="text-sm text-muted mt-0.5">

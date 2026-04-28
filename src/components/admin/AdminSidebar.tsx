@@ -5,11 +5,13 @@ import Link from 'next/link'
 import logoSrc from '../../../public/Logo.PNG'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useEffect, useState } from 'react'
 
 interface User {
-  id:        string
-  full_name: string
-  role:      string
+  id:                 string
+  full_name:          string
+  role:               string
+  passport_photo_url: string | null
 }
 
 interface Props {
@@ -41,6 +43,14 @@ function roleLabel(role: string) {
 export function AdminSidebar({ user }: Props) {
   const pathname = usePathname()
   const router   = useRouter()
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!user?.passport_photo_url) return
+    const supabase = createClient()
+    const { data } = supabase.storage.from('user-photos').getPublicUrl(user.passport_photo_url)
+    if (data?.publicUrl) setPhotoUrl(data.publicUrl)
+  }, [user?.passport_photo_url])
 
   async function signOut() {
     const supabase = createClient()
@@ -98,8 +108,14 @@ export function AdminSidebar({ user }: Props) {
         {user && (
           <div className="border-t border-white/10 p-4">
             <Link href="/admin/profile" className="flex items-center gap-3 rounded-xl px-1 py-1 hover:bg-white/5 transition-colors group">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#2D5A27' }}>
-                <span className="text-xs font-bold text-white">{initials(user.full_name)}</span>
+              <div className="w-9 h-9 rounded-full flex-shrink-0 overflow-hidden" style={{ background: '#2D5A27' }}>
+                {photoUrl ? (
+                  <img src={photoUrl} alt={user.full_name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-xs font-bold text-white">{initials(user.full_name)}</span>
+                  </div>
+                )}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-white truncate group-hover:text-white/90">{user.full_name}</p>

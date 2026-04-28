@@ -9,7 +9,7 @@ export default async function AdminProfilePage() {
 
   const { data: profile } = await (supabase as any)
     .from('users')
-    .select('id, full_name, employee_id, role, phone, email, date_of_birth, home_address, next_of_kin_name, next_of_kin_phone')
+    .select('id, full_name, employee_id, role, phone, email, date_of_birth, home_address, next_of_kin_name, next_of_kin_phone, passport_photo_url')
     .eq('id', user.id)
     .single()
 
@@ -17,6 +17,7 @@ export default async function AdminProfilePage() {
 
   return (
     <AdminProfileView
+      userId={profile.id}
       fullName={profile.full_name}
       employeeId={profile.employee_id}
       role={profile.role}
@@ -26,6 +27,7 @@ export default async function AdminProfilePage() {
       homeAddress={profile.home_address}
       nextOfKinName={profile.next_of_kin_name}
       nextOfKinPhone={profile.next_of_kin_phone}
+      passportPhotoUrl={profile.passport_photo_url}
     />
   )
 }
