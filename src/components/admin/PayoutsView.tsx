@@ -190,7 +190,7 @@ export function PayoutsView({ agents, hotLeadBonus, totalOwed, totalPaid, pendin
                         onClick={() => openPay(agent)}
                         className="px-3 py-1.5 rounded-lg bg-terra text-white text-xs font-semibold hover:bg-terra-dark transition-colors flex-shrink-0"
                       >
-                        Mark paid
+                        Pay
                       </button>
                     )}
                     {agent.net_owed === 0 && agent.last_paid_at && (
