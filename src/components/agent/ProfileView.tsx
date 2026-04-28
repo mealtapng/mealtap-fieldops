@@ -108,7 +108,7 @@ export function ProfileView({
   userId, fullName, employeeId, role, phone,
   email, dateOfBirth, homeAddress, ninLast4,
   nextOfKinName, nextOfKinPhone, bankName, bankAccountMasked,
-  passportPhotoUrl, qualityScore, zoneName,
+  passportPhotoUrl, zoneName,
   totalCaptures, hotLeads, daysActive, hotLeadBonus,
 }: ProfileProps) {
   const roleLabel =
