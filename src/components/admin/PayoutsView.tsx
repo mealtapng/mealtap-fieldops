@@ -188,8 +188,7 @@ export function PayoutsView({ agents, hotLeadBonus, totalOwed, totalPaid, pendin
                     {agent.net_owed > 0 && (
                       <button
                         onClick={() => openPay(agent)}
-                        disabled={!agent.bank_name}
-                        className="px-3 py-1.5 rounded-lg bg-terra text-white text-xs font-semibold hover:bg-terra-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+                        className="px-3 py-1.5 rounded-lg bg-terra text-white text-xs font-semibold hover:bg-terra-dark transition-colors flex-shrink-0"
                       >
                         Mark paid
                       </button>
@@ -210,13 +209,18 @@ export function PayoutsView({ agents, hotLeadBonus, totalOwed, totalPaid, pendin
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
             <h2 className="text-lg font-bold text-ink mb-1">Confirm payout</h2>
-            <p className="text-sm text-muted mb-5">
+            <p className="text-sm text-muted mb-4">
               Transfer <span className="font-bold text-ink">{fmt(paying.net_owed)}</span> to{' '}
               <span className="font-semibold">{paying.full_name}</span>
               {paying.bank_name && (
                 <> at <span className="font-medium">{paying.bank_name}</span>{paying.bank_account_masked ? ` · ${paying.bank_account_masked}` : ''}</>
               )}
             </p>
+            {!paying.bank_name && (
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-4">
+                No bank details on file for this agent. Make sure you have their account info before transferring.
+              </p>
+            )}
 
             <div>
               <label className="text-xs font-bold text-muted uppercase tracking-wider block mb-1.5">Note (optional)</label>
