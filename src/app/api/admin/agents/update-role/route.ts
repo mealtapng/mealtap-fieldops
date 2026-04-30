@@ -43,11 +43,11 @@ export async function POST(request: NextRequest) {
 
   if (dbResult.error) {
     console.error('[agents/update-role] db error:', dbResult.error.message)
-    return err('Failed to update role', 500)
+    return err(dbResult.error.message ?? 'Failed to update role', 500)
   }
   if (authResult.error) {
     console.error('[agents/update-role] auth error:', authResult.error.message)
-    return err('Failed to update auth metadata', 500)
+    return err(authResult.error.message ?? 'Failed to update auth metadata', 500)
   }
 
   return NextResponse.json({ success: true, role })
